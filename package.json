@@ -1,0 +1,85 @@
+{
+  "name": "last-admin-online",
+  "version": "0.0.0",
+  "main": "electron/main.js",
+  "description": "LAST ADMIN ONLINE - MVP",
+  "author": "Unknown",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "dev": "ng serve --host 0.0.0.0 --port 4200",
+    "electron:dev": "pnpm run dev & pnpm run electron:serve",
+    "electron:serve": "wait-on http://localhost:4200 && electron .",
+    "build": "ng build",
+    "dist": "ng build --configuration production",
+    "electron:build": "ng build --configuration production && electron-builder",
+    "clean": "node ./scripts/clean.js",
+    "package:win": "node ./scripts/pack.js",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "pnpm@9.12.0",
+  "dependencies": {
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.1",
+    "@angular/cli": "^21.1.1",
+    "@angular/compiler-cli": "^21.1.0",
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0",
+    "jsdom": "^27.1.0",
+    "rimraf": "^5.0.10",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8",
+    "wait-on": "^7.0.0"
+  },
+  "build": {
+    "appId": "com.lastadmin.online",
+    "productName": "Last Admin Online",
+    "directories": {
+      "output": "dist_electron",
+      "buildResources": "build_resources"
+    },
+    "files": [
+      "dist/last-admin-online/**",
+      "electron/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
