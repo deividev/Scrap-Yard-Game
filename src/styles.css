@@ -1,1 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-bg-main: #1e1e1e;
+  --color-bg-panel: #2a2a2a;
+  --color-border: #444444;
+  --color-accent-main: #ff9800;
+  --color-accent-positive: #66bb6a;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #b0b0b0;
+
+  --font-family-base: system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg-main);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  line-height: 1.4;
+}

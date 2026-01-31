@@ -1,0 +1,11 @@
+<div class="resources-panel">
+  <div class="resources-list">
+    @for (resource of resources(); track resource.id) {
+      <div class="resource-item">
+        <div class="resource-icon">{{ resource.icon }}</div>
+        <span class="resource-name">{{ resource.name }}</span>
+        <span class="resource-amount">{{ resource.amount }}</span>
+      </div>
+    }
+  </div>
+</div>

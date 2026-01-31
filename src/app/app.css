@@ -1,0 +1,15 @@
+.app-container {
+  padding: var(--space-5);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--color-accent-main);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+}
