@@ -5,30 +5,30 @@ export const INITIAL_RESOURCES: Resource[] = [
     id: ResourceType.SCRAP,
     name: 'Chatarra',
     amount: 0,
-    icon: '♻️'
+    icon: '♻️',
   },
   {
     id: ResourceType.METAL,
     name: 'Metal',
     amount: 0,
-    icon: '⚙️'
+    icon: '⚙️',
   },
   {
     id: ResourceType.PLASTIC,
     name: 'Plástico',
     amount: 0,
-    icon: '🧪'
+    icon: '🧪',
   },
   {
     id: ResourceType.COMPONENTS,
     name: 'Componentes',
     amount: 0,
-    icon: '🔧'
+    icon: '🔧',
   },
   {
     id: ResourceType.MONEY,
     name: 'Dinero',
     amount: 0,
-    icon: '💰'
-  }
+    icon: '💰',
+  },
 ];

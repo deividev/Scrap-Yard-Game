@@ -5,7 +5,6 @@ import { ResourcesPanelComponent } from './components/resources-panel/resources-
   selector: 'app-root',
   imports: [ResourcesPanelComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
-}
+export class App {}

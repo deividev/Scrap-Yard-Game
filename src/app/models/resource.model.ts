@@ -10,5 +10,5 @@ export enum ResourceType {
   METAL = 'metal',
   PLASTIC = 'plastic',
   COMPONENTS = 'components',
-  MONEY = 'money'
+  MONEY = 'money',
 }
