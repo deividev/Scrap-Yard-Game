@@ -11,7 +11,7 @@ export class GameLoopService {
 
   constructor(
     private resourcesService: ResourcesService,
-    private machinesService: MachinesService
+    private machinesService: MachinesService,
   ) {}
 
   start(): void {
@@ -48,7 +48,7 @@ export class GameLoopService {
 
       while (machine.progress >= 1) {
         const hasEnoughResources = machine.baseConsumption.every((consumption) =>
-          this.resourcesService.hasEnough(consumption.resourceId, consumption.amount)
+          this.resourcesService.hasEnough(consumption.resourceId, consumption.amount),
         );
 
         if (!hasEnoughResources) {
@@ -59,10 +59,7 @@ export class GameLoopService {
           this.resourcesService.subtract(consumption.resourceId, consumption.amount);
         }
 
-        this.resourcesService.add(
-          machine.baseProduction.resourceId,
-          machine.baseProduction.amount
-        );
+        this.resourcesService.add(machine.baseProduction.resourceId, machine.baseProduction.amount);
 
         this.machinesService.resetProgress(machine.id, 1);
       }
