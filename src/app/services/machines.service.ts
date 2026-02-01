@@ -1,12 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Machine, MachineUpgradeCost } from '../models/machine.model';
 import { INITIAL_MACHINES } from '../config/machines.config';
+import { ResourcesService } from './resources.service';
+import { ResourceType } from '../models/resource.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MachinesService {
   private machines = signal<Machine[]>(this.initializeMachines());
+  private resourcesService = inject(ResourcesService);
 
   private initializeMachines(): Machine[] {
     return INITIAL_MACHINES.map((m) => ({ ...m }));
@@ -36,46 +39,31 @@ export class MachinesService {
   }
 
   setActive(machineId: string, active: boolean): void {
-    this.machines.update((machines) => {
-      const machine = machines.find((m) => m.id === machineId);
-      if (machine) {
-        machine.isActive = active;
-        if (!active) {
-          machine.progress = 0;
-        }
-      }
-      return [...machines];
-    });
+    this.machines.update((machines) =>
+      machines.map((m) =>
+        m.id === machineId ? { ...m, isActive: active, progress: active ? m.progress : 0 } : m,
+      ),
+    );
   }
 
   updateProgress(machineId: string, delta: number): void {
-    this.machines.update((machines) => {
-      const machine = machines.find((m) => m.id === machineId);
-      if (machine) {
-        machine.progress += delta;
-      }
-      return [...machines];
-    });
+    this.machines.update((machines) =>
+      machines.map((m) =>
+        m.id === machineId ? { ...m, progress: Math.min(1.0, m.progress + delta) } : m,
+      ),
+    );
   }
 
-  resetProgress(machineId: string, amount: number): void {
-    this.machines.update((machines) => {
-      const machine = machines.find((m) => m.id === machineId);
-      if (machine) {
-        machine.progress -= amount;
-      }
-      return [...machines];
-    });
+  consumeProgress(machineId: string, amount: number): void {
+    this.machines.update((machines) =>
+      machines.map((m) => (m.id === machineId ? { ...m, progress: m.progress - amount } : m)),
+    );
   }
 
   upgradeLevel(machineId: string): void {
-    this.machines.update((machines) => {
-      const machine = machines.find((m) => m.id === machineId);
-      if (machine) {
-        machine.level++;
-      }
-      return [...machines];
-    });
+    this.machines.update((machines) =>
+      machines.map((m) => (m.id === machineId ? { ...m, level: m.level + 1 } : m)),
+    );
   }
 
   calculateUpgradeCostForNextLevel(currentLevel: number): MachineUpgradeCost {
@@ -96,6 +84,21 @@ export class MachinesService {
       return null;
     }
     return this.calculateUpgradeCostForNextLevel(machine.level);
+  }
+
+  // F) Additional methods for upgrade affordability
+  getNextLevelCost(machineId: string): MachineUpgradeCost | null {
+    return this.getUpgradeCost(machineId);
+  }
+
+  canAffordNextLevel(machineId: string): boolean {
+    const cost = this.getNextLevelCost(machineId);
+    if (!cost) return false;
+
+    const hasMoney = this.resourcesService.hasEnough(ResourceType.MONEY, cost.money);
+    const hasComponents = this.resourcesService.hasEnough(ResourceType.COMPONENTS, cost.components);
+
+    return hasMoney && hasComponents;
   }
 
   getState(): Machine[] {

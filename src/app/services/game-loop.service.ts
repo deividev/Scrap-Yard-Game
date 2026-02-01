@@ -1,17 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { MachinesService } from './machines.service';
+import { ScrapGenerationService } from './scrap-generation.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameLoopService {
   private intervalId: any = null;
-  private tickCount = 0;
+  private tickCount = signal(0);
 
   constructor(
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
+    private scrapGenerationService: ScrapGenerationService,
   ) {}
 
   start(): void {
@@ -32,7 +34,8 @@ export class GameLoopService {
   }
 
   private tick(): void {
-    this.tickCount++;
+    this.tickCount.update((count) => count + 1);
+    this.scrapGenerationService.processAutomaticGeneration();
     this.processProduction();
   }
 
@@ -44,29 +47,42 @@ export class GameLoopService {
         continue;
       }
 
-      this.machinesService.updateProgress(machine.id, machine.baseSpeed);
+      // 1) Check if machine CAN run cycle this tick (has inputs AND output space)
+      const hasEnoughResources = machine.baseConsumption.every((consumption) =>
+        this.resourcesService.hasEnough(consumption.resourceId, consumption.amount),
+      );
 
-      while (machine.progress >= 1) {
-        const hasEnoughResources = machine.baseConsumption.every((consumption) =>
-          this.resourcesService.hasEnough(consumption.resourceId, consumption.amount),
-        );
+      const hasOutputSpace =
+        this.resourcesService.getAvailableSpace(machine.baseProduction.resourceId) >=
+        machine.baseProduction.amount;
 
-        if (!hasEnoughResources) {
-          break;
-        }
+      const canRunCycle = hasEnoughResources && hasOutputSpace;
 
-        for (const consumption of machine.baseConsumption) {
-          this.resourcesService.subtract(consumption.resourceId, consumption.amount);
-        }
-
-        this.resourcesService.add(machine.baseProduction.resourceId, machine.baseProduction.amount);
-
-        this.machinesService.resetProgress(machine.id, 1);
+      if (canRunCycle) {
+        const effectiveSpeed = machine.baseSpeed;
+        this.machinesService.updateProgress(machine.id, effectiveSpeed);
       }
+
+      const updatedMachine = this.machinesService.getMachine(machine.id);
+      if (!updatedMachine || updatedMachine.progress < 1) {
+        continue;
+      }
+
+      // 4) Execute cycle: consume inputs, produce outputs, progress -= 1
+      for (const consumption of updatedMachine.baseConsumption) {
+        this.resourcesService.subtract(consumption.resourceId, consumption.amount);
+      }
+
+      this.resourcesService.add(
+        updatedMachine.baseProduction.resourceId,
+        updatedMachine.baseProduction.amount,
+      );
+
+      this.machinesService.consumeProgress(machine.id, 1);
     }
   }
 
   getTickCount(): number {
-    return this.tickCount;
+    return this.tickCount();
   }
 }

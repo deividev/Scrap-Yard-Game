@@ -6,7 +6,7 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.CRUSHER,
     name: 'Trituradora',
     level: 1,
-    baseSpeed: 1,
+    baseSpeed: 0.5,
     baseConsumption: [
       {
         resourceId: ResourceType.SCRAP,
@@ -24,7 +24,7 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.SEPARATOR,
     name: 'Separador',
     level: 1,
-    baseSpeed: 1,
+    baseSpeed: 0.5,
     baseConsumption: [
       {
         resourceId: ResourceType.SCRAP,
@@ -42,7 +42,7 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.SMELTER,
     name: 'Fundidora',
     level: 1,
-    baseSpeed: 0.5,
+    baseSpeed: 0.25,
     baseConsumption: [
       {
         resourceId: ResourceType.METAL,
@@ -60,7 +60,7 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.ASSEMBLER,
     name: 'Ensambladora',
     level: 1,
-    baseSpeed: 0.5,
+    baseSpeed: 0.17,
     baseConsumption: [
       {
         resourceId: ResourceType.METAL,
@@ -82,16 +82,16 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.PACKAGER,
     name: 'Empaquetadora',
     level: 1,
-    baseSpeed: 0.2,
+    baseSpeed: 0.1,
     baseConsumption: [
       {
         resourceId: ResourceType.COMPONENTS,
-        amount: 5,
+        amount: 8,
       },
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 10,
+      amount: 8,
     },
     isActive: false,
     progress: 0,

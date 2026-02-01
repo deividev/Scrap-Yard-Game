@@ -2,6 +2,7 @@ export interface Resource {
   id: string;
   name: string;
   amount: number;
+  capacity: number; // Infinity = unlimited (e.g., money)
   icon: string;
 }
 
