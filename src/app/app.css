@@ -1,15 +1,33 @@
-.app-container {
-  padding: var(--space-5);
-  max-width: 1400px;
-  margin: 0 auto;
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-h1 {
-  margin: 0 0 var(--space-4) 0;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--color-accent-main);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-align: center;
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.column-left {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 400px;
+}
+
+.column-right {
+  overflow-y: auto;
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.column-right:not(.hidden) {
+  width: 400px;
+}
+
+.column-right.hidden {
+  width: 60px;
+  overflow: hidden;
 }

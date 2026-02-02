@@ -1,8 +1,13 @@
-<div class="app-container">
-  <h1>Scrap Yard Idle</h1>
-  <app-resources-panel></app-resources-panel>
+<div class="app-layout">
+  <app-resources-header></app-resources-header>
 
-  <app-scrap-button></app-scrap-button>
+  <div class="app-body">
+    <div class="column-left">
+      <app-machine-list></app-machine-list>
+    </div>
 
-  <app-debug-machines-panel></app-debug-machines-panel>
+    <div class="column-right" [class.hidden]="isPanelMinimized">
+      <app-upgrades-panel (minimizedChange)="onPanelMinimizedChange($event)"></app-upgrades-panel>
+    </div>
+  </div>
 </div>

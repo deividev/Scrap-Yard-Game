@@ -38,10 +38,17 @@ export class MachinesService {
     return machine ? machine.isActive : false;
   }
 
+  isUnlocked(machineId: string): boolean {
+    const machine = this.getMachine(machineId);
+    return machine ? machine.level > 0 : false;
+  }
+
   setActive(machineId: string, active: boolean): void {
     this.machines.update((machines) =>
       machines.map((m) =>
-        m.id === machineId ? { ...m, isActive: active, progress: active ? m.progress : 0 } : m,
+        m.id === machineId && m.level > 0
+          ? { ...m, isActive: active, progress: active ? m.progress : 0 }
+          : m,
       ),
     );
   }

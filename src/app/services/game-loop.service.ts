@@ -69,16 +69,19 @@ export class GameLoopService {
       }
 
       // 4) Execute cycle: consume inputs, produce outputs, progress -= 1
-      for (const consumption of updatedMachine.baseConsumption) {
-        this.resourcesService.subtract(consumption.resourceId, consumption.amount);
-      }
+      // Add small delay so user can see 100% progress bar
+      setTimeout(() => {
+        for (const consumption of updatedMachine.baseConsumption) {
+          this.resourcesService.subtract(consumption.resourceId, consumption.amount);
+        }
 
-      this.resourcesService.add(
-        updatedMachine.baseProduction.resourceId,
-        updatedMachine.baseProduction.amount,
-      );
+        this.resourcesService.add(
+          updatedMachine.baseProduction.resourceId,
+          updatedMachine.baseProduction.amount,
+        );
 
-      this.machinesService.consumeProgress(machine.id, 1);
+        this.machinesService.consumeProgress(machine.id, 1);
+      }, 400);
     }
   }
 

@@ -6,10 +6,13 @@ import { INITIAL_RESOURCES } from '../config/resources.config';
   providedIn: 'root',
 })
 export class ResourcesService {
+  private baseCapacities = new Map<string, number>();
   private resources = signal<Resource[]>(this.initializeResources());
 
   private initializeResources(): Resource[] {
-    return INITIAL_RESOURCES.map((r) => ({ ...r }));
+    const resources = INITIAL_RESOURCES.map((r) => ({ ...r }));
+    resources.forEach((r) => this.baseCapacities.set(r.id, r.capacity));
+    return resources;
   }
 
   getAll(): Resource[] {
@@ -66,6 +69,16 @@ export class ResourcesService {
     if (!resource) return 0;
     if (!isFinite(resource.capacity)) return Infinity;
     return Math.max(0, resource.capacity - resource.amount);
+  }
+
+  getBaseCapacity(resourceId: string): number {
+    return this.baseCapacities.get(resourceId) || 0;
+  }
+
+  setCapacity(resourceId: string, newCapacity: number): void {
+    this.resources.update((resources) =>
+      resources.map((r) => (r.id === resourceId ? { ...r, capacity: newCapacity } : r)),
+    );
   }
 
   subtract(resourceId: string, amount: number): boolean {

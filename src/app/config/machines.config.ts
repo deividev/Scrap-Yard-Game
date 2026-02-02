@@ -23,7 +23,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SEPARATOR,
     name: 'Separador',
-    level: 1,
+    level: 0,
     baseSpeed: 0.5,
     baseConsumption: [
       {
@@ -59,7 +59,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ASSEMBLER,
     name: 'Ensambladora',
-    level: 1,
+    level: 0,
     baseSpeed: 0.17,
     baseConsumption: [
       {
