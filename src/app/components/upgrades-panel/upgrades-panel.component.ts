@@ -7,6 +7,7 @@ import { MachinesService } from '../../services/machines.service';
 import { UpgradesService } from '../../services/upgrades.service';
 import { ResourcesService } from '../../services/resources.service';
 import { ScrapGenerationService } from '../../services/scrap-generation.service';
+import { TranslationService } from '../../services/translation.service';
 import { UpgradeId } from '../../models/upgrade.model';
 import { ResourceType } from '../../models/resource.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
@@ -18,7 +19,9 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
   template: `
     <div class="upgrades-panel" [class.minimized]="isMinimized()">
       <div class="panel-header">
-        <h2 class="section-title" *ngIf="!isMinimized()">Mejoras</h2>
+        <h2 class="section-title" *ngIf="!isMinimized()">
+          {{ translationService.t('upgrades.title') }}
+        </h2>
         <app-button
           [label]="isMinimized() ? '◀' : '▶'"
           variant="ghost"
@@ -30,7 +33,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       <div class="panel-content" *ngIf="!isMinimized()">
         <div class="tabs">
           <app-button
-            *ngFor="let tab of tabs"
+            *ngFor="let tab of tabs()"
             [label]="tab.label"
             variant="ghost"
             size="sm"
@@ -46,7 +49,9 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
                 <span class="upgrade-icon">♻️</span>
                 <div class="upgrade-info">
                   <h4 class="upgrade-name">{{ scrapAutoUpgrade().name }}</h4>
-                  <p class="upgrade-description">Nivel {{ scrapAutoUpgrade().level }}</p>
+                  <p class="upgrade-description">
+                    {{ translationService.t('upgrades.nivel') }} {{ scrapAutoUpgrade().level }}
+                  </p>
                 </div>
               </div>
 
@@ -62,14 +67,16 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 
               <app-button
                 *ngIf="scrapAutoUpgrade().level < 3"
-                label="Mejorar"
+                [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
                 size="sm"
                 [disabled]="!scrapAutoUpgrade().canAfford"
                 (clicked)="purchaseScrapUpgrade()"
               />
 
-              <p *ngIf="scrapAutoUpgrade().level >= 3" class="max-level">Nivel máximo alcanzado</p>
+              <p *ngIf="scrapAutoUpgrade().level >= 3" class="max-level">
+                {{ translationService.t('upgrades.max_level') }}
+              </p>
             </div>
           </div>
 
@@ -79,11 +86,16 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
                 <span class="upgrade-icon">{{ upgrade.icon }}</span>
                 <div class="upgrade-info">
                   <h4 class="upgrade-name">{{ upgrade.name }}</h4>
-                  <p class="upgrade-description">Nivel {{ upgrade.level }}</p>
+                  <p class="upgrade-description">
+                    {{ translationService.t('upgrades.nivel') }} {{ upgrade.level }}
+                  </p>
                 </div>
               </div>
 
               <div class="upgrade-capacity">
+                <span class="capacity-label">{{
+                  translationService.t('upgrades.capacity_label')
+                }}</span>
                 <span class="capacity-current">{{ upgrade.currentCapacity | formatNumber }}</span>
                 <span class="capacity-arrow">→</span>
                 <span class="capacity-next">{{ upgrade.nextCapacity | formatNumber }}</span>
@@ -97,7 +109,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
               </div>
 
               <app-button
-                label="Mejorar"
+                [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
                 size="sm"
                 [disabled]="!upgrade.canAfford"
@@ -108,18 +120,29 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 
           <div *ngIf="activeTab() === 'machine'">
             <div *ngIf="selectedMachine(); else noMachine" class="machine-info">
-              <h3 class="machine-title">{{ selectedMachine()?.name }}</h3>
+              <h3 class="machine-title">{{ translatedMachineName() }}</h3>
               <div class="machine-details">
-                <p><strong>Nivel:</strong> {{ selectedMachine()?.level }}</p>
-                <p><strong>Velocidad base:</strong> {{ selectedMachine()?.baseSpeed }} ciclos/s</p>
+                <p>
+                  <strong>{{ translationService.t('upgrades.machine_tab.level_label') }}</strong>
+                  {{ selectedMachine()?.level }}
+                </p>
+                <p>
+                  <strong>{{
+                    translationService.t('upgrades.machine_tab.base_speed_label')
+                  }}</strong>
+                  {{ selectedMachine()?.baseSpeed }}
+                  {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
+                </p>
               </div>
               <div class="placeholder">
-                <p>Mejoras de velocidad próximamente</p>
+                <p>{{ translationService.t('upgrades.machine_tab.speed_upgrades_coming') }}</p>
               </div>
             </div>
             <ng-template #noMachine>
               <div class="placeholder">
-                <p class="machine-hint">Selecciona una máquina para ver mejoras</p>
+                <p class="machine-hint">
+                  {{ translationService.t('upgrades.machine_tab.no_selection') }}
+                </p>
               </div>
             </ng-template>
           </div>
@@ -335,6 +358,7 @@ export class UpgradesPanelComponent {
     private upgradesService: UpgradesService,
     private resourcesService: ResourcesService,
     private scrapGenerationService: ScrapGenerationService,
+    public translationService: TranslationService,
   ) {
     effect(() => {
       const selectedId = this.machineSelectionService.getSelectedMachineId();
@@ -352,18 +376,39 @@ export class UpgradesPanelComponent {
     return this.machinesService.getMachine(selectedId);
   });
 
+  translatedMachineName = computed(() => {
+    const machine = this.selectedMachine();
+    if (!machine) return '';
+    return this.translationService.t(`machines.${machine.id}`);
+  });
+
   storageUpgrades = computed(() => {
     const storageUpgradeIds = [
-      { id: UpgradeId.UPG_STORE_001, resourceId: ResourceType.SCRAP },
-      { id: UpgradeId.UPG_STORE_002, resourceId: ResourceType.METAL },
-      { id: UpgradeId.UPG_STORE_003, resourceId: ResourceType.PLASTIC },
-      { id: UpgradeId.UPG_STORE_004, resourceId: ResourceType.COMPONENTS },
+      {
+        id: UpgradeId.UPG_STORE_001,
+        resourceId: ResourceType.SCRAP,
+        nameKey: 'upgrades.storage.scrap',
+      },
+      {
+        id: UpgradeId.UPG_STORE_002,
+        resourceId: ResourceType.METAL,
+        nameKey: 'upgrades.storage.metal',
+      },
+      {
+        id: UpgradeId.UPG_STORE_003,
+        resourceId: ResourceType.PLASTIC,
+        nameKey: 'upgrades.storage.plastic',
+      },
+      {
+        id: UpgradeId.UPG_STORE_004,
+        resourceId: ResourceType.COMPONENTS,
+        nameKey: 'upgrades.storage.components',
+      },
     ];
 
-    return storageUpgradeIds.map(({ id, resourceId }) => {
+    return storageUpgradeIds.map(({ id, resourceId, nameKey }) => {
       const level = this.upgradesService.getLevel(id);
       const cost = this.upgradesService.getCostForNextLevel(id);
-      const definition = this.upgradesService.getDefinition(id);
       const baseCapacity = this.resourcesService.getBaseCapacity(resourceId);
       const currentCapacity = this.resourcesService.getCapacity(resourceId);
       const increment = this.upgradesService.getStorageIncrement(id);
@@ -377,7 +422,7 @@ export class UpgradesPanelComponent {
 
       return {
         upgradeId: id,
-        name: definition?.name || '',
+        name: this.translationService.t(nameKey),
         level,
         icon: resource?.icon || '?',
         currentCapacity,
@@ -391,7 +436,6 @@ export class UpgradesPanelComponent {
   scrapAutoUpgrade = computed(() => {
     const level = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
     const cost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_002);
-    const definition = this.upgradesService.getDefinition(UpgradeId.UPG_SCRAP_002);
 
     const rates = [0, 0.2, 0.5, 1.0];
     const currentRate = rates[level];
@@ -401,15 +445,22 @@ export class UpgradesPanelComponent {
       ? this.resourcesService.hasEnough(ResourceType.MONEY, cost.money)
       : false;
 
-    const currentAuto = currentRate === 0 ? '—' : `+${currentRate} /s`;
-    const nextAuto = nextRate === undefined ? '—' : `+${nextRate} /s`;
+    const manualText = this.translationService.t('upgrades.scrap_auto.manual');
+    const autoText = this.translationService.t('upgrades.scrap_auto.automatic');
+    const perSecondText = this.translationService.t('upgrades.scrap_auto.per_second');
+    const noneText = this.translationService.t('upgrades.scrap_auto.none');
 
-    const currentText = `Manual: +1 chatarra por click\nAutomático: ${currentAuto}`;
+    const currentAuto = currentRate === 0 ? noneText : `+${currentRate}${perSecondText}`;
+    const nextAuto = nextRate === undefined ? noneText : `+${nextRate}${perSecondText}`;
+
+    const currentText = `${manualText}\n${autoText}: ${currentAuto}`;
     const nextText =
-      level >= 3 ? 'Máximo alcanzado' : `Manual: +1 chatarra por click\nAutomático: ${nextAuto}`;
+      level >= 3
+        ? this.translationService.t('upgrades.max_level')
+        : `${manualText}\n${autoText}: ${nextAuto}`;
 
     return {
-      name: definition?.name || '',
+      name: this.translationService.t('upgrades.scrap_auto.name'),
       level,
       currentRate: currentText,
       nextRate: nextText,
@@ -418,11 +469,11 @@ export class UpgradesPanelComponent {
     };
   });
 
-  tabs = [
-    { id: 'scrap', label: 'Chatarra' },
-    { id: 'storage', label: 'Almacenamiento' },
-    { id: 'machine', label: 'Máquina' },
-  ];
+  tabs = computed(() => [
+    { id: 'scrap', label: this.translationService.t('upgrades.tabs.scrap') },
+    { id: 'storage', label: this.translationService.t('upgrades.tabs.storage') },
+    { id: 'machine', label: this.translationService.t('upgrades.tabs.machine') },
+  ]);
 
   toggleMinimize(): void {
     this.isMinimized.update((v) => !v);

@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "machines": "Máquinas"
+  },
+  "resources": {
+    "scrap": "Chatarra",
+    "metal": "Metal",
+    "plastic": "Plástico",
+    "components": "Componentes",
+    "money": "Dinero"
+  },
+  "machines": {
+    "crusher": "Trituradora",
+    "separator": "Separador",
+    "smelter": "Fundidora",
+    "assembler": "Ensambladora",
+    "packager": "Empaquetadora"
+  },
+  "status": {
+    "ok": "OK",
+    "parada": "Parada",
+    "bloqueada": "Bloqueada",
+    "falta_input": "Falta input",
+    "output_lleno": "Output lleno"
+  },
+  "buttons": {
+    "activa": "Activa",
+    "parada": "Parada",
+    "mejorar": "Mejorar",
+    "start": "Start",
+    "stop": "Stop",
+    "chatarra": "Chatarra"
+  },
+  "upgrades": {
+    "title": "Mejoras",
+    "tabs": {
+      "scrap": "Chatarra",
+      "storage": "Almacenamiento",
+      "machine": "Máquina"
+    },
+    "nivel": "Nivel",
+    "max_level": "Nivel máximo alcanzado",
+    "scrap_auto": {
+      "name": "Llegada Automática de Chatarra",
+      "manual": "Manual: +1 chatarra por clic",
+      "automatic": "Automático",
+      "per_second": "/s",
+      "none": "—"
+    },
+    "storage": {
+      "scrap": "Capacidad de Chatarra",
+      "metal": "Capacidad de Metal",
+      "plastic": "Capacidad de Plástico",
+      "components": "Capacidad de Componentes"
+    },
+    "capacity_label": "Capacidad:",
+    "machine_tab": {
+      "no_selection": "Selecciona una máquina para ver mejoras",
+      "level_label": "Nivel:",
+      "base_speed_label": "Velocidad base:",
+      "cycles_per_second": "ciclos/s",
+      "speed_upgrades_coming": "Mejoras de velocidad próximamente"
+    }
+  },
+  "debug": {
+    "tick": "Tick"
+  },
+  "common": {
+    "level_short": "Nv",
+    "cycle_time": "~{{time}}s"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "machines": "Machines"
+  },
+  "resources": {
+    "scrap": "Scrap",
+    "metal": "Metal",
+    "plastic": "Plastic",
+    "components": "Components",
+    "money": "Money"
+  },
+  "machines": {
+    "crusher": "Crusher",
+    "separator": "Separator",
+    "smelter": "Smelter",
+    "assembler": "Assembler",
+    "packager": "Packager"
+  },
+  "status": {
+    "ok": "OK",
+    "parada": "Stopped",
+    "bloqueada": "Locked",
+    "falta_input": "Missing input",
+    "output_lleno": "Output full"
+  },
+  "buttons": {
+    "activa": "Active",
+    "parada": "Stopped",
+    "mejorar": "Upgrade",
+    "start": "Start",
+    "stop": "Stop",
+    "chatarra": "Scrap"
+  },
+  "upgrades": {
+    "title": "Upgrades",
+    "tabs": {
+      "scrap": "Scrap",
+      "storage": "Storage",
+      "machine": "Machine"
+    },
+    "nivel": "Level",
+    "max_level": "Maximum level reached",
+    "scrap_auto": {
+      "name": "Automatic Scrap Generation",
+      "manual": "Manual: +1 scrap per click",
+      "automatic": "Automatic",
+      "per_second": "/s",
+      "none": "—"
+    },
+    "storage": {
+      "scrap": "Scrap Capacity",
+      "metal": "Metal Capacity",
+      "plastic": "Plastic Capacity",
+      "components": "Components Capacity"
+    },
+    "capacity_label": "Capacity:",
+    "machine_tab": {
+      "no_selection": "Select a machine to view upgrades",
+      "level_label": "Level:",
+      "base_speed_label": "Base speed:",
+      "cycles_per_second": "cycles/s",
+      "speed_upgrades_coming": "Speed upgrades coming soon"
+    }
+  },
+  "debug": {
+    "tick": "Tick"
+  },
+  "common": {
+    "level_short": "Lv",
+    "cycle_time": "~{{time}}s"
+  }
+}

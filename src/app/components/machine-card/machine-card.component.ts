@@ -4,6 +4,7 @@ import { Machine } from '../../models/machine.model';
 import { ResourcesService } from '../../services/resources.service';
 import { MachinesService } from '../../services/machines.service';
 import { MachineSelectionService } from '../../services/machine-selection.service';
+import { TranslationService } from '../../services/translation.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 
@@ -21,17 +22,25 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
     >
       <div class="machine-header">
         <div class="machine-title-group">
-          <h3 class="machine-name">{{ machine.name }}</h3>
-          <span class="machine-level" *ngIf="!isLocked()">Nv {{ machine.level }}</span>
+          <h3 class="machine-name">{{ translatedMachineName() }}</h3>
+          <span class="machine-level" *ngIf="!isLocked()"
+            >{{ translationService.t('common.level_short') }} {{ machine.level }}</span
+          >
         </div>
         <app-button
           *ngIf="!isLocked()"
-          [label]="machine.isActive ? 'Activa' : 'Parada'"
+          [label]="
+            machine.isActive
+              ? translationService.t('buttons.activa')
+              : translationService.t('buttons.parada')
+          "
           [variant]="machine.isActive ? 'primary' : 'secondary'"
           size="sm"
           (clicked)="toggleMachine()"
         />
-        <span *ngIf="isLocked()" class="locked-badge">🔒 Bloqueada</span>
+        <span *ngIf="isLocked()" class="locked-badge"
+          >🔒 {{ translationService.t('status.bloqueada') }}</span
+        >
       </div>
 
       <div class="machine-recipe">
@@ -62,11 +71,11 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         <span
           class="status-label"
           [ngClass]="{
-            'status-ok': statusText() === 'OK',
-            'status-parada': statusText() === 'Parada',
-            'status-bloqueada': statusText() === 'Bloqueada',
-            'status-input': statusText() === 'Falta input',
-            'status-output': statusText() === 'Output lleno',
+            'status-ok': statusText() === translationService.t('status.ok'),
+            'status-parada': statusText() === translationService.t('status.parada'),
+            'status-bloqueada': statusText() === translationService.t('status.bloqueada'),
+            'status-input': statusText() === translationService.t('status.falta_input'),
+            'status-output': statusText() === translationService.t('status.output_lleno'),
           }"
         >
           {{ statusText() }}
@@ -258,6 +267,7 @@ export class MachineCardComponent {
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
     private machineSelectionService: MachineSelectionService,
+    public translationService: TranslationService,
   ) {}
 
   private currentMachine = computed(
@@ -282,6 +292,11 @@ export class MachineCardComponent {
     const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);
     return resource?.icon || '?';
   }
+
+  translatedMachineName = computed(() => {
+    // El ID de la máquina ya es el tipo (crusher, separator, etc.)
+    return this.translationService.t(`machines.${this.machine.id}`);
+  });
 
   get recipeInputs(): string {
     return this.machine.baseConsumption.map((c) => `${c.amount} ${c.resourceId}`).join(' + ');
@@ -313,9 +328,9 @@ export class MachineCardComponent {
   statusText = computed(() => {
     const machine = this.currentMachine();
 
-    if (machine.level === 0) return 'Bloqueada';
+    if (machine.level === 0) return this.translationService.t('status.bloqueada');
 
-    if (!machine.isActive) return 'Parada';
+    if (!machine.isActive) return this.translationService.t('status.parada');
 
     const hasInputs = machine.baseConsumption.every((c) =>
       this.resourcesService.hasEnough(c.resourceId, c.amount),
@@ -324,9 +339,9 @@ export class MachineCardComponent {
       this.resourcesService.getAvailableSpace(machine.baseProduction.resourceId) >=
       machine.baseProduction.amount;
 
-    if (!hasInputs) return 'Falta input';
-    if (!hasSpace) return 'Output lleno';
-    return 'OK';
+    if (!hasInputs) return this.translationService.t('status.falta_input');
+    if (!hasSpace) return this.translationService.t('status.output_lleno');
+    return this.translationService.t('status.ok');
   });
 
   selectMachine(): void {

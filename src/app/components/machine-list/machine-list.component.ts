@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MachinesService } from '../../services/machines.service';
 import { MachineCardComponent } from '../machine-card/machine-card.component';
 import { MachineType } from '../../models/machine.model';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-machine-list',
@@ -10,7 +11,7 @@ import { MachineType } from '../../models/machine.model';
   imports: [CommonModule, MachineCardComponent],
   template: `
     <div class="machine-list">
-      <h2 class="section-title">Máquinas</h2>
+      <h2 class="section-title">{{ translationService.t('sections.machines') }}</h2>
       <div class="machines-container">
         <app-machine-card
           *ngFor="let machine of orderedMachines(); trackBy: trackByMachineId"
@@ -43,7 +44,10 @@ import { MachineType } from '../../models/machine.model';
   ],
 })
 export class MachineListComponent {
-  constructor(private machinesService: MachinesService) {}
+  constructor(
+    private machinesService: MachinesService,
+    public translationService: TranslationService,
+  ) {}
 
   private machineOrder = [
     MachineType.CRUSHER,
