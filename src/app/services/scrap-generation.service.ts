@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
+import { SCRAP_GENERATION_CONFIG } from '../config/game-balance.config';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class ScrapGenerationService {
    * Respects capacity automatically via ResourcesService.add()
    */
   generateManualScrap(): void {
-    this.resourcesService.add(ResourceType.SCRAP, 1);
+    this.resourcesService.add(ResourceType.SCRAP, SCRAP_GENERATION_CONFIG.MANUAL_GENERATION);
   }
 
   /**

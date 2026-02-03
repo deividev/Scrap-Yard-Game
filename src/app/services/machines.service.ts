@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Machine, MachineUpgradeCost } from '../models/machine.model';
 import { INITIAL_MACHINES } from '../config/machines.config';
+import { MACHINE_UPGRADE_CONFIG } from '../config/game-balance.config';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
 
@@ -76,8 +77,12 @@ export class MachinesService {
   calculateUpgradeCostForNextLevel(currentLevel: number): MachineUpgradeCost {
     const safeCurrentLevel = Math.max(1, currentLevel);
     const newLevel = safeCurrentLevel + 1;
-    const moneyCost = Math.ceil(20 * Math.pow(1.15, newLevel - 2));
-    const componentsCost = newLevel < 4 ? 0 : newLevel - 3;
+    const moneyCost = Math.ceil(
+      MACHINE_UPGRADE_CONFIG.BASE_MONEY_COST *
+        Math.pow(MACHINE_UPGRADE_CONFIG.COST_MULTIPLIER, newLevel - 2),
+    );
+    const componentsCost =
+      newLevel < MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL ? 0 : newLevel - 3;
 
     return {
       money: moneyCost,

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { UpgradeState, UpgradeId, UpgradeCost } from '../models/upgrade.model';
 import { UPGRADE_DEFINITIONS } from '../config/upgrade-definitions.config';
-import { UPGRADE_COST_FORMULAS } from '../config/upgrade-cost-formulas.config';
+import { UPGRADE_COST_FORMULAS, STORAGE_UPGRADE_CONFIG } from '../config/game-balance.config';
 
 /**
  * G) Upgrades Service - Placeholder
@@ -44,9 +44,10 @@ export class UpgradesService {
    * Calculate cost for next level of an upgrade.
    * Formula: ceil(baseCost * (1.15 ^ currentLevel)) for most upgrades
    * Formula: ceil(baseCost * (1.25 ^ currentLevel)) for scrap upgrades
+   * Storage upgrades are capped at level 50.
    *
    * @param upgradeId The upgrade to calculate cost for
-   * @returns Cost object with money and components, or null if upgrade not found
+   * @returns Cost object with money and components, or null if upgrade not found or max level reached
    */
   getCostForNextLevel(upgradeId: UpgradeId): UpgradeCost | null {
     const upgrade = this.upgrades().find((u) => u.id === upgradeId);
@@ -56,6 +57,12 @@ export class UpgradesService {
     if (!definition) return null;
 
     const currentLevel = upgrade.level;
+
+    // Check max level for storage upgrades
+    const isStorageUpgrade = upgradeId.startsWith('UPG_STORE_');
+    if (isStorageUpgrade && currentLevel >= STORAGE_UPGRADE_CONFIG.MAX_LEVEL) {
+      return null; // Max level reached
+    }
 
     const isScrapUpgrade =
       upgradeId === UpgradeId.UPG_SCRAP_001 || upgradeId === UpgradeId.UPG_SCRAP_002;
@@ -89,19 +96,34 @@ export class UpgradesService {
     );
   }
 
-  getStorageIncrement(upgradeId: UpgradeId): number {
+  /**
+   * Calculate storage increment based on upgrade level.
+   * Every 10 levels, the increment increases.
+   */
+  getStorageIncrement(upgradeId: UpgradeId, level: number): number {
+    const tier = Math.floor(level / STORAGE_UPGRADE_CONFIG.LEVELS_PER_TIER);
+
+    let baseIncrement: number;
+
     switch (upgradeId) {
-      case UpgradeId.UPG_STORE_001:
-        return 50;
-      case UpgradeId.UPG_STORE_002:
-        return 20;
-      case UpgradeId.UPG_STORE_003:
-        return 20;
-      case UpgradeId.UPG_STORE_004:
-        return 5;
+      case UpgradeId.UPG_STORE_001: // Scrap
+        baseIncrement = STORAGE_UPGRADE_CONFIG.BASE_INCREMENTS.SCRAP;
+        break;
+      case UpgradeId.UPG_STORE_002: // Metal
+        baseIncrement = STORAGE_UPGRADE_CONFIG.BASE_INCREMENTS.METAL;
+        break;
+      case UpgradeId.UPG_STORE_003: // Plastic
+        baseIncrement = STORAGE_UPGRADE_CONFIG.BASE_INCREMENTS.PLASTIC;
+        break;
+      case UpgradeId.UPG_STORE_004: // Components
+        baseIncrement = STORAGE_UPGRADE_CONFIG.BASE_INCREMENTS.COMPONENTS;
+        break;
       default:
         return 0;
     }
+
+    // Increment increases by SCALE_FACTOR each tier
+    return Math.floor(baseIncrement * Math.pow(STORAGE_UPGRADE_CONFIG.SCALE_FACTOR, tier));
   }
 
   // Serialization support

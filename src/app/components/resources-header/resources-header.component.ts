@@ -13,7 +13,7 @@ import { FormatNumberPipe } from '../../pipes/format-number.pipe';
     <header class="resources-header">
       <div class="resource-item money">
         <span class="resource-icon">💰</span>
-        <span class="resource-amount">{{ money() | formatNumber }}</span>
+        <span class="resource-amount">{{ money() }}</span>
       </div>
       <div class="resources-grid">
         <div class="resource-item">

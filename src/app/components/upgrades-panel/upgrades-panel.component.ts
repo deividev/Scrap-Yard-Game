@@ -11,6 +11,7 @@ import { TranslationService } from '../../services/translation.service';
 import { UpgradeId } from '../../models/upgrade.model';
 import { ResourceType } from '../../models/resource.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
+import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
 
 @Component({
   selector: 'app-upgrades-panel',
@@ -66,7 +67,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
               </div>
 
               <app-button
-                *ngIf="scrapAutoUpgrade().level < 3"
+                *ngIf="scrapAutoUpgrade().level < SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL"
                 [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
                 size="sm"
@@ -74,7 +75,10 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
                 (clicked)="purchaseScrapUpgrade()"
               />
 
-              <p *ngIf="scrapAutoUpgrade().level >= 3" class="max-level">
+              <p
+                *ngIf="scrapAutoUpgrade().level >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL"
+                class="max-level"
+              >
                 {{ translationService.t('upgrades.max_level') }}
               </p>
             </div>
@@ -101,7 +105,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
                 <span class="capacity-next">{{ upgrade.nextCapacity | formatNumber }}</span>
               </div>
 
-              <div class="upgrade-cost">
+              <div class="upgrade-cost" *ngIf="!upgrade.isMaxLevel">
                 <span class="cost-item">💰 {{ upgrade.cost.money | formatNumber }}</span>
                 <span *ngIf="upgrade.cost.components > 0" class="cost-item"
                   >🔧 {{ upgrade.cost.components | formatNumber }}</span
@@ -109,12 +113,17 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
               </div>
 
               <app-button
+                *ngIf="!upgrade.isMaxLevel"
                 [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
                 size="sm"
                 [disabled]="!upgrade.canAfford"
                 (clicked)="purchaseStorageUpgrade(upgrade.upgradeId)"
               />
+
+              <p *ngIf="upgrade.isMaxLevel" class="max-level">
+                {{ translationService.t('upgrades.max_level') }}
+              </p>
             </div>
           </div>
 
@@ -349,6 +358,10 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 export class UpgradesPanelComponent {
   @Output() minimizedChange = new EventEmitter<boolean>();
 
+  // Exponer configs para usar en template
+  readonly SCRAP_GENERATION_CONFIG = SCRAP_GENERATION_CONFIG;
+  readonly STORAGE_UPGRADE_CONFIG = STORAGE_UPGRADE_CONFIG;
+
   isMinimized = signal(false);
   activeTab = signal('scrap');
 
@@ -411,14 +424,19 @@ export class UpgradesPanelComponent {
       const cost = this.upgradesService.getCostForNextLevel(id);
       const baseCapacity = this.resourcesService.getBaseCapacity(resourceId);
       const currentCapacity = this.resourcesService.getCapacity(resourceId);
-      const increment = this.upgradesService.getStorageIncrement(id);
-      const nextCapacity = baseCapacity + increment * (level + 1);
+
+      // Calculate next capacity by summing all increments up to next level
+      const nextIncrement = this.upgradesService.getStorageIncrement(id, level + 1);
+      const nextCapacity = currentCapacity + nextIncrement;
+
       const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);
 
       const canAfford = cost
         ? this.resourcesService.hasEnough(ResourceType.MONEY, cost.money) &&
           this.resourcesService.hasEnough(ResourceType.COMPONENTS, cost.components)
         : false;
+
+      const isMaxLevel = level >= STORAGE_UPGRADE_CONFIG.MAX_LEVEL;
 
       return {
         upgradeId: id,
@@ -428,7 +446,8 @@ export class UpgradesPanelComponent {
         currentCapacity,
         nextCapacity,
         cost: cost || { money: 0, components: 0 },
-        canAfford,
+        canAfford: canAfford && !isMaxLevel,
+        isMaxLevel,
       };
     });
   });
@@ -437,7 +456,7 @@ export class UpgradesPanelComponent {
     const level = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
     const cost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_002);
 
-    const rates = [0, 0.2, 0.5, 1.0];
+    const rates = SCRAP_GENERATION_CONFIG.AUTO_GENERATION_RATES;
     const currentRate = rates[level];
     const nextRate = rates[level + 1];
 
@@ -455,7 +474,7 @@ export class UpgradesPanelComponent {
 
     const currentText = `${manualText}\n${autoText}: ${currentAuto}`;
     const nextText =
-      level >= 3
+      level >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL
         ? this.translationService.t('upgrades.max_level')
         : `${manualText}\n${autoText}: ${nextAuto}`;
 
@@ -494,6 +513,9 @@ export class UpgradesPanelComponent {
 
     if (!canAfford) return;
 
+    const currentLevel = this.upgradesService.getLevel(upgradeId);
+    if (currentLevel >= STORAGE_UPGRADE_CONFIG.MAX_LEVEL) return; // Max level
+
     this.resourcesService.subtract(ResourceType.MONEY, cost.money);
     this.resourcesService.subtract(ResourceType.COMPONENTS, cost.components);
 
@@ -502,16 +524,17 @@ export class UpgradesPanelComponent {
     const definition = this.upgradesService.getDefinition(upgradeId);
     if (definition?.targetResourceId) {
       const newLevel = this.upgradesService.getLevel(upgradeId);
-      const baseCapacity = this.resourcesService.getBaseCapacity(definition.targetResourceId);
-      const increment = this.upgradesService.getStorageIncrement(upgradeId);
-      const newCapacity = baseCapacity + increment * newLevel;
+      // Calculate the increment for this specific level
+      const increment = this.upgradesService.getStorageIncrement(upgradeId, newLevel);
+      const currentCapacity = this.resourcesService.getCapacity(definition.targetResourceId);
+      const newCapacity = currentCapacity + increment;
       this.resourcesService.setCapacity(definition.targetResourceId, newCapacity);
     }
   }
 
   purchaseScrapUpgrade(): void {
     const currentLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
-    if (currentLevel >= 3) return;
+    if (currentLevel >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL) return;
 
     const upgradeCost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_002);
     if (!upgradeCost) return;
@@ -523,7 +546,7 @@ export class UpgradesPanelComponent {
     this.upgradesService.purchaseUpgrade(UpgradeId.UPG_SCRAP_002);
 
     const newLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
-    const rates = [0, 0.2, 0.5, 1.0];
+    const rates = SCRAP_GENERATION_CONFIG.AUTO_GENERATION_RATES;
     this.scrapGenerationService.setAutomaticGenerationRate(rates[newLevel] || 0);
   }
 }
