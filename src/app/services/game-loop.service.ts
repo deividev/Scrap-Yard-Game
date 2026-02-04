@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { MachinesService } from './machines.service';
 import { ScrapGenerationService } from './scrap-generation.service';
+import { SaveService } from './save.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +10,8 @@ import { ScrapGenerationService } from './scrap-generation.service';
 export class GameLoopService {
   private intervalId: any = null;
   private tickCount = signal(0);
+  private saveService = inject(SaveService);
+  private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
     private resourcesService: ResourcesService,
@@ -37,6 +40,10 @@ export class GameLoopService {
     this.tickCount.update((count) => count + 1);
     this.scrapGenerationService.processAutomaticGeneration();
     this.processProduction();
+
+    if (this.tickCount() % this.AUTO_SAVE_INTERVAL === 0) {
+      this.saveService.save();
+    }
   }
 
   private processProduction(): void {

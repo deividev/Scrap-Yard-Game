@@ -1,16 +1,17 @@
 {
-  "name": "last-admin-online",
+  "name": "scrap-yard",
   "version": "0.0.0",
   "main": "electron/main.js",
-  "description": "LAST ADMIN ONLINE - MVP",
+  "description": "SCRAP YARD - MVP",
   "author": "Unknown",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "dev": "ng serve --host 0.0.0.0 --port 4200",
-    "electron:dev": "pnpm run dev & pnpm run electron:serve",
-    "electron:serve": "wait-on http://localhost:4200 && electron .",
+    "electron": "pnpm run build:electron && npx electron .",
+    "electron:quick": "npx electron .",
     "build": "ng build",
+    "build:electron": "ng build --base-href ./",
     "dist": "ng build --configuration production",
     "electron:build": "ng build --configuration production && electron-builder",
     "clean": "node ./scripts/clean.js",
@@ -51,12 +52,11 @@
     "jsdom": "^27.1.0",
     "rimraf": "^5.0.10",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8",
-    "wait-on": "^7.0.0"
+    "vitest": "^4.0.8"
   },
   "build": {
-    "appId": "com.lastadmin.online",
-    "productName": "Last Admin Online",
+    "appId": "com.scrapyard.game",
+    "productName": "Scrap Yard",
     "directories": {
       "output": "dist_electron",
       "buildResources": "build_resources"

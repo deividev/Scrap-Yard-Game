@@ -22,6 +22,7 @@ import { UPGRADE_COST_FORMULAS, STORAGE_UPGRADE_CONFIG } from '../config/game-ba
 })
 export class UpgradesService {
   private upgrades = signal<UpgradeState[]>(this.initializeUpgrades());
+  private saveService?: any;
 
   private initializeUpgrades(): UpgradeState[] {
     // Initialize all upgrades at level 0
@@ -94,6 +95,7 @@ export class UpgradesService {
     this.upgrades.update((upgrades) =>
       upgrades.map((u) => (u.id === upgradeId ? { ...u, level: u.level + 1 } : u)),
     );
+    this.saveService?.markDirty();
   }
 
   /**
@@ -133,5 +135,9 @@ export class UpgradesService {
 
   setState(upgrades: UpgradeState[]): void {
     this.upgrades.set(upgrades.map((u) => ({ ...u })));
+  }
+
+  setSaveService(saveService: any): void {
+    this.saveService = saveService;
   }
 }

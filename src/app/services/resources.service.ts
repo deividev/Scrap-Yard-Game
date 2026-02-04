@@ -6,6 +6,7 @@ import { INITIAL_RESOURCES } from '../config/resources.config';
   providedIn: 'root',
 })
 export class ResourcesService {
+  private saveService?: any;
   private baseCapacities = new Map<string, number>();
   private resources = signal<Resource[]>(this.initializeResources());
 
@@ -79,6 +80,7 @@ export class ResourcesService {
     this.resources.update((resources) =>
       resources.map((r) => (r.id === resourceId ? { ...r, capacity: newCapacity } : r)),
     );
+    this.saveService?.markDirty();
   }
 
   subtract(resourceId: string, amount: number): boolean {
@@ -110,5 +112,9 @@ export class ResourcesService {
 
   setState(resources: Resource[]): void {
     this.resources.set(resources.map((r) => ({ ...r })));
+  }
+
+  setSaveService(saveService: any): void {
+    this.saveService = saveService;
   }
 }

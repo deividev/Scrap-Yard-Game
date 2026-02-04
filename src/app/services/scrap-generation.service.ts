@@ -8,6 +8,7 @@ import { SCRAP_GENERATION_CONFIG } from '../config/game-balance.config';
 })
 export class ScrapGenerationService {
   private automaticGenerationRate = signal(0);
+  private saveService?: any;
 
   constructor(private resourcesService: ResourcesService) {}
 
@@ -25,6 +26,7 @@ export class ScrapGenerationService {
    */
   setAutomaticGenerationRate(rate: number): void {
     this.automaticGenerationRate.set(Math.max(0, rate));
+    this.saveService?.markDirty();
   }
 
   getAutomaticGenerationRate(): number {
@@ -41,5 +43,9 @@ export class ScrapGenerationService {
     if (rate > 0) {
       this.resourcesService.add(ResourceType.SCRAP, rate);
     }
+  }
+
+  setSaveService(saveService: any): void {
+    this.saveService = saveService;
   }
 }

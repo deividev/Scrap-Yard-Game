@@ -11,6 +11,7 @@ import { ResourceType } from '../models/resource.model';
 export class MachinesService {
   private machines = signal<Machine[]>(this.initializeMachines());
   private resourcesService = inject(ResourcesService);
+  private saveService?: any;
 
   private initializeMachines(): Machine[] {
     return INITIAL_MACHINES.map((m) => ({ ...m }));
@@ -52,6 +53,7 @@ export class MachinesService {
           : m,
       ),
     );
+    this.saveService?.markDirty();
   }
 
   updateProgress(machineId: string, delta: number): void {
@@ -60,18 +62,21 @@ export class MachinesService {
         m.id === machineId ? { ...m, progress: Math.min(1.0, m.progress + delta) } : m,
       ),
     );
+    this.saveService?.markDirty();
   }
 
   consumeProgress(machineId: string, amount: number): void {
     this.machines.update((machines) =>
       machines.map((m) => (m.id === machineId ? { ...m, progress: m.progress - amount } : m)),
     );
+    this.saveService?.markDirty();
   }
 
   upgradeLevel(machineId: string): void {
     this.machines.update((machines) =>
       machines.map((m) => (m.id === machineId ? { ...m, level: m.level + 1 } : m)),
     );
+    this.saveService?.markDirty();
   }
 
   calculateUpgradeCostForNextLevel(currentLevel: number): MachineUpgradeCost {
@@ -119,5 +124,9 @@ export class MachinesService {
 
   setState(machines: Machine[]): void {
     this.machines.set(machines.map((m) => ({ ...m })));
+  }
+
+  setSaveService(saveService: any): void {
+    this.saveService = saveService;
   }
 }

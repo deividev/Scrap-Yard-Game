@@ -7,16 +7,39 @@ function timestamp() {
   return d.toISOString().replace(/[:.]/g, '-');
 }
 
+function cleanDistElectron() {
+  const distElectronPattern = /^dist_electron/;
+  const rootDir = process.cwd();
+  const items = fs.readdirSync(rootDir);
+
+  items.forEach((item) => {
+    if (distElectronPattern.test(item)) {
+      const itemPath = path.join(rootDir, item);
+      console.log('Removing old build:', item);
+      fs.rmSync(itemPath, { recursive: true, force: true });
+    }
+  });
+}
+
 try {
+  console.log('Cleaning previous builds...');
+  cleanDistElectron();
+
   console.log('Building web assets...');
   execSync('pnpm run dist', { stdio: 'inherit' });
 
   // Fix Angular base href for file:// (Electron) so assets load relative to index.html
   try {
-    const indexHtmlPath = path.join(process.cwd(), 'dist', 'last-admin-online', 'browser', 'index.html');
+    const indexHtmlPath = path.join(
+      process.cwd(),
+      'dist',
+      'last-admin-online',
+      'browser',
+      'index.html',
+    );
     if (fs.existsSync(indexHtmlPath)) {
       let html = fs.readFileSync(indexHtmlPath, 'utf8');
-      if (html.includes("<base href=\"/\">")) {
+      if (html.includes('<base href="/">')) {
         html = html.replace('<base href="/">', '<base href="./">');
         fs.writeFileSync(indexHtmlPath, html, 'utf8');
         console.log('Patched base href in', indexHtmlPath);
@@ -29,11 +52,11 @@ try {
   const pkg = require(path.join(process.cwd(), 'package.json'));
   const baseBuild = pkg.build || {};
 
-  const outDir = path.join(process.cwd(), `dist_electron_${timestamp()}`);
+  const outDir = path.join(process.cwd(), 'dist_electron');
   console.log('Using electron-builder output dir:', outDir);
 
   const tmpConfig = Object.assign({}, baseBuild, {
-    directories: Object.assign({}, baseBuild.directories || {}, { output: outDir })
+    directories: Object.assign({}, baseBuild.directories || {}, { output: outDir }),
   });
 
   const tmpPath = path.join(process.cwd(), '.electron-builder.tmp.json');
@@ -45,7 +68,9 @@ try {
   execSync(`pnpm exec electron-builder --config "${tmpPath}" --win`, { stdio: 'inherit' });
 
   // cleanup tmp config
-  try { fs.unlinkSync(tmpPath); } catch (e) {}
+  try {
+    fs.unlinkSync(tmpPath);
+  } catch (e) {}
 
   console.log('Packaging complete. Output:', outDir);
 } catch (e) {
