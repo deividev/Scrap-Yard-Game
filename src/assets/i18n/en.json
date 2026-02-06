@@ -28,8 +28,8 @@
     "parada": "Stopped",
     "mejorar": "Upgrade",
     "start": "Start",
-    "stop": "Stop",
-    "chatarra": "Scrap"
+    "stop": "Pause",
+    "chatarra": "Generate Scrap"
   },
   "upgrades": {
     "title": "Upgrades",
@@ -58,8 +58,19 @@
       "no_selection": "Select a machine to view upgrades",
       "level_label": "Level:",
       "base_speed_label": "Base speed:",
+      "effective_speed_label": "Effective speed:",
+      "production_multiplier_label": "Production multiplier:",
+      "next_bonus_label": "Next bonus:",
+      "in_levels": "in {{count}} levels",
       "cycles_per_second": "cycles/s",
       "speed_upgrades_coming": "Speed upgrades coming soon"
+    },
+    "scrap_details": {
+      "manual_label": "Manual:",
+      "automatic_current_label": "Current automatic:",
+      "next_level_label": "Next level:",
+      "per_click": "scrap per click",
+      "per_second": "/s"
     }
   },
   "debug": {

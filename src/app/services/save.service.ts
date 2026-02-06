@@ -63,7 +63,13 @@ export class SaveService {
       scrapGenerationRate: this.scrapGenerationService.getAutomaticGenerationRate(),
     };
 
-    const serialized = JSON.stringify(saveState);
+    // Custom replacer to handle Infinity values
+    const serialized = JSON.stringify(saveState, (key, value) => {
+      if (value === Infinity) {
+        return '__INFINITY__';
+      }
+      return value;
+    });
 
     try {
       if (this.isElectron) {
@@ -106,7 +112,13 @@ export class SaveService {
           return false;
         }
 
-        const saveState: SaveState = JSON.parse(result.data);
+        // Custom reviver to restore Infinity values
+        const saveState: SaveState = JSON.parse(result.data, (key, value) => {
+          if (value === '__INFINITY__') {
+            return Infinity;
+          }
+          return value;
+        });
         this.restoreState(saveState);
         return true;
       } else {
@@ -115,7 +127,13 @@ export class SaveService {
           return false;
         }
 
-        const saveState: SaveState = JSON.parse(savedData);
+        // Custom reviver to restore Infinity values
+        const saveState: SaveState = JSON.parse(savedData, (key, value) => {
+          if (value === '__INFINITY__') {
+            return Infinity;
+          }
+          return value;
+        });
         this.restoreState(saveState);
         return true;
       }
@@ -130,6 +148,10 @@ export class SaveService {
     this.machinesService.setState(saveState.machines);
     this.upgradesService.setState(saveState.upgrades);
     this.scrapGenerationService.setAutomaticGenerationRate(saveState.scrapGenerationRate);
+
+    // Apply all storage upgrade effects after loading
+    this.upgradesService.applyStorageUpgrades(this.resourcesService);
+
     this.isDirty.set(false);
   }
 

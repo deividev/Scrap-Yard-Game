@@ -33,7 +33,7 @@ export const INITIAL_RESOURCES: Resource[] = [
   {
     id: ResourceType.MONEY,
     name: 'Dinero',
-    amount: 100000,
+    amount: 10000,
     capacity: INITIAL_CAPACITIES.MONEY,
     icon: '💰',
   },

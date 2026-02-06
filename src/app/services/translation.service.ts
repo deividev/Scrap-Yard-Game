@@ -64,8 +64,19 @@ export interface Translations {
       no_selection: string;
       level_label: string;
       base_speed_label: string;
+      effective_speed_label: string;
+      production_multiplier_label: string;
+      next_bonus_label: string;
+      in_levels: string;
       cycles_per_second: string;
       speed_upgrades_coming: string;
+    };
+    scrap_details: {
+      manual_label: string;
+      automatic_current_label: string;
+      next_level_label: string;
+      per_click: string;
+      per_second: string;
     };
   };
   debug: {

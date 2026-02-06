@@ -111,6 +111,16 @@ export class ResourcesService {
   }
 
   setState(resources: Resource[]): void {
+    // Preserve base capacities when loading state
+    resources.forEach((loadedResource) => {
+      const baseCapacity = this.baseCapacities.get(loadedResource.id);
+      if (baseCapacity !== undefined) {
+        // If the base capacity is Infinity, ensure it stays Infinity
+        if (!isFinite(baseCapacity)) {
+          loadedResource.capacity = Infinity;
+        }
+      }
+    });
     this.resources.set(resources.map((r) => ({ ...r })));
   }
 

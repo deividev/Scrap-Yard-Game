@@ -27,9 +27,9 @@
     "activa": "Activa",
     "parada": "Parada",
     "mejorar": "Mejorar",
-    "start": "Start",
-    "stop": "Stop",
-    "chatarra": "Chatarra"
+    "start": "Iniciar",
+    "stop": "Pausar",
+    "chatarra": "Generar Chatarra"
   },
   "upgrades": {
     "title": "Mejoras",
@@ -58,8 +58,19 @@
       "no_selection": "Selecciona una máquina para ver mejoras",
       "level_label": "Nivel:",
       "base_speed_label": "Velocidad base:",
+      "effective_speed_label": "Velocidad efectiva:",
+      "production_multiplier_label": "Multiplicador de producción:",
+      "next_bonus_label": "Próximo multiplicador:",
+      "in_levels": "en {{count}} niveles",
       "cycles_per_second": "ciclos/s",
       "speed_upgrades_coming": "Mejoras de velocidad próximamente"
+    },
+    "scrap_details": {
+      "manual_label": "Manual:",
+      "automatic_current_label": "Automático actual:",
+      "next_level_label": "Próximo nivel:",
+      "per_click": "chatarra por click",
+      "per_second": "/s"
     }
   },
   "debug": {

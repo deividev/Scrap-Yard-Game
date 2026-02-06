@@ -9,13 +9,9 @@
 // ============================================
 
 export const UPGRADE_COST_FORMULAS = {
-  // Multiplicador de coste por nivel para upgrades normales
-  // Formula: baseCost * (DEFAULT_MULTIPLIER ^ currentLevel)
   DEFAULT_MULTIPLIER: 1.15,
-
-  // Multiplicador de coste por nivel para upgrades de chatarra
-  // Formula: baseCost * (SCRAP_MULTIPLIER ^ currentLevel)
   SCRAP_MULTIPLIER: 1.25,
+  STORAGE_MULTIPLIER: 1.2,
 };
 
 // ============================================
@@ -23,27 +19,19 @@ export const UPGRADE_COST_FORMULAS = {
 // ============================================
 
 export const STORAGE_UPGRADE_CONFIG = {
-  // Máximo nivel de upgrades de almacenamiento
   MAX_LEVEL: 50,
-
-  // Cada cuántos niveles aumenta el tier (y el incremento)
-  LEVELS_PER_TIER: 10,
-
-  // Incremento base por recurso (tier 0: niveles 1-10)
-  BASE_INCREMENTS: {
-    SCRAP: 50,
-    METAL: 20,
-    PLASTIC: 20,
+  INCREMENTS: {
+    SCRAP: 25,
+    METAL: 15,
+    PLASTIC: 15,
     COMPONENTS: 5,
   },
-
-  // Factor de escalado: incremento aumenta 50% cada tier
-  // Tier 0: base × 1
-  // Tier 1: base × 1.5
-  // Tier 2: base × 2.25
-  // Tier 3: base × 3.375
-  // Tier 4: base × 5.06
-  SCALE_FACTOR: 1.5,
+  BASE_COSTS: {
+    SCRAP: 20,
+    METAL: 35,
+    PLASTIC: 35,
+    COMPONENTS: 60,
+  },
 };
 
 // ============================================
@@ -51,19 +39,12 @@ export const STORAGE_UPGRADE_CONFIG = {
 // ============================================
 
 export const SCRAP_GENERATION_CONFIG = {
-  // Generación manual por clic
   MANUAL_GENERATION: 1,
-
-  // Tasas de generación automática por nivel de upgrade
-  AUTO_GENERATION_RATES: [
-    0, // Nivel 0: sin generación automática
-    0.2, // Nivel 1: +0.2 chatarra/segundo
-    0.5, // Nivel 2: +0.5 chatarra/segundo
-    1.0, // Nivel 3: +1.0 chatarra/segundo (máximo)
-  ],
-
-  // Nivel máximo de upgrade de generación automática
-  MAX_AUTO_LEVEL: 50,
+  MAX_LEVEL: 10,
+  BASE_COST_MONEY: 60,
+  COST_MULTIPLIER: 1.25,
+  COMPONENTS_START_LEVEL: 6,
+  AUTO_GENERATION_RATES: [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
 };
 
 // ============================================
@@ -71,20 +52,18 @@ export const SCRAP_GENERATION_CONFIG = {
 // ============================================
 
 export const MACHINE_UPGRADE_CONFIG = {
-  // Coste base de dinero para primer upgrade de máquina
-  BASE_MONEY_COST: 20,
-
-  // Multiplicador de coste por nivel
-  // Formula: ceil(BASE_MONEY_COST * (COST_MULTIPLIER ^ (newLevel - 2)))
+  MAX_LEVEL: 50,
   COST_MULTIPLIER: 1.15,
-
-  // A partir de qué nivel se requieren componentes
   COMPONENTS_START_LEVEL: 4,
-
-  // Fórmula para componentes: newLevel - 3 (a partir del nivel 4)
-  // Nivel 4: 1 componente
-  // Nivel 5: 2 componentes
-  // Nivel 6: 3 componentes, etc.
+  SPEED_BONUS_PER_LEVEL: 0.1,
+  PRODUCTION_BONUS_EVERY_N_LEVELS: 10,
+  BASE_COSTS: {
+    CRUSHER: 30,
+    SEPARATOR: 30,
+    SMELTER: 50,
+    ASSEMBLER: 60,
+    PACKAGER: 80,
+  },
 };
 
 // ============================================

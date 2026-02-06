@@ -51,23 +51,43 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                 <div class="upgrade-info">
                   <h4 class="upgrade-name">{{ scrapAutoUpgrade().name }}</h4>
                   <p class="upgrade-description">
-                    {{ translationService.t('upgrades.nivel') }} {{ scrapAutoUpgrade().level }}
+                    {{ translationService.t('upgrades.nivel') }} {{ scrapAutoUpgrade().level }} /
+                    {{ SCRAP_GENERATION_CONFIG.MAX_LEVEL }}
                   </p>
                 </div>
               </div>
 
-              <div class="upgrade-capacity">
-                <span class="capacity-current">{{ scrapAutoUpgrade().currentRate }}</span>
-                <span class="capacity-arrow">→</span>
-                <span class="capacity-next">{{ scrapAutoUpgrade().nextRate }}</span>
+              <div class="upgrade-details">
+                <p class="detail-line">
+                  <strong>{{ translationService.t('upgrades.scrap_details.manual_label') }}</strong>
+                  +{{ SCRAP_GENERATION_CONFIG.MANUAL_GENERATION }}
+                  {{ translationService.t('upgrades.scrap_details.per_click') }}
+                </p>
+                <p class="detail-line">
+                  <strong>{{
+                    translationService.t('upgrades.scrap_details.automatic_current_label')
+                  }}</strong>
+                  +{{ scrapAutoUpgrade().currentRate
+                  }}{{ translationService.t('upgrades.scrap_details.per_second') }}
+                </p>
+                <p class="detail-line" *ngIf="!scrapAutoUpgrade().isMaxLevel">
+                  <strong>{{
+                    translationService.t('upgrades.scrap_details.next_level_label')
+                  }}</strong>
+                  +{{ scrapAutoUpgrade().nextRate
+                  }}{{ translationService.t('upgrades.scrap_details.per_second') }}
+                </p>
               </div>
 
-              <div class="upgrade-cost" *ngIf="scrapAutoUpgrade().level < 3">
+              <div class="upgrade-cost" *ngIf="!scrapAutoUpgrade().isMaxLevel">
                 <span class="cost-item">💰 {{ scrapAutoUpgrade().cost.money | formatNumber }}</span>
+                <span *ngIf="scrapAutoUpgrade().cost.components > 0" class="cost-item"
+                  >🔧 {{ scrapAutoUpgrade().cost.components | formatNumber }}</span
+                >
               </div>
 
               <app-button
-                *ngIf="scrapAutoUpgrade().level < SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL"
+                *ngIf="!scrapAutoUpgrade().isMaxLevel"
                 [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
                 size="sm"
@@ -75,10 +95,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                 (clicked)="purchaseScrapUpgrade()"
               />
 
-              <p
-                *ngIf="scrapAutoUpgrade().level >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL"
-                class="max-level"
-              >
+              <p *ngIf="scrapAutoUpgrade().isMaxLevel" class="max-level">
                 {{ translationService.t('upgrades.max_level') }}
               </p>
             </div>
@@ -129,22 +146,73 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
 
           <div *ngIf="activeTab() === 'machine'">
             <div *ngIf="selectedMachine(); else noMachine" class="machine-info">
-              <h3 class="machine-title">{{ translatedMachineName() }}</h3>
-              <div class="machine-details">
-                <p>
-                  <strong>{{ translationService.t('upgrades.machine_tab.level_label') }}</strong>
-                  {{ selectedMachine()?.level }}
+              <div class="upgrade-item">
+                <div class="upgrade-header">
+                  <span class="upgrade-icon">⚙️</span>
+                  <div class="upgrade-info">
+                    <h4 class="upgrade-name">{{ translatedMachineName() }}</h4>
+                    <p class="upgrade-description">
+                      {{ translationService.t('upgrades.nivel') }}
+                      {{ machineUpgrade().level }} / {{ machineUpgrade().maxLevel }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="upgrade-details">
+                  <p class="detail-line">
+                    <strong>{{
+                      translationService.t('upgrades.machine_tab.base_speed_label')
+                    }}</strong>
+                    {{ machineUpgrade().baseSpeed }}
+                    {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
+                  </p>
+                  <p class="detail-line">
+                    <strong>{{
+                      translationService.t('upgrades.machine_tab.effective_speed_label')
+                    }}</strong>
+                    {{ machineUpgrade().effectiveSpeed.toFixed(2) }}
+                    {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
+                    <span class="bonus"
+                      >(+{{ (machineUpgrade().speedBonus * 100).toFixed(0) }}%)</span
+                    >
+                  </p>
+                  <p class="detail-line" *ngIf="machineUpgrade().productionMultiplier > 1">
+                    <strong>{{
+                      translationService.t('upgrades.machine_tab.production_multiplier_label')
+                    }}</strong>
+                    ×{{ machineUpgrade().productionMultiplier }}
+                  </p>
+                  <p
+                    class="detail-line"
+                    *ngIf="!machineUpgrade().isMaxLevel && machineUpgrade().nextBonusAt > 0"
+                  >
+                    <strong>{{
+                      translationService.t('upgrades.machine_tab.next_bonus_label')
+                    }}</strong>
+                    {{ translationService.t('upgrades.machine_tab.in_levels').replace('{{count}}',
+                    machineUpgrade().nextBonusAt.toString()) }}
+                  </p>
+                </div>
+
+                <div class="upgrade-cost" *ngIf="!machineUpgrade().isMaxLevel">
+                  <span class="cost-item">💰 {{ machineUpgrade().cost.money | formatNumber }}</span>
+                  <span *ngIf="machineUpgrade().cost.components > 0" class="cost-item">
+                    🔧 {{ machineUpgrade().cost.components | formatNumber }}
+                  </span>
+                </div>
+
+                <app-button
+                  *ngIf="!machineUpgrade().isMaxLevel"
+                  [label]="translationService.t('buttons.mejorar')"
+                  variant="primary"
+                  size="sm"
+                  [disabled]="!machineUpgrade().canAfford"
+                  (clicked)="purchaseMachineUpgrade()"
+                />
+
+                <p *ngIf="machineUpgrade().isMaxLevel" class="max-level">
+                  {{ translationService.t('upgrades.max_level') }}
                 </p>
-                <p>
-                  <strong>{{
-                    translationService.t('upgrades.machine_tab.base_speed_label')
-                  }}</strong>
-                  {{ selectedMachine()?.baseSpeed }}
-                  {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
-                </p>
-              </div>
-              <div class="placeholder">
-                <p>{{ translationService.t('upgrades.machine_tab.speed_upgrades_coming') }}</p>
               </div>
             </div>
             <ng-template #noMachine>
@@ -321,6 +389,21 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
         color: var(--color-text-secondary);
       }
 
+      .upgrade-details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        background: var(--color-bg-panel);
+        border-radius: var(--border-radius-small);
+      }
+
+      .detail-line {
+        margin: 0;
+        font-size: 13px;
+        color: var(--color-text-primary);
+      }
+
       .upgrade-capacity {
         display: flex;
         align-items: center;
@@ -351,6 +434,18 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
 
       .cost-item {
         color: var(--color-text-secondary);
+      }
+
+      .bonus {
+        color: var(--color-accent-positive);
+        margin-left: var(--space-2);
+      }
+
+      .max-level {
+        color: var(--color-accent-positive);
+        font-weight: 600;
+        text-align: center;
+        margin: 0;
       }
     `,
   ],
@@ -395,6 +490,69 @@ export class UpgradesPanelComponent {
     return this.translationService.t(`machines.${machine.id}`);
   });
 
+  machineUpgrade = computed(() => {
+    const machine = this.selectedMachine();
+    if (!machine) {
+      return {
+        level: 0,
+        maxLevel: 0,
+        baseSpeed: 0,
+        effectiveSpeed: 0,
+        speedBonus: 0,
+        productionMultiplier: 1,
+        nextBonusAt: 0,
+        cost: { money: 0, components: 0 },
+        canAfford: false,
+        isMaxLevel: true,
+      };
+    }
+
+    const upgradeId = this.upgradesService.getMachineUpgradeIdByMachineType(machine.id);
+    if (!upgradeId) {
+      return {
+        level: 0,
+        maxLevel: 0,
+        baseSpeed: machine.baseSpeed,
+        effectiveSpeed: machine.baseSpeed,
+        speedBonus: 0,
+        productionMultiplier: 1,
+        nextBonusAt: 0,
+        cost: { money: 0, components: 0 },
+        canAfford: false,
+        isMaxLevel: true,
+      };
+    }
+
+    const level = this.upgradesService.getLevel(upgradeId);
+    const cost = this.upgradesService.getCostForNextLevel(upgradeId);
+    const effectiveSpeed = this.upgradesService.calculateEffectiveSpeed(
+      machine.baseSpeed,
+      machine.id,
+    );
+    const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
+
+    const speedBonus = level * 0.1;
+    const nextBonusAt = productionMultiplier > 1 ? 10 - (level % 10) : 10 - level;
+
+    const canAfford = cost
+      ? this.resourcesService.hasEnough(ResourceType.MONEY, cost.money) &&
+        this.resourcesService.hasEnough(ResourceType.COMPONENTS, cost.components)
+      : false;
+
+    return {
+      level,
+      maxLevel: 50,
+      baseSpeed: machine.baseSpeed,
+      effectiveSpeed,
+      speedBonus,
+      productionMultiplier,
+      nextBonusAt,
+      cost: cost || { money: 0, components: 0 },
+      canAfford,
+      isMaxLevel: level >= 50,
+    };
+  });
+
   storageUpgrades = computed(() => {
     const storageUpgradeIds = [
       {
@@ -425,9 +583,12 @@ export class UpgradesPanelComponent {
       const baseCapacity = this.resourcesService.getBaseCapacity(resourceId);
       const currentCapacity = this.resourcesService.getCapacity(resourceId);
 
-      // Calculate next capacity by summing all increments up to next level
-      const nextIncrement = this.upgradesService.getStorageIncrement(id, level + 1);
-      const nextCapacity = currentCapacity + nextIncrement;
+      // Calculate next capacity using the linear formula: baseCapacity + (increment * (level + 1))
+      const nextCapacity = this.upgradesService.calculateStorageCapacity(
+        id,
+        level + 1,
+        baseCapacity,
+      );
 
       const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);
 
@@ -455,36 +616,24 @@ export class UpgradesPanelComponent {
   scrapAutoUpgrade = computed(() => {
     const level = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
     const cost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_002);
+    const isMaxLevel = level >= SCRAP_GENERATION_CONFIG.MAX_LEVEL;
 
-    const rates = SCRAP_GENERATION_CONFIG.AUTO_GENERATION_RATES;
-    const currentRate = rates[level];
-    const nextRate = rates[level + 1];
+    const currentRate = this.scrapGenerationService.getAutoRateByLevel(level);
+    const nextRate = this.scrapGenerationService.getAutoRateByLevel(level + 1);
 
     const canAfford = cost
-      ? this.resourcesService.hasEnough(ResourceType.MONEY, cost.money)
+      ? this.resourcesService.hasEnough(ResourceType.MONEY, cost.money) &&
+        this.resourcesService.hasEnough(ResourceType.COMPONENTS, cost.components)
       : false;
-
-    const manualText = this.translationService.t('upgrades.scrap_auto.manual');
-    const autoText = this.translationService.t('upgrades.scrap_auto.automatic');
-    const perSecondText = this.translationService.t('upgrades.scrap_auto.per_second');
-    const noneText = this.translationService.t('upgrades.scrap_auto.none');
-
-    const currentAuto = currentRate === 0 ? noneText : `+${currentRate}${perSecondText}`;
-    const nextAuto = nextRate === undefined ? noneText : `+${nextRate}${perSecondText}`;
-
-    const currentText = `${manualText}\n${autoText}: ${currentAuto}`;
-    const nextText =
-      level >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL
-        ? this.translationService.t('upgrades.max_level')
-        : `${manualText}\n${autoText}: ${nextAuto}`;
 
     return {
       name: this.translationService.t('upgrades.scrap_auto.name'),
       level,
-      currentRate: currentText,
-      nextRate: nextText,
+      currentRate,
+      nextRate,
       cost: cost || { money: 0, components: 0 },
-      canAfford,
+      canAfford: canAfford && !isMaxLevel,
+      isMaxLevel,
     };
   });
 
@@ -521,32 +670,73 @@ export class UpgradesPanelComponent {
 
     this.upgradesService.purchaseUpgrade(upgradeId);
 
+    // Apply the new storage capacity immediately
     const definition = this.upgradesService.getDefinition(upgradeId);
     if (definition?.targetResourceId) {
       const newLevel = this.upgradesService.getLevel(upgradeId);
-      // Calculate the increment for this specific level
-      const increment = this.upgradesService.getStorageIncrement(upgradeId, newLevel);
-      const currentCapacity = this.resourcesService.getCapacity(definition.targetResourceId);
-      const newCapacity = currentCapacity + increment;
+      const baseCapacity = this.resourcesService.getBaseCapacity(definition.targetResourceId);
+      const newCapacity = this.upgradesService.calculateStorageCapacity(
+        upgradeId,
+        newLevel,
+        baseCapacity,
+      );
       this.resourcesService.setCapacity(definition.targetResourceId, newCapacity);
     }
   }
 
   purchaseScrapUpgrade(): void {
     const currentLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
-    if (currentLevel >= SCRAP_GENERATION_CONFIG.MAX_AUTO_LEVEL) return;
+    if (currentLevel >= SCRAP_GENERATION_CONFIG.MAX_LEVEL) return;
 
     const upgradeCost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_002);
     if (!upgradeCost) return;
 
     const hasEnoughMoney = this.resourcesService.hasEnough(ResourceType.MONEY, upgradeCost.money);
-    if (!hasEnoughMoney) return;
+    const hasEnoughComponents = this.resourcesService.hasEnough(
+      ResourceType.COMPONENTS,
+      upgradeCost.components,
+    );
+
+    if (!hasEnoughMoney || !hasEnoughComponents) return;
 
     this.resourcesService.subtract(ResourceType.MONEY, upgradeCost.money);
+    if (upgradeCost.components > 0) {
+      this.resourcesService.subtract(ResourceType.COMPONENTS, upgradeCost.components);
+    }
+
     this.upgradesService.purchaseUpgrade(UpgradeId.UPG_SCRAP_002);
 
     const newLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
-    const rates = SCRAP_GENERATION_CONFIG.AUTO_GENERATION_RATES;
-    this.scrapGenerationService.setAutomaticGenerationRate(rates[newLevel] || 0);
+    const newRate = this.scrapGenerationService.getAutoRateByLevel(newLevel);
+    this.scrapGenerationService.setAutomaticGenerationRate(newRate);
+  }
+
+  purchaseMachineUpgrade(): void {
+    const machine = this.selectedMachine();
+    if (!machine) return;
+
+    const upgradeId = this.upgradesService.getMachineUpgradeIdByMachineType(machine.id);
+    if (!upgradeId) return;
+
+    const currentLevel = this.upgradesService.getLevel(upgradeId);
+    if (currentLevel >= 50) return;
+
+    const cost = this.upgradesService.getCostForNextLevel(upgradeId);
+    if (!cost) return;
+
+    const hasEnoughMoney = this.resourcesService.hasEnough(ResourceType.MONEY, cost.money);
+    const hasEnoughComponents = this.resourcesService.hasEnough(
+      ResourceType.COMPONENTS,
+      cost.components,
+    );
+
+    if (!hasEnoughMoney || !hasEnoughComponents) return;
+
+    this.resourcesService.subtract(ResourceType.MONEY, cost.money);
+    if (cost.components > 0) {
+      this.resourcesService.subtract(ResourceType.COMPONENTS, cost.components);
+    }
+
+    this.upgradesService.purchaseUpgrade(upgradeId);
   }
 }

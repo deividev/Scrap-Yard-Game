@@ -3,6 +3,7 @@ import { ResourcesService } from './resources.service';
 import { MachinesService } from './machines.service';
 import { ScrapGenerationService } from './scrap-generation.service';
 import { SaveService } from './save.service';
+import { UpgradesService } from './upgrades.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ export class GameLoopService {
   private intervalId: any = null;
   private tickCount = signal(0);
   private saveService = inject(SaveService);
+  private upgradesService = inject(UpgradesService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
@@ -54,40 +56,63 @@ export class GameLoopService {
         continue;
       }
 
-      // 1) Check if machine CAN run cycle this tick (has inputs AND output space)
-      const hasEnoughResources = machine.baseConsumption.every((consumption) =>
-        this.resourcesService.hasEnough(consumption.resourceId, consumption.amount),
-      );
+      // Calculate effective amounts with production multiplier
+      const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
 
-      const hasOutputSpace =
-        this.resourcesService.getAvailableSpace(machine.baseProduction.resourceId) >=
-        machine.baseProduction.amount;
+      const inputAmounts = machine.baseConsumption.map((c) => ({
+        resourceId: c.resourceId,
+        amount: c.amount * productionMultiplier,
+      }));
 
-      const canRunCycle = hasEnoughResources && hasOutputSpace;
+      const outputAmount = machine.baseProduction.amount * productionMultiplier;
 
-      if (canRunCycle) {
-        const effectiveSpeed = machine.baseSpeed;
+      // Check if machine is starting a new cycle (progress is 0 or very close to 0)
+      const isStartingNewCycle = machine.progress < 0.01;
+
+      if (isStartingNewCycle) {
+        // At cycle START: Check if we have inputs and space, then consume inputs immediately
+        const hasEnoughResources = inputAmounts.every((consumption) =>
+          this.resourcesService.hasEnough(consumption.resourceId, consumption.amount),
+        );
+
+        const availableSpace = this.resourcesService.getAvailableSpace(
+          machine.baseProduction.resourceId,
+        );
+        const hasOutputSpace = !isFinite(availableSpace) || availableSpace >= outputAmount;
+
+        if (hasEnoughResources && hasOutputSpace) {
+          // Consume inputs at cycle START
+          for (const consumption of inputAmounts) {
+            this.resourcesService.subtract(consumption.resourceId, consumption.amount);
+          }
+
+          // Now progress the cycle
+          const effectiveSpeed = this.upgradesService.calculateEffectiveSpeed(
+            machine.baseSpeed,
+            machine.id,
+          );
+          this.machinesService.updateProgress(machine.id, effectiveSpeed);
+        }
+        // If not enough resources, machine stays at 0 progress
+      } else {
+        // Machine is mid-cycle, just progress normally
+        const effectiveSpeed = this.upgradesService.calculateEffectiveSpeed(
+          machine.baseSpeed,
+          machine.id,
+        );
         this.machinesService.updateProgress(machine.id, effectiveSpeed);
       }
 
+      // Check if cycle completed (progress >= 1)
       const updatedMachine = this.machinesService.getMachine(machine.id);
       if (!updatedMachine || updatedMachine.progress < 1) {
         continue;
       }
 
-      // 4) Execute cycle: consume inputs, produce outputs, progress -= 1
-      // Add small delay so user can see 100% progress bar
+      // At cycle END: Produce outputs and reset progress
       setTimeout(() => {
-        for (const consumption of updatedMachine.baseConsumption) {
-          this.resourcesService.subtract(consumption.resourceId, consumption.amount);
-        }
-
-        this.resourcesService.add(
-          updatedMachine.baseProduction.resourceId,
-          updatedMachine.baseProduction.amount,
-        );
-
-        this.machinesService.consumeProgress(machine.id, 1);
+        this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
+        this.machinesService.consumeProgress(updatedMachine.id, 1);
       }, 400);
     }
   }

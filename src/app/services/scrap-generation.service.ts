@@ -20,10 +20,6 @@ export class ScrapGenerationService {
     this.resourcesService.add(ResourceType.SCRAP, SCRAP_GENERATION_CONFIG.MANUAL_GENERATION);
   }
 
-  /**
-   * Set automatic generation rate (scrap per second).
-   * Will be activated by upgrade UPG_SCRAP_002 in the future.
-   */
   setAutomaticGenerationRate(rate: number): void {
     this.automaticGenerationRate.set(Math.max(0, rate));
     this.saveService?.markDirty();
@@ -33,11 +29,13 @@ export class ScrapGenerationService {
     return this.automaticGenerationRate();
   }
 
-  /**
-   * Called from GameLoopService.tick() once per second.
-   * Adds automatic scrap generation if rate > 0.
-   * Respects capacity automatically via ResourcesService.add()
-   */
+  getAutoRateByLevel(level: number): number {
+    if (level < 1 || level > SCRAP_GENERATION_CONFIG.MAX_LEVEL) {
+      return 0;
+    }
+    return SCRAP_GENERATION_CONFIG.AUTO_GENERATION_RATES[level] || 0;
+  }
+
   processAutomaticGeneration(): void {
     const rate = this.automaticGenerationRate();
     if (rate > 0) {

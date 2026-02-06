@@ -1,10 +1,11 @@
-import { Component, Input, computed, ViewEncapsulation } from '@angular/core';
+import { Component, Input, computed, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Machine } from '../../models/machine.model';
 import { ResourcesService } from '../../services/resources.service';
 import { MachinesService } from '../../services/machines.service';
 import { MachineSelectionService } from '../../services/machine-selection.service';
 import { TranslationService } from '../../services/translation.service';
+import { UpgradesService } from '../../services/upgrades.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 
@@ -24,17 +25,17 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         <div class="machine-title-group">
           <h3 class="machine-name">{{ translatedMachineName() }}</h3>
           <span class="machine-level" *ngIf="!isLocked()"
-            >{{ translationService.t('common.level_short') }} {{ machine.level }}</span
+            >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
           >
         </div>
         <app-button
           *ngIf="!isLocked()"
           [label]="
-            machine.isActive
+            currentIsActive()
               ? translationService.t('buttons.activa')
               : translationService.t('buttons.parada')
           "
-          [variant]="machine.isActive ? 'primary' : 'secondary'"
+          [variant]="currentIsActive() ? 'primary' : 'secondary'"
           size="sm"
           (clicked)="toggleMachine()"
         />
@@ -45,7 +46,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 
       <div class="machine-recipe">
         <span class="recipe-inputs">
-          <span *ngFor="let input of machine.baseConsumption; let last = last">
+          <span *ngFor="let input of effectiveInputs(); let last = last">
             <span class="resource-icon">{{ getResourceIcon(input.resourceId) }}</span>
             <span class="resource-amount">{{ input.amount }}</span>
             <span *ngIf="!last" class="separator">+</span>
@@ -54,9 +55,22 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         <span class="recipe-arrow">→</span>
         <span class="recipe-output">
           <span class="resource-icon">{{
-            getResourceIcon(machine.baseProduction.resourceId)
+            getResourceIcon(currentBaseProduction().resourceId)
           }}</span>
-          <span class="resource-amount">{{ machine.baseProduction.amount }}</span>
+          <span class="resource-amount">{{ effectiveOutput() }}</span>
+        </span>
+      </div>
+
+      <div class="machine-stats" *ngIf="!isLocked()">
+        <span class="stat-item" [title]="'Velocidad efectiva'">
+          ⚡ {{ effectiveSpeed().toFixed(2) }} ciclos/s
+        </span>
+        <span
+          class="stat-item"
+          *ngIf="productionMultiplier() > 1"
+          [title]="'Multiplicador de producción'"
+        >
+          ×{{ productionMultiplier() }}
         </span>
       </div>
 
@@ -80,7 +94,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         >
           {{ statusText() }}
         </span>
-        <span class="cycle-time">~{{ cycleTime }}s</span>
+        <span class="cycle-time">~{{ effectiveCycleTime().toFixed(1) }}s</span>
       </div>
     </div>
   `,
@@ -189,6 +203,26 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         color: var(--color-accent-main);
       }
 
+      .machine-stats {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) 0;
+        font-size: 11px;
+      }
+
+      .stat-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 2px 6px;
+        background: var(--color-bg-main);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-small);
+        font-weight: 500;
+        color: var(--color-accent-positive);
+      }
+
       .machine-progress-container {
         display: flex;
         align-items: center;
@@ -263,6 +297,8 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 export class MachineCardComponent {
   @Input() machine!: Machine;
 
+  private upgradesService = inject(UpgradesService);
+
   constructor(
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
@@ -273,6 +309,13 @@ export class MachineCardComponent {
   private currentMachine = computed(
     () => this.machinesService.getMachine(this.machine.id) || this.machine,
   );
+
+  currentLevel = computed(() => {
+    const upgradeId = this.upgradesService.getMachineUpgradeIdByMachineType(this.machine.id);
+    return upgradeId ? this.upgradesService.getLevel(upgradeId) : this.currentMachine().level;
+  });
+  currentIsActive = computed(() => this.currentMachine().isActive);
+  currentBaseProduction = computed(() => this.currentMachine().baseProduction);
 
   progressPercent = computed(() => {
     const machine = this.currentMachine();
@@ -298,6 +341,36 @@ export class MachineCardComponent {
     return this.translationService.t(`machines.${this.machine.id}`);
   });
 
+  productionMultiplier = computed(() => {
+    const machine = this.currentMachine();
+    return this.upgradesService.calculateProductionMultiplier(machine.id);
+  });
+
+  effectiveSpeed = computed(() => {
+    const machine = this.currentMachine();
+    return this.upgradesService.calculateEffectiveSpeed(machine.baseSpeed, machine.id);
+  });
+
+  effectiveInputs = computed(() => {
+    const machine = this.currentMachine();
+    const multiplier = this.productionMultiplier();
+    return machine.baseConsumption.map((input) => ({
+      resourceId: input.resourceId,
+      amount: input.amount * multiplier,
+    }));
+  });
+
+  effectiveOutput = computed(() => {
+    const machine = this.currentMachine();
+    const multiplier = this.productionMultiplier();
+    return machine.baseProduction.amount * multiplier;
+  });
+
+  effectiveCycleTime = computed(() => {
+    const speed = this.effectiveSpeed();
+    return speed > 0 ? 1 / speed : 0;
+  });
+
   get recipeInputs(): string {
     return this.machine.baseConsumption.map((c) => `${c.amount} ${c.resourceId}`).join(' + ');
   }
@@ -316,12 +389,20 @@ export class MachineCardComponent {
     if (machine.level === 0) return false;
     if (!machine.isActive) return false;
 
+    const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
+
     const hasInputs = machine.baseConsumption.every((c) =>
-      this.resourcesService.hasEnough(c.resourceId, c.amount),
+      this.resourcesService.hasEnough(c.resourceId, c.amount * productionMultiplier),
     );
-    const hasSpace =
-      this.resourcesService.getAvailableSpace(machine.baseProduction.resourceId) >=
-      machine.baseProduction.amount;
+
+    const outputAmount = machine.baseProduction.amount * productionMultiplier;
+    const outputResourceId = machine.baseProduction.resourceId;
+    const availableSpace = this.resourcesService.getAvailableSpace(outputResourceId);
+
+    // Para recursos con capacidad infinita (Infinity), siempre hay espacio
+    // Para recursos finitos, verificar que haya suficiente espacio
+    const hasSpace = !isFinite(availableSpace) || availableSpace >= outputAmount;
+
     return hasInputs && hasSpace;
   });
 
@@ -332,12 +413,19 @@ export class MachineCardComponent {
 
     if (!machine.isActive) return this.translationService.t('status.parada');
 
+    const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
+
     const hasInputs = machine.baseConsumption.every((c) =>
-      this.resourcesService.hasEnough(c.resourceId, c.amount),
+      this.resourcesService.hasEnough(c.resourceId, c.amount * productionMultiplier),
     );
-    const hasSpace =
-      this.resourcesService.getAvailableSpace(machine.baseProduction.resourceId) >=
-      machine.baseProduction.amount;
+
+    const outputAmount = machine.baseProduction.amount * productionMultiplier;
+    const outputResourceId = machine.baseProduction.resourceId;
+    const availableSpace = this.resourcesService.getAvailableSpace(outputResourceId);
+
+    // Para recursos con capacidad infinita (Infinity), siempre hay espacio
+    // Para recursos finitos, verificar que haya suficiente espacio
+    const hasSpace = !isFinite(availableSpace) || availableSpace >= outputAmount;
 
     if (!hasInputs) return this.translationService.t('status.falta_input');
     if (!hasSpace) return this.translationService.t('status.output_lleno');
