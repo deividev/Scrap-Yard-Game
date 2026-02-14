@@ -30,9 +30,12 @@
 }
 
 .resource-icon {
-  font-size: 32px;
+  width: 56px;
+  height: 56px;
   margin-bottom: var(--space-2);
   line-height: 1;
+  object-fit: contain;
+  font-size: 56px;
 }
 
 .resource-name {

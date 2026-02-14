@@ -7,7 +7,10 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <button [class]="buttonClasses" [disabled]="disabled" (click)="handleClick($event)">
-      {{ label }}
+      <ng-content></ng-content>
+      @if (label) {
+        {{ label }}
+      }
     </button>
   `,
   styles: [
@@ -19,7 +22,7 @@ import { CommonModule } from '@angular/common';
         border: none;
         border-radius: var(--border-radius-small);
         cursor: pointer;
-        transition: opacity 0.15s ease;
+        transition: opacity 0.15s ease, transform 0.1s ease;
         outline: none;
       }
 
@@ -29,6 +32,7 @@ import { CommonModule } from '@angular/common';
 
       button:active:not(:disabled) {
         opacity: 0.7;
+        transform: scale(0.97);
       }
 
       button:disabled {

@@ -7,21 +7,26 @@
     "metal": "Metal",
     "plastic": "Plástico",
     "components": "Componentes",
-    "money": "Dinero"
+    "money": "Dinero",
+    "recycled_plastic": "Plástico reciclado",
+    "electric_components": "Componentes eléctricos"
   },
   "machines": {
     "crusher": "Trituradora",
     "separator": "Separador",
     "smelter": "Fundidora",
     "assembler": "Ensambladora",
-    "packager": "Empaquetadora"
+    "packager": "Empaquetadora",
+    "electric_packager": "Empaquetadora eléctrica",
+    "recycler": "Recicladora",
+    "electric_assembler": "Ensambladora eléctrica"
   },
   "status": {
-    "ok": "OK",
-    "parada": "Parada",
+    "parada": "Detenida",
     "bloqueada": "Bloqueada",
-    "falta_input": "Falta input",
-    "output_lleno": "Output lleno"
+    "falta_input": "Esperando materiales",
+    "output_lleno": "Almacén lleno",
+    "produciendo": "Produciendo"
   },
   "buttons": {
     "activa": "Activa",
@@ -29,7 +34,23 @@
     "mejorar": "Mejorar",
     "start": "Iniciar",
     "stop": "Pausar",
-    "chatarra": "Generar Chatarra"
+    "chatarra": "Generar Chatarra",
+    "venderComponentes": "Vender Componente"
+  },
+  "tooltips": {
+    "generate_scrap": "Generar {amount} chatarra por {cost} dinero",
+    "sell_metal": "Vender 1 metal por 2 dinero",
+    "sell_components": "Vender 1 componente por 3 dinero",
+    "machine_speed": "Esta máquina completa un ciclo cada {time} segundos",
+    "machine_multiplier": "Produce ×{production} pero consume ×{consumption} materiales por ciclo"
+  },
+  "notifications": {
+    "upgrade_completed": "{name} Nv {level}",
+    "machine_unlocked": "{name} desbloqueada"
+  },
+  "progression": {
+    "next_unlock": "Próximo desbloqueo: {machine} ({requirement} Nv {level})",
+    "all_unlocked": "🎉 ¡Todas las máquinas desbloqueadas!"
   },
   "upgrades": {
     "title": "Mejoras",
@@ -40,6 +61,7 @@
     },
     "nivel": "Nivel",
     "max_level": "Nivel máximo alcanzado",
+    "upgrading": "Mejorando",
     "scrap_auto": {
       "name": "Llegada Automática de Chatarra",
       "manual": "Manual: +1 chatarra por clic",
@@ -47,11 +69,16 @@
       "per_second": "/s",
       "none": "—"
     },
+    "scrap_manual": {
+      "name": "Descarga Manual Mejorada"
+    },
     "storage": {
       "scrap": "Capacidad de Chatarra",
       "metal": "Capacidad de Metal",
       "plastic": "Capacidad de Plástico",
-      "components": "Capacidad de Componentes"
+      "components": "Capacidad de Componentes",
+      "recycled_plastic": "Capacidad de Plástico Reciclado",
+      "electric_components": "Capacidad de Componentes Eléctricos"
     },
     "capacity_label": "Capacidad:",
     "machine_tab": {
@@ -59,11 +86,20 @@
       "level_label": "Nivel:",
       "base_speed_label": "Velocidad base:",
       "effective_speed_label": "Velocidad efectiva:",
+      "efficiency_label": "Eficiencia:",
+      "consumption_label": "Consumo",
+      "production_label": "Producción",
       "production_multiplier_label": "Multiplicador de producción:",
       "next_bonus_label": "Próximo multiplicador:",
       "in_levels": "en {{count}} niveles",
       "cycles_per_second": "ciclos/s",
-      "speed_upgrades_coming": "Mejoras de velocidad próximamente"
+      "speed_upgrades_coming": "Mejoras de velocidad próximamente",
+      "showing_upgrades_for": "Mostrando mejoras de",
+      "view_all_machines": "← Ver todas las máquinas",
+      "all_machines_title": "Todas las Mejoras de Máquinas",
+      "click_machine_hint": "Mejora directamente o haz clic en una máquina del panel izquierdo para ver detalles",
+      "speed_label": "Velocidad",
+      "levels": "niveles"
     },
     "scrap_details": {
       "manual_label": "Manual:",
@@ -79,5 +115,6 @@
   "common": {
     "level_short": "Nv",
     "cycle_time": "~{{time}}s"
+
   }
 }

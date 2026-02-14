@@ -4,6 +4,9 @@ import { MachinesService } from './machines.service';
 import { ScrapGenerationService } from './scrap-generation.service';
 import { SaveService } from './save.service';
 import { UpgradesService } from './upgrades.service';
+import { UpgradeProgressService } from './upgrade-progress.service';
+import { MachineUnlockService } from './machine-unlock.service';
+import { UpgradeId } from '../models/upgrade.model';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +16,8 @@ export class GameLoopService {
   private tickCount = signal(0);
   private saveService = inject(SaveService);
   private upgradesService = inject(UpgradesService);
+  private upgradeProgressService = inject(UpgradeProgressService);
+  private machineUnlockService = inject(MachineUnlockService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
@@ -40,11 +45,49 @@ export class GameLoopService {
 
   private tick(): void {
     this.tickCount.update((count) => count + 1);
+
+    // Procesar generación de chatarra
     this.scrapGenerationService.processAutomaticGeneration();
+
+    // Procesar producción de máquinas
     this.processProduction();
 
+    // Procesar progreso de upgrades (1 segundo de deltaTime)
+    this.processUpgradeProgress(1);
+
+    // Auto-guardado
     if (this.tickCount() % this.AUTO_SAVE_INTERVAL === 0) {
       this.saveService.save();
+    }
+  }
+
+  /**
+   * Procesa el progreso de todos los upgrades activos.
+   * Completa y aplica efectos de los upgrades que terminan.
+   */
+  private processUpgradeProgress(deltaTime: number): void {
+    const completedUpgrades = this.upgradeProgressService.updateProgress(deltaTime);
+
+    // Aplicar efectos de upgrades completados
+    for (const upgradeId of completedUpgrades) {
+      this.upgradesService.completeUpgrade(upgradeId);
+
+      // Si es un upgrade de almacenamiento, actualizar capacidades
+      if (upgradeId.startsWith('UPG_STORE_')) {
+        this.upgradesService.applyStorageUpgrades(this.resourcesService);
+      }
+
+      // Si es el upgrade de generación automática de chatarra, actualizar el rate
+      if (upgradeId === UpgradeId.UPG_SCRAP_002) {
+        const newLevel = this.upgradesService.getLevel(upgradeId);
+        const newRate = this.scrapGenerationService.getAutoRateByLevel(newLevel);
+        this.scrapGenerationService.setAutomaticGenerationRate(newRate);
+      }
+
+      // Si es un upgrade de máquina, verificar desbloqueos
+      if (upgradeId.startsWith('UPG_MACH_')) {
+        this.machineUnlockService.checkAndUnlockMachines();
+      }
     }
   }
 
@@ -56,12 +99,13 @@ export class GameLoopService {
         continue;
       }
 
-      // Calculate effective amounts with production multiplier
+      // Calculate effective amounts with separate multipliers
+      const consumptionMultiplier = this.upgradesService.calculateConsumptionMultiplier(machine.id);
       const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
 
       const inputAmounts = machine.baseConsumption.map((c) => ({
         resourceId: c.resourceId,
-        amount: c.amount * productionMultiplier,
+        amount: c.amount * consumptionMultiplier,
       }));
 
       const outputAmount = machine.baseProduction.amount * productionMultiplier;
@@ -109,11 +153,11 @@ export class GameLoopService {
         continue;
       }
 
-      // At cycle END: Produce outputs and reset progress
+      // At cycle END: Produce outputs immediately, but reset progress with delay for visual feedback
+      this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
       setTimeout(() => {
-        this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
         this.machinesService.consumeProgress(updatedMachine.id, 1);
-      }, 400);
+      }, 500);
     }
   }
 

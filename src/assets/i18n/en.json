@@ -7,21 +7,26 @@
     "metal": "Metal",
     "plastic": "Plastic",
     "components": "Components",
-    "money": "Money"
+    "money": "Money",
+    "recycled_plastic": "Recycled Plastic",
+    "electric_components": "Electric Components"
   },
   "machines": {
     "crusher": "Crusher",
     "separator": "Separator",
     "smelter": "Smelter",
     "assembler": "Assembler",
-    "packager": "Packager"
+    "packager": "Packager",
+    "electric_packager": "Electric Packager",
+    "recycler": "Recycler",
+    "electric_assembler": "Electric Assembler"
   },
   "status": {
-    "ok": "OK",
     "parada": "Stopped",
     "bloqueada": "Locked",
-    "falta_input": "Missing input",
-    "output_lleno": "Output full"
+    "falta_input": "Waiting for materials",
+    "output_lleno": "Storage full",
+    "produciendo": "Producing"
   },
   "buttons": {
     "activa": "Active",
@@ -29,7 +34,23 @@
     "mejorar": "Upgrade",
     "start": "Start",
     "stop": "Pause",
-    "chatarra": "Generate Scrap"
+    "chatarra": "Generate Scrap",
+    "venderComponentes": "Sell Component"
+  },
+  "tooltips": {
+    "generate_scrap": "Generate {amount} scrap for {cost} money",
+    "sell_metal": "Sell 1 metal for 2 money",
+    "sell_components": "Sell 1 component for 3 money",
+    "machine_speed": "This machine completes a cycle every {time} seconds",
+    "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle"
+  },
+  "notifications": {
+    "upgrade_completed": "{name} Lv {level}",
+    "machine_unlocked": "{name} unlocked"
+  },
+  "progression": {
+    "next_unlock": "Next unlock: {machine} ({requirement} Lv {level})",
+    "all_unlocked": "🎉 All machines unlocked!"
   },
   "upgrades": {
     "title": "Upgrades",
@@ -40,6 +61,7 @@
     },
     "nivel": "Level",
     "max_level": "Maximum level reached",
+    "upgrading": "Upgrading",
     "scrap_auto": {
       "name": "Automatic Scrap Generation",
       "manual": "Manual: +1 scrap per click",
@@ -47,23 +69,35 @@
       "per_second": "/s",
       "none": "—"
     },
+    "scrap_manual": {
+      "name": "Improved Manual Unloading"
+    },
     "storage": {
       "scrap": "Scrap Capacity",
       "metal": "Metal Capacity",
       "plastic": "Plastic Capacity",
-      "components": "Components Capacity"
+      "components": "Components Capacity",
+      "recycled_plastic": "Recycled Plastic Capacity",
+      "electric_components": "Electric Components Capacity"
     },
     "capacity_label": "Capacity:",
     "machine_tab": {
       "no_selection": "Select a machine to view upgrades",
       "level_label": "Level:",
       "base_speed_label": "Base speed:",
-      "effective_speed_label": "Effective speed:",
-      "production_multiplier_label": "Production multiplier:",
+      "effective_speed_label": "Effective speed:",      "efficiency_label": "Efficiency:",
+      "consumption_label": "Consumption",
+      "production_label": "Production",      "production_multiplier_label": "Production multiplier:",
       "next_bonus_label": "Next bonus:",
       "in_levels": "in {{count}} levels",
       "cycles_per_second": "cycles/s",
-      "speed_upgrades_coming": "Speed upgrades coming soon"
+      "speed_upgrades_coming": "Speed upgrades coming soon",
+      "showing_upgrades_for": "Showing upgrades for",
+      "view_all_machines": "← View all machines",
+      "all_machines_title": "All Machine Upgrades",
+      "click_machine_hint": "Upgrade directly or click a machine on the left panel to view details",
+      "speed_label": "Speed",
+      "levels": "levels"
     },
     "scrap_details": {
       "manual_label": "Manual:",
@@ -79,5 +113,6 @@
   "common": {
     "level_short": "Lv",
     "cycle_time": "~{{time}}s"
+
   }
 }

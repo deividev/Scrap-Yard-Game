@@ -14,6 +14,8 @@ export interface Translations {
     plastic: string;
     components: string;
     money: string;
+    recycled_plastic: string;
+    electric_components: string;
   };
   machines: {
     crusher: string;
@@ -21,13 +23,16 @@ export interface Translations {
     smelter: string;
     assembler: string;
     packager: string;
+    electric_packager: string;
+    recycler: string;
+    electric_assembler: string;
   };
   status: {
-    ok: string;
     parada: string;
     bloqueada: string;
     falta_input: string;
     output_lleno: string;
+    produciendo: string;
   };
   buttons: {
     activa: string;
@@ -36,6 +41,22 @@ export interface Translations {
     start: string;
     stop: string;
     chatarra: string;
+    venderComponentes: string;
+  };
+  tooltips: {
+    generate_scrap: string;
+    sell_metal: string;
+    sell_components: string;
+    machine_speed: string;
+    machine_multiplier: string;
+  };
+  notifications: {
+    upgrade_completed: string;
+    machine_unlocked: string;
+  };
+  progression: {
+    next_unlock: string;
+    all_unlocked: string;
   };
   upgrades: {
     title: string;
@@ -53,11 +74,16 @@ export interface Translations {
       per_second: string;
       none: string;
     };
+    scrap_manual: {
+      name: string;
+    };
     storage: {
       scrap: string;
       metal: string;
       plastic: string;
       components: string;
+      recycled_plastic: string;
+      electric_components: string;
     };
     capacity_label: string;
     machine_tab: {
@@ -65,6 +91,9 @@ export interface Translations {
       level_label: string;
       base_speed_label: string;
       effective_speed_label: string;
+      efficiency_label: string;
+      consumption_label: string;
+      production_label: string;
       production_multiplier_label: string;
       next_bonus_label: string;
       in_levels: string;
@@ -133,6 +162,22 @@ export class TranslationService {
     }
 
     return typeof value === 'string' ? value : key;
+  }
+
+  /**
+   * Translate with parameters interpolation
+   * Usage: tp('tooltips.generate_scrap', { amount: 5, cost: 1 })
+   * Returns: "Generar 5 chatarra por 1 dinero"
+   */
+  tp(key: string, params: Record<string, string | number>): string {
+    let translation = this.t(key);
+    
+    // Replace all {param} with actual values
+    Object.keys(params).forEach(param => {
+      translation = translation.replace(`{${param}}`, String(params[param]));
+    });
+    
+    return translation;
   }
 
   // Computed signals for easy access

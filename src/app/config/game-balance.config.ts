@@ -25,12 +25,16 @@ export const STORAGE_UPGRADE_CONFIG = {
     METAL: 15,
     PLASTIC: 15,
     COMPONENTS: 5,
+    RECYCLED_PLASTIC: 10,
+    ELECTRIC_COMPONENTS: 5,
   },
   BASE_COSTS: {
     SCRAP: 20,
     METAL: 35,
     PLASTIC: 35,
     COMPONENTS: 60,
+    RECYCLED_PLASTIC: 50,
+    ELECTRIC_COMPONENTS: 80,
   },
 };
 
@@ -39,9 +43,10 @@ export const STORAGE_UPGRADE_CONFIG = {
 // ============================================
 
 export const SCRAP_GENERATION_CONFIG = {
-  MANUAL_GENERATION: 1,
+  MANUAL_GENERATION: 5,
+  MANUAL_COST: 1, // Coste en dinero por cada click manual de chatarra
   MAX_LEVEL: 10,
-  BASE_COST_MONEY: 60,
+  BASE_COST_MONEY: 150,
   COST_MULTIPLIER: 1.25,
   COMPONENTS_START_LEVEL: 6,
   AUTO_GENERATION_RATES: [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
@@ -63,6 +68,9 @@ export const MACHINE_UPGRADE_CONFIG = {
     SMELTER: 50,
     ASSEMBLER: 60,
     PACKAGER: 80,
+    ELECTRIC_PACKAGER: 90,
+    RECYCLER: 70,
+    ELECTRIC_ASSEMBLER: 100,
   },
 };
 
@@ -71,11 +79,14 @@ export const MACHINE_UPGRADE_CONFIG = {
 // ============================================
 
 export const MACHINE_BASE_SPEEDS = {
-  CRUSHER: 0.5, // 2 segundos por ciclo
-  SEPARATOR: 0.5, // 2 segundos por ciclo
-  SMELTER: 0.25, // 4 segundos por ciclo
-  ASSEMBLER: 0.17, // ~6 segundos por ciclo
-  PACKAGER: 0.1, // 10 segundos por ciclo
+  CRUSHER: 0.5,
+  SEPARATOR: 0.5,
+  SMELTER: 0.25,
+  ASSEMBLER: 0.17,
+  PACKAGER: 0.1,
+  ELECTRIC_PACKAGER: 0.1,
+  RECYCLER: 0.5,
+  ELECTRIC_ASSEMBLER: 0.12,
 };
 
 // ============================================
@@ -96,5 +107,7 @@ export const INITIAL_CAPACITIES = {
   METAL: 30,
   PLASTIC: 30,
   COMPONENTS: 10,
-  MONEY: Infinity, // Sin límite
+  MONEY: Infinity,
+  RECYCLED_PLASTIC: 20,
+  ELECTRIC_COMPONENTS: 10,
 };

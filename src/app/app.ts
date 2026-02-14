@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { ResourcesHeaderComponent } from './components/resources-header/resources-header.component';
 import { MachineListComponent } from './components/machine-list/machine-list.component';
 import { UpgradesPanelComponent } from './components/upgrades-panel/upgrades-panel.component';
+import { NotificationContainerComponent } from './components/ui/notification-container/notification-container.component';
 import { CommonModule } from '@angular/common';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
@@ -11,7 +12,7 @@ import { ScrapGenerationService } from './services/scrap-generation.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ResourcesHeaderComponent, MachineListComponent, UpgradesPanelComponent],
+  imports: [CommonModule, ResourcesHeaderComponent, MachineListComponent, UpgradesPanelComponent, NotificationContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { UpgradeState, UpgradeId, UpgradeCost } from '../models/upgrade.model';
 import { ResourceType } from '../models/resource.model';
 import { UPGRADE_DEFINITIONS } from '../config/upgrade-definitions.config';
@@ -8,6 +8,9 @@ import {
   SCRAP_GENERATION_CONFIG,
   MACHINE_UPGRADE_CONFIG,
 } from '../config/game-balance.config';
+import { UpgradeProgressService } from './upgrade-progress.service';
+import { NotificationService } from './notification.service';
+import { TranslationService } from './translation.service';
 
 /**
  * G) Upgrades Service - Placeholder
@@ -29,6 +32,9 @@ import {
 export class UpgradesService {
   private upgrades = signal<UpgradeState[]>(this.initializeUpgrades());
   private saveService?: any;
+  private upgradeProgressService = inject(UpgradeProgressService);
+  private notificationService = inject(NotificationService);
+  private translationService = inject(TranslationService);
 
   private initializeUpgrades(): UpgradeState[] {
     return UPGRADE_DEFINITIONS.map((def) => ({
@@ -93,7 +99,10 @@ export class UpgradesService {
       multiplier = UPGRADE_COST_FORMULAS.DEFAULT_MULTIPLIER;
     }
 
-    const moneyCost = Math.ceil(definition.baseCostMoney * Math.pow(multiplier, currentLevel));
+    // Formula: baseCost * multiplier^(currentLevel - 1)
+    // Level 1 (initial) -> cost for level 2 = baseCost * multiplier^0 = baseCost
+    // Level 2 -> cost for level 3 = baseCost * multiplier^1 = baseCost * multiplier
+    const moneyCost = Math.ceil(definition.baseCostMoney * Math.pow(multiplier, currentLevel - 1));
 
     let componentsCost = 0;
     if (definition.extraCostComponents) {
@@ -120,11 +129,69 @@ export class UpgradesService {
     return UPGRADE_DEFINITIONS.find((d) => d.id === upgradeId);
   }
 
+  /**
+   * Inicia el proceso de compra de un upgrade.
+   * En lugar de aplicar el efecto inmediatamente, inicia el progreso con tiempo.
+   */
   purchaseUpgrade(upgradeId: UpgradeId): void {
-    this.upgrades.update((upgrades) =>
-      upgrades.map((u) => (u.id === upgradeId ? { ...u, level: u.level + 1 } : u)),
-    );
+    // Verificar si ya hay un upgrade en progreso para este ID
+    if (this.upgradeProgressService.isUpgradeInProgress(upgradeId)) {
+      console.warn(`Upgrade ${upgradeId} ya está en progreso`);
+      return;
+    }
+
+    const currentLevel = this.getLevel(upgradeId);
+    const targetLevel = currentLevel + 1;
+    const category = this.getUpgradeCategory(upgradeId);
+
+    // Iniciar el progreso del upgrade
+    this.upgradeProgressService.startUpgrade(upgradeId, targetLevel, category);
     this.saveService?.markDirty();
+  }
+
+  /**
+   * Completa un upgrade cuando su progreso llega al 100%.
+   * Este método es llamado por GameLoopService.
+   */
+  completeUpgrade(upgradeId: UpgradeId): void {
+    const definition = this.getDefinition(upgradeId);
+    let newLevel = 0;
+    this.upgrades.update((upgrades) =>
+      upgrades.map((u) => {
+        if (u.id === upgradeId) {
+          newLevel = u.level + 1;
+          return { ...u, level: newLevel };
+        }
+        return u;
+      }),
+    );
+    
+    if (definition && newLevel > 0) {
+      const message = this.translationService.tp('notifications.upgrade_completed', {
+        name: definition.name,
+        level: newLevel.toString()
+      });
+      this.notificationService.show(message, 'success');
+    }
+    
+    this.saveService?.markDirty();
+  }
+
+  /**
+   * Determina la categoría de un upgrade para calcular su tiempo base.
+   */
+  private getUpgradeCategory(upgradeId: UpgradeId): 'STORAGE' | 'SCRAP' | 'MACHINE' {
+    if (upgradeId.startsWith('UPG_STORE_')) {
+      return 'STORAGE';
+    }
+    if (upgradeId.startsWith('UPG_SCRAP_')) {
+      return 'SCRAP';
+    }
+    if (upgradeId.startsWith('UPG_MACH_')) {
+      return 'MACHINE';
+    }
+    // Default to MACHINE for unknown types
+    return 'MACHINE';
   }
 
   /**
@@ -137,6 +204,8 @@ export class UpgradesService {
       { upgradeId: UpgradeId.UPG_STORE_002, resourceId: ResourceType.METAL },
       { upgradeId: UpgradeId.UPG_STORE_003, resourceId: ResourceType.PLASTIC },
       { upgradeId: UpgradeId.UPG_STORE_004, resourceId: ResourceType.COMPONENTS },
+      { upgradeId: UpgradeId.UPG_STORE_005, resourceId: ResourceType.RECYCLED_PLASTIC },
+      { upgradeId: UpgradeId.UPG_STORE_006, resourceId: ResourceType.ELECTRIC_COMPONENTS },
     ];
 
     for (const { upgradeId, resourceId } of storageUpgrades) {
@@ -149,7 +218,8 @@ export class UpgradesService {
 
   /**
    * Calculate total storage capacity based on base capacity and upgrade level.
-   * Formula: capacity = baseCapacity + (increment * level)
+   * Formula: capacity = baseCapacity + (increment * (level - 1))
+   * Level 1 = base capacity, each upgrade adds one increment
    * This is linear scaling, while cost is exponential (1.15^level)
    */
   calculateStorageCapacity(upgradeId: UpgradeId, level: number, baseCapacity: number): number {
@@ -168,11 +238,17 @@ export class UpgradesService {
       case UpgradeId.UPG_STORE_004: // Components
         increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.COMPONENTS;
         break;
+      case UpgradeId.UPG_STORE_005: // Recycled Plastic
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.RECYCLED_PLASTIC;
+        break;
+      case UpgradeId.UPG_STORE_006: // Electric Components
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.ELECTRIC_COMPONENTS;
+        break;
       default:
         return baseCapacity;
     }
 
-    return baseCapacity + increment * level;
+    return baseCapacity + increment * (level - 1);
   }
 
   getMachineUpgradeIdByMachineType(machineType: string): UpgradeId | null {
@@ -182,6 +258,9 @@ export class UpgradesService {
       smelter: UpgradeId.UPG_MACH_002,
       assembler: UpgradeId.UPG_MACH_004,
       packager: UpgradeId.UPG_MACH_005,
+      recycler: UpgradeId.UPG_MACH_006,
+      electric_assembler: UpgradeId.UPG_MACH_007,
+      electric_packager: UpgradeId.UPG_MACH_008,
     };
     return mapping[machineType] || null;
   }
@@ -191,7 +270,9 @@ export class UpgradesService {
     if (!upgradeId) return baseSpeed;
 
     const level = this.getLevel(upgradeId);
-    return baseSpeed * (1 + MACHINE_UPGRADE_CONFIG.SPEED_BONUS_PER_LEVEL * level);
+    // Use (level - 1) because level 1 is the initial state with no upgrades
+    const upgrades = level - 1;
+    return baseSpeed * (1 + MACHINE_UPGRADE_CONFIG.SPEED_BONUS_PER_LEVEL * upgrades);
   }
 
   calculateProductionMultiplier(machineType: string): number {
@@ -199,11 +280,30 @@ export class UpgradesService {
     if (!upgradeId) return 1;
 
     const level = this.getLevel(upgradeId);
-    if (level < MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS) {
+    const upgrades = level - 1;
+    if (upgrades < MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS) {
       return 1;
     }
 
-    return 1 + Math.floor(level / MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS);
+    // Progresión A - Agresiva (valores enteros):
+    // L10-19: x3, L20-29: x5, L30-39: x7, L40-50: x10
+    const tier = Math.floor(upgrades / MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS);
+    const productionValues = [1, 3, 5, 7, 10]; // tier 0-4
+    return productionValues[Math.min(tier, 4)] || 1;
+  }
+
+  calculateConsumptionMultiplier(machineType: string): number {
+    const upgradeId = this.getMachineUpgradeIdByMachineType(machineType);
+    if (!upgradeId) return 1;
+
+    const level = this.getLevel(upgradeId);
+    const upgrades = level - 1;
+    if (upgrades < MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS) {
+      return 1;
+    }
+
+    // Consumo crece linealmente: L10-19: x2, L20-29: x3, L30-39: x4, L40-50: x5
+    return 1 + Math.floor(upgrades / MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS);
   }
 
   getState(): UpgradeState[] {

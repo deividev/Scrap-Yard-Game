@@ -30,4 +30,7 @@ export enum MachineType {
   SMELTER = 'smelter',
   ASSEMBLER = 'assembler',
   PACKAGER = 'packager',
+  ELECTRIC_PACKAGER = 'electric_packager',
+  RECYCLER = 'recycler',
+  ELECTRIC_ASSEMBLER = 'electric_assembler',
 }

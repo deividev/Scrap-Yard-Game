@@ -21,8 +21,9 @@ import { ResourceType } from '../models/resource.model';
 })
 export class MarketService {
   // Base prices according to MVP_BALANCING_TABLE (for future use)
-  private readonly METAL_PRICE = 1;
+  private readonly METAL_PRICE = 2;
   private readonly PLASTIC_PRICE = 2;
+  private readonly COMPONENTS_PRICE = 3; // Early game: 1 component = 2 money
 
   constructor(private resourcesService: ResourcesService) {}
 
@@ -51,6 +52,43 @@ export class MarketService {
   getPrice(resourceId: string): number {
     if (resourceId === ResourceType.METAL) return this.METAL_PRICE;
     if (resourceId === ResourceType.PLASTIC) return this.PLASTIC_PRICE;
+    if (resourceId === ResourceType.COMPONENTS) return this.COMPONENTS_PRICE;
     return 0;
+  }
+
+  /**
+   * Manual sell components for money.
+   * Used in early game before Empaquetadora is unlocked.
+   * @param amount Number of components to sell
+   * @returns true if sale was successful, false otherwise
+   */
+  sellComponents(amount: number): boolean {
+    if (!this.resourcesService.hasEnough(ResourceType.COMPONENTS, amount)) {
+      return false;
+    }
+
+    const success = this.resourcesService.subtract(ResourceType.COMPONENTS, amount);
+    if (success) {
+      const moneyEarned = amount * this.COMPONENTS_PRICE;
+      this.resourcesService.add(ResourceType.MONEY, moneyEarned);
+      return true;
+    }
+
+    return false;
+  }
+
+  sellMetal(amount: number): boolean {
+    if (!this.resourcesService.hasEnough(ResourceType.METAL, amount)) {
+      return false;
+    }
+
+    const success = this.resourcesService.subtract(ResourceType.METAL, amount);
+    if (success) {
+      const moneyEarned = amount * this.METAL_PRICE;
+      this.resourcesService.add(ResourceType.MONEY, moneyEarned);
+      return true;
+    }
+
+    return false;
   }
 }

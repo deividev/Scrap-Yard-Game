@@ -47,6 +47,25 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     effectType: 'storage',
     targetResourceId: ResourceType.COMPONENTS,
   },
+  {
+    id: UpgradeId.UPG_STORE_005,
+    category: UpgradeCategory.STORAGE,
+    name: 'Almacén de Plástico Reciclado',
+    baseCostMoney: 50,
+    description: '+10 capacidad máxima de Plástico Reciclado por nivel',
+    effectType: 'storage',
+    targetResourceId: ResourceType.RECYCLED_PLASTIC,
+  },
+  {
+    id: UpgradeId.UPG_STORE_006,
+    category: UpgradeCategory.STORAGE,
+    name: 'Almacén de Componentes Eléctricos',
+    baseCostMoney: 80,
+    extraCostComponents: 1,
+    description: '+5 capacidad máxima de Componentes Eléctricos por nivel',
+    effectType: 'storage',
+    targetResourceId: ResourceType.ELECTRIC_COMPONENTS,
+  },
 
   // MACHINE SPEED UPGRADES
   {
@@ -94,13 +113,40 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     effectType: 'machine_speed',
     targetMachineId: MachineType.PACKAGER,
   },
+  {
+    id: UpgradeId.UPG_MACH_006,
+    category: UpgradeCategory.MACHINE,
+    name: 'Recicladora: Velocidad',
+    baseCostMoney: 70,
+    description: 'Aumenta velocidad de Recicladora',
+    effectType: 'machine_speed',
+    targetMachineId: MachineType.RECYCLER,
+  },
+  {
+    id: UpgradeId.UPG_MACH_007,
+    category: UpgradeCategory.MACHINE,
+    name: 'Ensambladora Eléctrica: Velocidad',
+    baseCostMoney: 100,
+    description: 'Aumenta velocidad de Ensambladora Eléctrica',
+    effectType: 'machine_speed',
+    targetMachineId: MachineType.ELECTRIC_ASSEMBLER,
+  },
+  {
+    id: UpgradeId.UPG_MACH_008,
+    category: UpgradeCategory.MACHINE,
+    name: 'Empaquetadora Eléctrica: Velocidad',
+    baseCostMoney: 90,
+    description: 'Aumenta velocidad de Empaquetadora Eléctrica',
+    effectType: 'machine_speed',
+    targetMachineId: MachineType.ELECTRIC_PACKAGER,
+  },
 
   // SCRAP GENERATION UPGRADES
   {
     id: UpgradeId.UPG_SCRAP_001,
     category: UpgradeCategory.SCRAP,
     name: 'Descarga Manual Mejorada',
-    baseCostMoney: 40,
+    baseCostMoney: 100,
     description: '+1 Chatarra adicional por acción manual por nivel',
     effectType: 'scrap_manual',
   },

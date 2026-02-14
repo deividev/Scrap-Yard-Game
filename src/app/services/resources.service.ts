@@ -29,19 +29,20 @@ export class ResourcesService {
     if (amount <= 0) return;
 
     this.resources.update((resources) => {
-      const resource = resources.find((r) => r.id === resourceId);
-      if (resource) {
-        // Check if capacity is limited (not Infinity)
-        if (isFinite(resource.capacity)) {
-          const availableSpace = resource.capacity - resource.amount;
-          const amountToAdd = Math.min(amount, availableSpace);
-          resource.amount += amountToAdd;
-        } else {
-          // Unlimited capacity (Infinity)
-          resource.amount += amount;
+      return resources.map(r => {
+        if (r.id === resourceId) {
+          // Check if capacity is limited (not Infinity)
+          if (isFinite(r.capacity)) {
+            const availableSpace = r.capacity - r.amount;
+            const amountToAdd = Math.min(amount, availableSpace);
+            return { ...r, amount: r.amount + amountToAdd };
+          } else {
+            // Unlimited capacity (Infinity)
+            return { ...r, amount: r.amount + amount };
+          }
         }
-      }
-      return [...resources];
+        return r;
+      });
     });
   }
 
@@ -92,11 +93,9 @@ export class ResourcesService {
     }
 
     this.resources.update((resources) => {
-      const res = resources.find((r) => r.id === resourceId);
-      if (res) {
-        res.amount -= amount;
-      }
-      return [...resources];
+      return resources.map(r => 
+        r.id === resourceId ? { ...r, amount: r.amount - amount } : r
+      );
     });
 
     return true;
@@ -119,6 +118,11 @@ export class ResourcesService {
         if (!isFinite(baseCapacity)) {
           loadedResource.capacity = Infinity;
         }
+      }
+      // Always use current icon from INITIAL_RESOURCES to support icon updates
+      const currentResource = INITIAL_RESOURCES.find(r => r.id === loadedResource.id);
+      if (currentResource) {
+        loadedResource.icon = currentResource.icon;
       }
     });
     this.resources.set(resources.map((r) => ({ ...r })));

@@ -12,4 +12,6 @@ export enum ResourceType {
   PLASTIC = 'plastic',
   COMPONENTS = 'components',
   MONEY = 'money',
+  RECYCLED_PLASTIC = 'recycled_plastic',
+  ELECTRIC_COMPONENTS = 'electric_components',
 }

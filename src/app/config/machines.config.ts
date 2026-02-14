@@ -1,4 +1,9 @@
-import { Machine, MachineType } from '../models/machine.model';
+import {
+  Machine,
+  MachineType,
+  MachineConsumption,
+  MachineProduction,
+} from '../models/machine.model';
 import { ResourceType } from '../models/resource.model';
 
 export const INITIAL_MACHINES: Machine[] = [
@@ -41,7 +46,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SMELTER,
     name: 'Fundidora',
-    level: 1,
+    level: 0,
     baseSpeed: 0.25,
     baseConsumption: [
       {
@@ -81,17 +86,79 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.PACKAGER,
     name: 'Empaquetadora',
-    level: 1,
+    level: 0,
     baseSpeed: 0.1,
     baseConsumption: [
       {
         resourceId: ResourceType.COMPONENTS,
-        amount: 8,
+        amount: 4,
       },
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 8,
+      amount: 20,
+    },
+    isActive: false,
+    progress: 0,
+  },
+  {
+    id: MachineType.ELECTRIC_PACKAGER,
+    name: 'Empaquetadora eléctrica',
+    level: 0,
+    baseSpeed: 0.1,
+    baseConsumption: [
+      {
+        resourceId: ResourceType.ELECTRIC_COMPONENTS,
+        amount: 6,
+      },
+    ],
+    baseProduction: {
+      resourceId: ResourceType.MONEY,
+      amount: 40,
+    },
+    isActive: false,
+    progress: 0,
+  },
+  {
+    id: MachineType.RECYCLER,
+    name: 'Recicladora',
+    level: 0,
+    baseSpeed: 0.5,
+    baseConsumption: [
+      {
+        resourceId: ResourceType.PLASTIC,
+        amount: 1,
+      },
+    ],
+    baseProduction: {
+      resourceId: ResourceType.RECYCLED_PLASTIC,
+      amount: 1,
+    },
+    isActive: false,
+    progress: 0,
+  },
+  {
+    id: MachineType.ELECTRIC_ASSEMBLER,
+    name: 'Ensambladora eléctrica',
+    level: 0,
+    baseSpeed: 0.12,
+    baseConsumption: [
+      {
+        resourceId: ResourceType.METAL,
+        amount: 1,
+      },
+      {
+        resourceId: ResourceType.COMPONENTS,
+        amount: 1,
+      },
+      {
+        resourceId: ResourceType.RECYCLED_PLASTIC,
+        amount: 1,
+      },
+    ],
+    baseProduction: {
+      resourceId: ResourceType.ELECTRIC_COMPONENTS,
+      amount: 1,
     },
     isActive: false,
     progress: 0,

@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { Machine } from '../models/machine.model';
+import { Machine, MachineType } from '../models/machine.model';
 import { INITIAL_MACHINES } from '../config/machines.config';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
@@ -48,7 +48,7 @@ export class MachinesService {
     this.machines.update((machines) =>
       machines.map((m) =>
         m.id === machineId && m.level > 0
-          ? { ...m, isActive: active, progress: active ? m.progress : 0 }
+          ? { ...m, isActive: active }
           : m,
       ),
     );
@@ -83,7 +83,21 @@ export class MachinesService {
   }
 
   setState(machines: Machine[]): void {
-    this.machines.set(machines.map((m) => ({ ...m })));
+    // Merge loaded state with current config to ensure base values are always correct
+    const mergedMachines = machines.map((loadedMachine) => {
+      const configMachine = INITIAL_MACHINES.find((m) => m.id === loadedMachine.id);
+      if (configMachine) {
+        return {
+          ...loadedMachine,
+          name: configMachine.name,
+          baseSpeed: configMachine.baseSpeed,
+          baseConsumption: configMachine.baseConsumption,
+          baseProduction: configMachine.baseProduction,
+        };
+      }
+      return loadedMachine;
+    });
+    this.machines.set(mergedMachines);
   }
 
   setSaveService(saveService: any): void {
