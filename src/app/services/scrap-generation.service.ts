@@ -44,7 +44,7 @@ export class ScrapGenerationService {
 
     // Generar chatarra
     this.resourcesService.add(ResourceType.SCRAP, totalGeneration);
-    
+
     return true;
   }
 

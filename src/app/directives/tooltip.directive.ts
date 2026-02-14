@@ -7,7 +7,10 @@ import { Directive, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
 export class TooltipDirective implements OnInit {
   @Input('appTooltip') tooltipText: string = '';
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+  ) {}
 
   ngOnInit() {
     if (this.tooltipText) {

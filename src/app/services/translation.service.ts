@@ -171,12 +171,12 @@ export class TranslationService {
    */
   tp(key: string, params: Record<string, string | number>): string {
     let translation = this.t(key);
-    
+
     // Replace all {param} with actual values
-    Object.keys(params).forEach(param => {
+    Object.keys(params).forEach((param) => {
       translation = translation.replace(`{${param}}`, String(params[param]));
     });
-    
+
     return translation;
   }
 

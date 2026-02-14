@@ -85,9 +85,11 @@
       "no_selection": "Select a machine to view upgrades",
       "level_label": "Level:",
       "base_speed_label": "Base speed:",
-      "effective_speed_label": "Effective speed:",      "efficiency_label": "Efficiency:",
+      "effective_speed_label": "Effective speed:",
+      "efficiency_label": "Efficiency:",
       "consumption_label": "Consumption",
-      "production_label": "Production",      "production_multiplier_label": "Production multiplier:",
+      "production_label": "Production",
+      "production_multiplier_label": "Production multiplier:",
       "next_bonus_label": "Next bonus:",
       "in_levels": "in {{count}} levels",
       "cycles_per_second": "cycles/s",
@@ -113,6 +115,5 @@
   "common": {
     "level_short": "Lv",
     "cycle_time": "~{{time}}s"
-
   }
 }

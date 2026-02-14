@@ -29,7 +29,7 @@ export class ResourcesService {
     if (amount <= 0) return;
 
     this.resources.update((resources) => {
-      return resources.map(r => {
+      return resources.map((r) => {
         if (r.id === resourceId) {
           // Check if capacity is limited (not Infinity)
           if (isFinite(r.capacity)) {
@@ -93,9 +93,7 @@ export class ResourcesService {
     }
 
     this.resources.update((resources) => {
-      return resources.map(r => 
-        r.id === resourceId ? { ...r, amount: r.amount - amount } : r
-      );
+      return resources.map((r) => (r.id === resourceId ? { ...r, amount: r.amount - amount } : r));
     });
 
     return true;
@@ -120,7 +118,7 @@ export class ResourcesService {
         }
       }
       // Always use current icon from INITIAL_RESOURCES to support icon updates
-      const currentResource = INITIAL_RESOURCES.find(r => r.id === loadedResource.id);
+      const currentResource = INITIAL_RESOURCES.find((r) => r.id === loadedResource.id);
       if (currentResource) {
         loadedResource.icon = currentResource.icon;
       }

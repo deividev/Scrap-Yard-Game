@@ -22,7 +22,9 @@ import { CommonModule } from '@angular/common';
         border: none;
         border-radius: var(--border-radius-small);
         cursor: pointer;
-        transition: opacity 0.15s ease, transform 0.1s ease;
+        transition:
+          opacity 0.15s ease,
+          transform 0.1s ease;
         outline: none;
       }
 

@@ -154,17 +154,19 @@ export class SaveService {
     this.resourcesService.setState(saveState.resources);
     this.machinesService.setState(saveState.machines);
     this.upgradesService.setState(saveState.upgrades);
-    
+
     // Restaurar rate de generación automática
     // Si está guardado, usar ese valor; si no, recalcular basado en el nivel
     const savedRate = saveState.scrapGenerationRate || 0;
     const autoUpgradeLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_002);
-    
+
     if (savedRate === 0 && autoUpgradeLevel > 0) {
       // El rate guardado es 0 pero hay niveles en el upgrade, recalcular
       const correctRate = this.scrapGenerationService.getAutoRateByLevel(autoUpgradeLevel);
       this.scrapGenerationService.setAutomaticGenerationRate(correctRate);
-      console.log(`[SaveService] Rate de generación automática recalculado: ${correctRate} (nivel ${autoUpgradeLevel})`);
+      console.log(
+        `[SaveService] Rate de generación automática recalculado: ${correctRate} (nivel ${autoUpgradeLevel})`,
+      );
     } else {
       this.scrapGenerationService.setAutomaticGenerationRate(savedRate);
     }
@@ -178,31 +180,34 @@ export class SaveService {
     if (saveState.lastSaveTimestamp) {
       const offlineTime = (Date.now() - saveState.lastSaveTimestamp) / 1000; // En segundos
       const completedUpgrades = this.upgradeProgressService.processOfflineProgress(offlineTime);
-      
+
       // Aplicar efectos de upgrades completados offline
       for (const upgradeId of completedUpgrades) {
         this.upgradesService.completeUpgrade(upgradeId);
-        
+
         // Si es un upgrade de almacenamiento, actualizar capacidades
         if (upgradeId.startsWith('UPG_STORE_')) {
           this.upgradesService.applyStorageUpgrades(this.resourcesService);
         }
-        
+
         // Si es el upgrade de generación automática de chatarra, actualizar el rate
         if (upgradeId === UpgradeId.UPG_SCRAP_002) {
           const newLevel = this.upgradesService.getLevel(upgradeId);
           const newRate = this.scrapGenerationService.getAutoRateByLevel(newLevel);
           this.scrapGenerationService.setAutomaticGenerationRate(newRate);
         }
-        
+
         // Si es un upgrade de máquina, verificar desbloqueos
         if (upgradeId.startsWith('UPG_MACH_')) {
           this.machineUnlockService.checkAndUnlockMachines();
         }
       }
-      
+
       if (completedUpgrades.length > 0) {
-        console.log(`[SaveService] ${completedUpgrades.length} upgrades completados offline:`, completedUpgrades);
+        console.log(
+          `[SaveService] ${completedUpgrades.length} upgrades completados offline:`,
+          completedUpgrades,
+        );
       }
     }
 

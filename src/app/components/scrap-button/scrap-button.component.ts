@@ -15,17 +15,20 @@ import { UpgradeId } from '../../models/upgrade.model';
   standalone: true,
   template: `
     <app-tooltip [text]="tooltipText()" [position]="'bottom'">
-      <app-button
-        variant="primary"
-        size="sm"
-        [disabled]="!canAfford()"
-        (clicked)="generateScrap()"
-      >
+      <app-button variant="primary" size="sm" [disabled]="!canAfford()" (clicked)="generateScrap()">
         <span style="display: inline-flex; align-items: center; gap: 4px;">
           <span>-{{ scrapCost }}</span>
-          <img src="assets/icons/gold_resource.png" style="width: 28px; height: 28px; vertical-align: middle;" alt="Money" />
+          <img
+            src="assets/icons/gold_resource.png"
+            style="width: 28px; height: 28px; vertical-align: middle;"
+            alt="Money"
+          />
           <span>+{{ scrapAmount() }}</span>
-          <img src="assets/icons/scrap_resource.png" style="width: 28px; height: 28px; vertical-align: middle;" alt="Scrap" />
+          <img
+            src="assets/icons/scrap_resource.png"
+            style="width: 28px; height: 28px; vertical-align: middle;"
+            alt="Scrap"
+          />
         </span>
       </app-button>
     </app-tooltip>
@@ -34,7 +37,7 @@ import { UpgradeId } from '../../models/upgrade.model';
 })
 export class ScrapButtonComponent {
   scrapCost = SCRAP_GENERATION_CONFIG.MANUAL_COST;
-  
+
   scrapAmount = computed(() => {
     const manualBoostLevel = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_001);
     const manualBoost = manualBoostLevel - 1;
@@ -44,16 +47,16 @@ export class ScrapButtonComponent {
   tooltipText = computed(() => {
     return this.translationService.tp('tooltips.generate_scrap', {
       amount: this.scrapAmount(),
-      cost: this.scrapCost
+      cost: this.scrapCost,
     });
   });
-  
+
   canAfford = computed(() => {
     // Verificar dinero
     if (!this.resourcesService.hasEnough(ResourceType.MONEY, this.scrapCost)) {
       return false;
     }
-    
+
     // Verificar espacio disponible para chatarra
     const availableSpace = this.resourcesService.getAvailableSpace(ResourceType.SCRAP);
     return availableSpace >= this.scrapAmount();
@@ -63,7 +66,7 @@ export class ScrapButtonComponent {
     private scrapGenerationService: ScrapGenerationService,
     private resourcesService: ResourcesService,
     private upgradesService: UpgradesService,
-    private translationService: TranslationService
+    private translationService: TranslationService,
   ) {}
 
   generateScrap(): void {

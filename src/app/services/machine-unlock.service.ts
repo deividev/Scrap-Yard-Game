@@ -63,7 +63,7 @@ export class MachineUnlockService {
    */
   getUnlockInfo(machineType: MachineType): MachineUnlockInfo {
     const machine = this.machinesService.getMachine(machineType);
-    
+
     if (!machine || machine.level > 0) {
       return { isUnlocked: true, requirements: [] };
     }
@@ -96,38 +96,44 @@ export class MachineUnlockService {
         requirements = [];
     }
 
-    const allMet = requirements.length > 0 && requirements.every(r => r.isMet);
+    const allMet = requirements.length > 0 && requirements.every((r) => r.isMet);
     return { isUnlocked: allMet, requirements };
   }
 
   private getSmelterRequirements(): UnlockRequirement[] {
     const currentLevel = this.getMachineLevel(MachineType.CRUSHER);
-    return [{
-      machineType: MachineType.CRUSHER,
-      requiredLevel: 2,
-      currentLevel,
-      isMet: currentLevel >= 2
-    }];
+    return [
+      {
+        machineType: MachineType.CRUSHER,
+        requiredLevel: 2,
+        currentLevel,
+        isMet: currentLevel >= 2,
+      },
+    ];
   }
 
   private getPackagerRequirements(): UnlockRequirement[] {
     const currentLevel = this.getMachineLevel(MachineType.SMELTER);
-    return [{
-      machineType: MachineType.SMELTER,
-      requiredLevel: 3,
-      currentLevel,
-      isMet: currentLevel >= 3
-    }];
+    return [
+      {
+        machineType: MachineType.SMELTER,
+        requiredLevel: 3,
+        currentLevel,
+        isMet: currentLevel >= 3,
+      },
+    ];
   }
 
   private getSeparatorRequirements(): UnlockRequirement[] {
     const currentLevel = this.getMachineLevel(MachineType.PACKAGER);
-    return [{
-      machineType: MachineType.PACKAGER,
-      requiredLevel: 2,
-      currentLevel,
-      isMet: currentLevel >= 2
-    }];
+    return [
+      {
+        machineType: MachineType.PACKAGER,
+        requiredLevel: 2,
+        currentLevel,
+        isMet: currentLevel >= 2,
+      },
+    ];
   }
 
   private getAssemblerRequirements(): UnlockRequirement[] {
@@ -138,25 +144,27 @@ export class MachineUnlockService {
         machineType: MachineType.SEPARATOR,
         requiredLevel: 2,
         currentLevel: separatorLevel,
-        isMet: separatorLevel >= 2
+        isMet: separatorLevel >= 2,
       },
       {
         machineType: MachineType.SMELTER,
         requiredLevel: 4,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 4
-      }
+        isMet: smelterLevel >= 4,
+      },
     ];
   }
 
   private getRecyclerRequirements(): UnlockRequirement[] {
     const currentLevel = this.getMachineLevel(MachineType.SEPARATOR);
-    return [{
-      machineType: MachineType.SEPARATOR,
-      requiredLevel: 3,
-      currentLevel,
-      isMet: currentLevel >= 3
-    }];
+    return [
+      {
+        machineType: MachineType.SEPARATOR,
+        requiredLevel: 3,
+        currentLevel,
+        isMet: currentLevel >= 3,
+      },
+    ];
   }
 
   private getElectricAssemblerRequirements(): UnlockRequirement[] {
@@ -168,20 +176,20 @@ export class MachineUnlockService {
         machineType: MachineType.RECYCLER,
         requiredLevel: 2,
         currentLevel: recyclerLevel,
-        isMet: recyclerLevel >= 2
+        isMet: recyclerLevel >= 2,
       },
       {
         machineType: MachineType.SMELTER,
         requiredLevel: 5,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 5
+        isMet: smelterLevel >= 5,
       },
       {
         machineType: MachineType.ASSEMBLER,
         requiredLevel: 1,
         currentLevel: assemblerLevel,
-        isMet: assemblerLevel >= 1
-      }
+        isMet: assemblerLevel >= 1,
+      },
     ];
   }
 
@@ -193,14 +201,14 @@ export class MachineUnlockService {
         machineType: MachineType.ELECTRIC_ASSEMBLER,
         requiredLevel: 2,
         currentLevel: electricAssemblerLevel,
-        isMet: electricAssemblerLevel >= 2
+        isMet: electricAssemblerLevel >= 2,
       },
       {
         machineType: MachineType.PACKAGER,
         requiredLevel: 3,
         currentLevel: packagerLevel,
-        isMet: packagerLevel >= 3
-      }
+        isMet: packagerLevel >= 3,
+      },
     ];
   }
 
@@ -221,7 +229,7 @@ export class MachineUnlockService {
       const machineName = this.translationService.t('machines.smelter');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -243,7 +251,7 @@ export class MachineUnlockService {
       const machineName = this.translationService.t('machines.packager');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -265,7 +273,7 @@ export class MachineUnlockService {
       const machineName = this.translationService.t('machines.separator');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -282,14 +290,16 @@ export class MachineUnlockService {
 
     const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    
+
     if (separatorLevel >= 2 && smelterLevel >= 4) {
       this.machinesService.upgradeLevel(MachineType.ASSEMBLER);
-      console.log('[MachineUnlock] Assembler unlocked! (Separator level 2 + Smelter level 4 reached)');
+      console.log(
+        '[MachineUnlock] Assembler unlocked! (Separator level 2 + Smelter level 4 reached)',
+      );
       const machineName = this.translationService.t('machines.assembler');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -311,7 +321,7 @@ export class MachineUnlockService {
       const machineName = this.translationService.t('machines.recycler');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -329,14 +339,16 @@ export class MachineUnlockService {
     const recyclerLevel = this.getMachineLevel(MachineType.RECYCLER);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
     const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
-    
+
     if (recyclerLevel >= 2 && smelterLevel >= 5 && assemblerLevel >= 1) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_ASSEMBLER);
-      console.log('[MachineUnlock] Electric Assembler unlocked! (Recycler level 2 + Smelter level 5 + Assembler unlocked)');
+      console.log(
+        '[MachineUnlock] Electric Assembler unlocked! (Recycler level 2 + Smelter level 5 + Assembler unlocked)',
+      );
       const machineName = this.translationService.t('machines.electric_assembler');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }
@@ -353,14 +365,16 @@ export class MachineUnlockService {
 
     const electricAssemblerLevel = this.getMachineLevel(MachineType.ELECTRIC_ASSEMBLER);
     const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
-    
+
     if (electricAssemblerLevel >= 2 && packagerLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_PACKAGER);
-      console.log('[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 2 + Packager level 3)');
+      console.log(
+        '[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 2 + Packager level 3)',
+      );
       const machineName = this.translationService.t('machines.electric_packager');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock'
+        'unlock',
       );
     }
   }

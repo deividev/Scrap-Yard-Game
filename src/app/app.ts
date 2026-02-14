@@ -12,7 +12,13 @@ import { ScrapGenerationService } from './services/scrap-generation.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ResourcesHeaderComponent, MachineListComponent, UpgradesPanelComponent, NotificationContainerComponent],
+  imports: [
+    CommonModule,
+    ResourcesHeaderComponent,
+    MachineListComponent,
+    UpgradesPanelComponent,
+    NotificationContainerComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

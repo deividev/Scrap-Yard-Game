@@ -38,7 +38,11 @@ import { SCRAP_GENERATION_CONFIG } from '../../config/game-balance.config';
           [disabled]="!canSellComponents()"
         >
           <span style="display: inline-flex; align-items: center; gap: 4px;">
-            <img src="assets/icons/gold_resource.png" style="width: 20px; height: 20px; vertical-align: middle;" alt="Money" />
+            <img
+              src="assets/icons/gold_resource.png"
+              style="width: 20px; height: 20px; vertical-align: middle;"
+              alt="Money"
+            />
             <span>{{ translationService.t('buttons.venderComponentes') }}</span>
           </span>
         </app-button>
@@ -101,7 +105,7 @@ export class DebugControlsComponent {
     if (!this.resourcesService.hasEnough(ResourceType.MONEY, SCRAP_GENERATION_CONFIG.MANUAL_COST)) {
       return false;
     }
-    
+
     // Verificar espacio disponible para chatarra
     const totalGeneration = SCRAP_GENERATION_CONFIG.MANUAL_GENERATION;
     const availableSpace = this.resourcesService.getAvailableSpace(ResourceType.SCRAP);

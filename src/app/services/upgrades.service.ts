@@ -165,15 +165,15 @@ export class UpgradesService {
         return u;
       }),
     );
-    
+
     if (definition && newLevel > 0) {
       const message = this.translationService.tp('notifications.upgrade_completed', {
         name: definition.name,
-        level: newLevel.toString()
+        level: newLevel.toString(),
       });
       this.notificationService.show(message, 'success');
     }
-    
+
     this.saveService?.markDirty();
   }
 

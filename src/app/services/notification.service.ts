@@ -15,9 +15,9 @@ export class NotificationService {
   private nextId = 1;
   private readonly MAX_VISIBLE = 3;
   private readonly DURATIONS = {
-    success: 3000,  // Upgrades: 3 segundos
-    info: 3500,     // Info: 3.5 segundos
-    unlock: 5000,   // Desbloqueos: 5 segundos
+    success: 3000, // Upgrades: 3 segundos
+    info: 3500, // Info: 3.5 segundos
+    unlock: 5000, // Desbloqueos: 5 segundos
   };
 
   notifications$ = this.notifications.asReadonly();

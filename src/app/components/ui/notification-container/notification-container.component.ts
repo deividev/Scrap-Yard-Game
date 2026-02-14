@@ -39,7 +39,9 @@ import { NotificationService } from '../../../services/notification.service';
       min-width: 280px;
       max-width: 400px;
       text-align: center;
-      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.2s forwards;
+      animation:
+        slideIn 0.3s ease-out,
+        fadeOut 0.3s ease-in 2.2s forwards;
     }
 
     .notification-success {

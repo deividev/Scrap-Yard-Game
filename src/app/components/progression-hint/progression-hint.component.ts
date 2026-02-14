@@ -64,18 +64,18 @@ export class ProgressionHintComponent {
     // Buscar la primera máquina bloqueada en el orden de progresión
     for (const machineType of this.progressionOrder) {
       const unlockInfo = this.machineUnlockService.getUnlockInfo(machineType);
-      
+
       if (!unlockInfo.isUnlocked && unlockInfo.requirements.length > 0) {
         const machineName = this.translationService.t(`machines.${machineType}`);
-        
+
         // Encontrar el primer requisito que no está cumplido
-        const unmetReq = unlockInfo.requirements.find(r => !r.isMet);
+        const unmetReq = unlockInfo.requirements.find((r) => !r.isMet);
         if (unmetReq) {
           const reqMachineName = this.translationService.t(`machines.${unmetReq.machineType}`);
           return this.translationService.tp('progression.next_unlock', {
             machine: machineName,
             requirement: reqMachineName,
-            level: unmetReq.requiredLevel.toString()
+            level: unmetReq.requiredLevel.toString(),
           });
         }
       }

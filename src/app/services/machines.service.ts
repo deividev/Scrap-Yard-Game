@@ -46,11 +46,7 @@ export class MachinesService {
 
   setActive(machineId: string, active: boolean): void {
     this.machines.update((machines) =>
-      machines.map((m) =>
-        m.id === machineId && m.level > 0
-          ? { ...m, isActive: active }
-          : m,
-      ),
+      machines.map((m) => (m.id === machineId && m.level > 0 ? { ...m, isActive: active } : m)),
     );
     this.saveService?.markDirty();
   }

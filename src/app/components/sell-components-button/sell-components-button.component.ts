@@ -12,17 +12,20 @@ import { TranslationService } from '../../services/translation.service';
   standalone: true,
   template: `
     <app-tooltip [text]="translationService.t('tooltips.sell_components')" [position]="'bottom'">
-      <app-button
-        variant="primary"
-        size="sm"
-        [disabled]="!canSell()"
-        (clicked)="sellComponents()"
-      >
+      <app-button variant="primary" size="sm" [disabled]="!canSell()" (clicked)="sellComponents()">
         <span style="display: inline-flex; align-items: center; gap: 4px;">
           <span>-1</span>
-          <img src="assets/icons/components_resource.png" style="width: 28px; height: 28px; vertical-align: middle;" alt="Components" />
+          <img
+            src="assets/icons/components_resource.png"
+            style="width: 28px; height: 28px; vertical-align: middle;"
+            alt="Components"
+          />
           <span>+3</span>
-          <img src="assets/icons/gold_resource.png" style="width: 28px; height: 28px; vertical-align: middle;" alt="Money" />
+          <img
+            src="assets/icons/gold_resource.png"
+            style="width: 28px; height: 28px; vertical-align: middle;"
+            alt="Money"
+          />
         </span>
       </app-button>
     </app-tooltip>
@@ -32,7 +35,7 @@ import { TranslationService } from '../../services/translation.service';
 export class SellComponentsButtonComponent {
   sellAmount = 1;
   moneyGain = 3;
-  
+
   canSell = computed(() => {
     return this.resourcesService.hasEnough(ResourceType.COMPONENTS, this.sellAmount);
   });
@@ -40,7 +43,7 @@ export class SellComponentsButtonComponent {
   constructor(
     private resourcesService: ResourcesService,
     private marketService: MarketService,
-    public translationService: TranslationService
+    public translationService: TranslationService,
   ) {}
 
   sellComponents(): void {
