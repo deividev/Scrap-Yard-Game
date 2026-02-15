@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
@@ -13,6 +13,9 @@ import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 import { TranslationService } from '../../services/translation.service';
+import { GameStateService } from '../../services/game-state.service';
+import { SaveService } from '../../services/save.service';
+import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
 @Component({
   selector: 'app-resources-header',
@@ -26,6 +29,7 @@ import { TranslationService } from '../../services/translation.service';
     ProgressionHintComponent,
     FormatNumberPipe,
     TooltipComponent,
+    AppButtonComponent,
   ],
   template: `
     <header class="resources-header">
@@ -180,6 +184,12 @@ import { TranslationService } from '../../services/translation.service';
       <app-progression-hint></app-progression-hint>
 
       <div class="header-actions">
+        <app-button
+          [label]="translationService.t('main_menu.back_to_menu')"
+          variant="ghost"
+          size="sm"
+          (clicked)="returnToMenu()"
+        />
         <app-debug-controls></app-debug-controls>
       </div>
     </header>
@@ -226,6 +236,9 @@ import { TranslationService } from '../../services/translation.service';
 
       .header-actions {
         margin-left: auto;
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
       }
 
       .resource-icon {
@@ -263,6 +276,9 @@ import { TranslationService } from '../../services/translation.service';
   ],
 })
 export class ResourcesHeaderComponent {
+  private gameStateService = inject(GameStateService);
+  private saveService = inject(SaveService);
+
   constructor(
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
@@ -376,4 +392,10 @@ export class ResourcesHeaderComponent {
     const smelter = this.machinesService.getMachine(MachineType.SMELTER);
     return smelter ? smelter.level > 0 : false;
   });
+
+  returnToMenu(): void {
+    // Guardar el juego antes de volver al menú
+    this.saveService.save();
+    this.gameStateService.returnToMenu();
+  }
 }

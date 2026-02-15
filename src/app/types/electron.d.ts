@@ -5,6 +5,7 @@ export interface ElectronApi {
   hasSave: () => Promise<{ success: boolean; exists: boolean }>;
   clearSave: () => Promise<{ success: boolean; error?: string }>;
   getSavePath: () => Promise<{ success: boolean; path: string }>;
+  quit?: () => void;
 }
 
 declare global {

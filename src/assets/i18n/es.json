@@ -2,6 +2,17 @@
   "sections": {
     "machines": "Máquinas"
   },
+  "main_menu": {
+    "title": "SCRAP YARD IDLE",
+    "subtitle": "Gestiona tu desguace y aprovecha la chatarra",
+    "play": "Jugar",
+    "continue": "Continuar",
+    "new_game": "Nueva Partida",
+    "options": "Opciones",
+    "exit": "Salir",
+    "confirm_new_game": "¿Estás seguro de que quieres comenzar una nueva partida? Se perderá tu progreso actual.",
+    "back_to_menu": "Menú Principal"
+  },
   "resources": {
     "scrap": "Chatarra",
     "metal": "Metal",

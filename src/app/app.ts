@@ -3,12 +3,14 @@ import { ResourcesHeaderComponent } from './components/resources-header/resource
 import { MachineListComponent } from './components/machine-list/machine-list.component';
 import { UpgradesPanelComponent } from './components/upgrades-panel/upgrades-panel.component';
 import { NotificationContainerComponent } from './components/ui/notification-container/notification-container.component';
+import { MainMenuComponent } from './components/main-menu/main-menu.component';
 import { CommonModule } from '@angular/common';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
 import { MachinesService } from './services/machines.service';
 import { UpgradesService } from './services/upgrades.service';
 import { ScrapGenerationService } from './services/scrap-generation.service';
+import { GameStateService } from './services/game-state.service';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +20,7 @@ import { ScrapGenerationService } from './services/scrap-generation.service';
     MachineListComponent,
     UpgradesPanelComponent,
     NotificationContainerComponent,
+    MainMenuComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -30,6 +33,7 @@ export class App implements OnInit, OnDestroy {
   private machinesService = inject(MachinesService);
   private upgradesService = inject(UpgradesService);
   private scrapGenerationService = inject(ScrapGenerationService);
+  gameStateService = inject(GameStateService);
 
   private beforeUnloadHandler = (event: BeforeUnloadEvent) => {
     this.saveService.save();
@@ -41,6 +45,8 @@ export class App implements OnInit, OnDestroy {
     this.upgradesService.setSaveService(this.saveService);
     this.scrapGenerationService.setSaveService(this.saveService);
 
+    // Cargar el juego en segundo plano
+    // Si no hay save, se usarán los valores por defecto
     this.saveService.load();
 
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
