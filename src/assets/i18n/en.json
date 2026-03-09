@@ -13,6 +13,22 @@
     "confirm_new_game": "Are you sure you want to start a new game? Your current progress will be lost.",
     "back_to_menu": "Main Menu"
   },
+  "options": {
+    "title": "OPTIONS",
+    "music_volume": "Music Volume",
+    "sfx_volume": "Sound Effects Volume",
+    "language": "Language",
+    "fullscreen": "Fullscreen",
+    "resolution": "Resolution",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "reset_defaults": "Reset Defaults",
+    "back": "Back",
+    "reset_title": "Reset Settings",
+    "confirm_reset": "Are you sure you want to reset all settings to default values? This includes volumes, language, and display settings.",
+    "reset_confirm": "Reset",
+    "reset_cancel": "Cancel"
+  },
   "resources": {
     "scrap": "Scrap",
     "metal": "Metal",

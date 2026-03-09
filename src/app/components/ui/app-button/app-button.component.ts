@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AudioService } from '../../../services/audio.service';
 
 @Component({
   selector: 'app-button',
@@ -141,6 +142,8 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class AppButtonComponent {
+  private audioService = inject(AudioService);
+
   @Input() label: string = '';
   @Input() variant: 'primary' | 'secondary' | 'ghost' = 'primary';
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
@@ -154,6 +157,7 @@ export class AppButtonComponent {
   handleClick(event: Event): void {
     event.stopPropagation();
     if (!this.disabled) {
+      this.audioService.playUiClick();
       this.clicked.emit();
     }
   }

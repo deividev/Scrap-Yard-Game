@@ -6,6 +6,8 @@ export interface ElectronApi {
   clearSave: () => Promise<{ success: boolean; error?: string }>;
   getSavePath: () => Promise<{ success: boolean; path: string }>;
   quit?: () => void;
+  toggleFullscreen?: () => void;
+  setResolution?: (resolution: string) => void;
 }
 
 declare global {

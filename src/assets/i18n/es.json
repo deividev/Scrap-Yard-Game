@@ -13,6 +13,22 @@
     "confirm_new_game": "¿Estás seguro de que quieres comenzar una nueva partida? Se perderá tu progreso actual.",
     "back_to_menu": "Menú Principal"
   },
+  "options": {
+    "title": "OPCIONES",
+    "music_volume": "Volumen Música",
+    "sfx_volume": "Volumen Efectos",
+    "language": "Idioma",
+    "fullscreen": "Pantalla Completa",
+    "resolution": "Resolución",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "reset_defaults": "Restablecer",
+    "back": "Volver",
+    "reset_title": "Restablecer Configuración",
+    "confirm_reset": "¿Estás seguro de que quieres restablecer todas las opciones a los valores por defecto? Esto incluye volúmenes, idioma y configuración de pantalla.",
+    "reset_confirm": "Restablecer",
+    "reset_cancel": "Cancelar"
+  },
   "resources": {
     "scrap": "Chatarra",
     "metal": "Metal",

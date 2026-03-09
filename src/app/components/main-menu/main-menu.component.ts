@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { BackgroundGridComponent } from '../ui/background-grid/background-grid.component';
@@ -53,7 +53,6 @@ import { TranslationService } from '../../services/translation.service';
             [label]="translationService.t('main_menu.options')"
             variant="ghost"
             size="lg"
-            [disabled]="true"
             (clicked)="openOptions()"
           />
           <app-button
@@ -401,7 +400,8 @@ export class MainMenuComponent implements OnInit {
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
 
-  hasSavedGame = signal(false);
+  // Computed reactivo que lee directamente del SaveService
+  hasSavedGame = computed(() => this.saveService.isGameStarted());
   isElectron = typeof window !== 'undefined' && !!window.electronApi;
 
   // Partículas flotantes
@@ -419,14 +419,16 @@ export class MainMenuComponent implements OnInit {
   ];
 
   async ngOnInit() {
-    // Verificar si hay un juego guardado
-    const hasSave = await this.saveService.hasSaveData();
-    this.hasSavedGame.set(hasSave);
+    // Ya no es necesario establecer hasSavedGame aquí
+    // porque ahora es un computed() que reacciona automáticamente
   }
 
   continueGame(): void {
     // El juego ya está cargado en app.ts
-    // Solo necesitamos cambiar la vista
+    // Marcar que el juego ha sido iniciado y cambiar la vista
+    this.saveService.markGameStarted();
+    // Guardar inmediatamente para persistir el estado
+    this.saveService.save();
     this.gameStateService.startGame();
   }
 
@@ -441,14 +443,16 @@ export class MainMenuComponent implements OnInit {
         window.location.reload();
       });
     } else {
-      // No hay partida guardada, solo iniciar el juego
+      // No hay partida guardada, marcar juego iniciado e iniciar
+      this.saveService.markGameStarted();
+      // Guardar inmediatamente para persistir settings y estado inicial
+      this.saveService.save();
       this.gameStateService.startGame();
     }
   }
 
   openOptions(): void {
-    // Placeholder para el paso 11
-    console.log('Opciones - Se implementará en el paso 11');
+    this.gameStateService.openOptions();
   }
 
   exitGame(): void {

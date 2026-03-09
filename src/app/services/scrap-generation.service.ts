@@ -4,6 +4,7 @@ import { ResourceType } from '../models/resource.model';
 import { SCRAP_GENERATION_CONFIG } from '../config/game-balance.config';
 import { UpgradesService } from './upgrades.service';
 import { UpgradeId } from '../models/upgrade.model';
+import { AudioService } from './audio.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class ScrapGenerationService {
   private automaticGenerationRate = signal(0);
   private saveService?: any;
   private upgradesService = inject(UpgradesService);
+  private audioService = inject(AudioService);
 
   constructor(private resourcesService: ResourcesService) {}
 
@@ -24,6 +26,7 @@ export class ScrapGenerationService {
   generateManualScrap(): boolean {
     // Verificar si tiene suficiente dinero
     if (!this.resourcesService.hasEnough(ResourceType.MONEY, SCRAP_GENERATION_CONFIG.MANUAL_COST)) {
+      this.audioService.playError();
       return false;
     }
 
@@ -36,6 +39,7 @@ export class ScrapGenerationService {
     // Verificar si hay espacio suficiente para la chatarra
     const availableSpace = this.resourcesService.getAvailableSpace(ResourceType.SCRAP);
     if (availableSpace < totalGeneration) {
+      this.audioService.playError();
       return false; // No hay espacio suficiente, no gastar dinero
     }
 
@@ -44,6 +48,7 @@ export class ScrapGenerationService {
 
     // Generar chatarra
     this.resourcesService.add(ResourceType.SCRAP, totalGeneration);
+    this.audioService.playScrapGenerated();
 
     return true;
   }

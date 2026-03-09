@@ -5,6 +5,8 @@ import { UpgradesService } from './upgrades.service';
 import { ScrapGenerationService } from './scrap-generation.service';
 import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
+import { SettingsService } from './settings.service';
+import { TranslationService } from './translation.service';
 import { SaveState } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 
@@ -18,8 +20,11 @@ export class SaveService {
   private scrapGenerationService = inject(ScrapGenerationService);
   private upgradeProgressService = inject(UpgradeProgressService);
   private machineUnlockService = inject(MachineUnlockService);
+  private settingsService = inject(SettingsService);
+  private translationService = inject(TranslationService);
 
   private isDirty = signal(false);
+  private gameStarted = signal(false);
   private isElectron = typeof window !== 'undefined' && !!window.electronApi;
 
   constructor() {
@@ -52,6 +57,21 @@ export class SaveService {
     return this.isDirty();
   }
 
+  /**
+   * Marca que el usuario ha iniciado el juego
+   * (no solo guardado configuraciones)
+   */
+  markGameStarted(): void {
+    this.gameStarted.set(true);
+    this.markDirty();
+  }
+
+  /**
+   * Signal de solo lectura para que componentes puedan reaccionar
+   * al estado de gameStarted
+   */
+  isGameStarted = this.gameStarted.asReadonly();
+
   async save(): Promise<void> {
     console.log('[SaveService] save() called. isDirty:', this.isDirty());
 
@@ -68,6 +88,8 @@ export class SaveService {
       scrapGenerationRate: this.scrapGenerationService.getAutomaticGenerationRate(),
       upgradeProgress: this.upgradeProgressService.serialize(),
       lastSaveTimestamp: Date.now(),
+      settings: this.settingsService.getState(),
+      gameStarted: this.gameStarted(),
     };
 
     // Custom replacer to handle Infinity values
@@ -155,6 +177,16 @@ export class SaveService {
     this.machinesService.setState(saveState.machines);
     this.upgradesService.setState(saveState.upgrades);
 
+    // Restaurar flag de juego iniciado (siempre establecer el valor explícitamente)
+    this.gameStarted.set(saveState.gameStarted === true);
+
+    // Restaurar configuraciones si están disponibles
+    if (saveState.settings) {
+      this.settingsService.setState(saveState.settings);
+      // Sincronizar idioma con TranslationService
+      this.translationService.setLanguage(saveState.settings.language);
+    }
+
     // Restaurar rate de generación automática
     // Si está guardado, usar ese valor; si no, recalcular basado en el nivel
     const savedRate = saveState.scrapGenerationRate || 0;
@@ -221,11 +253,42 @@ export class SaveService {
   }
 
   async hasSaveData(): Promise<boolean> {
+    // Primero verificar si existe el archivo/clave
+    let exists = false;
     if (this.isElectron) {
       const result = await window.electronApi!.hasSave();
-      return result.exists;
+      exists = result.exists;
     } else {
-      return localStorage.getItem('scrapyard_save') !== null;
+      exists = localStorage.getItem('scrapyard_save') !== null;
+    }
+
+    // Si no existe, retornar false inmediatamente
+    if (!exists) {
+      return false;
+    }
+
+    // Si existe, verificar si el juego ha sido iniciado (no solo configuraciones guardadas)
+    // Intentar cargar el save y verificar el flag gameStarted
+    try {
+      let savedData: string | null = null;
+      if (this.isElectron) {
+        const result = await window.electronApi!.loadGame();
+        savedData = result.success ? (result.data ?? null) : null;
+      } else {
+        savedData = localStorage.getItem('scrapyard_save');
+      }
+
+      if (!savedData) {
+        return false;
+      }
+
+      const saveState: SaveState = JSON.parse(savedData);
+      // Solo consideramos que hay un juego guardado si gameStarted es true
+      return saveState.gameStarted === true;
+    } catch (error) {
+      console.error('[SaveService] Error checking gameStarted flag:', error);
+      // En caso de error, asumir que no hay juego guardado
+      return false;
     }
   }
 
@@ -237,6 +300,7 @@ export class SaveService {
       localStorage.removeItem('scrapyard_save_tmp');
     }
     this.isDirty.set(false);
+    this.gameStarted.set(false);
   }
 
   async getSavePath(): Promise<string | null> {

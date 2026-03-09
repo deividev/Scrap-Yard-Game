@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 /**
  * Tipos de vista de la aplicación
  */
-export type GameView = 'main-menu' | 'game';
+export type GameView = 'main-menu' | 'game' | 'options';
 
 /**
  * Servicio para gestionar el estado general del juego
@@ -43,6 +43,13 @@ export class GameStateService {
    */
   returnToMenu(): void {
     this.setView('main-menu');
+  }
+
+  /**
+   * Abre el menú de opciones
+   */
+  openOptions(): void {
+    this.setView('options');
   }
 
   /**

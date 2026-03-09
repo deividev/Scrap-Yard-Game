@@ -7,6 +7,7 @@ import { UpgradesService } from './upgrades.service';
 import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
 import { UpgradeId } from '../models/upgrade.model';
+import { AudioService } from './audio.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,7 @@ export class GameLoopService {
   private upgradesService = inject(UpgradesService);
   private upgradeProgressService = inject(UpgradeProgressService);
   private machineUnlockService = inject(MachineUnlockService);
+  private audioService = inject(AudioService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
@@ -93,6 +95,7 @@ export class GameLoopService {
 
   private processProduction(): void {
     const machines = this.machinesService.getAll();
+    let producedInThisTick = false;
 
     for (const machine of machines) {
       if (!machine.isActive) {
@@ -155,9 +158,14 @@ export class GameLoopService {
 
       // At cycle END: Produce outputs immediately, but reset progress with delay for visual feedback
       this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
+      producedInThisTick = true;
       setTimeout(() => {
         this.machinesService.consumeProgress(updatedMachine.id, 1);
       }, 500);
+    }
+
+    if (producedInThisTick) {
+      this.audioService.playProductionTick();
     }
   }
 
