@@ -19,6 +19,7 @@ Idle/incremental game built with Angular 19 standalone + Electron. The player ge
 ## Architecture & Key Services
 
 ### State Management — Angular Signals
+
 All mutable state lives in services as `signal()`. Components read signals reactively, never store copies.
 
 ```typescript
@@ -32,23 +33,24 @@ private resourcesService = inject(ResourcesService);
 
 ### Core Services
 
-| Service | Responsibility |
-|---|---|
-| `GameStateService` | Current view signal: `'main-menu' \| 'game' \| 'options'` |
-| `ResourcesService` | All resource amounts/capacities. Single source of truth for resources |
-| `MachinesService` | Machine state, activation, progress |
-| `UpgradesService` | Upgrade levels per `UpgradeId` |
-| `ScrapGenerationService` | Manual click + automatic scrap tick |
-| `GameLoopService` | `setInterval` tick (1000ms). Runs machines, auto-scrap, triggers save |
-| `SaveService` | Load/save game state. Dirty flag pattern. Supports Electron + localStorage |
-| `AudioService` | Music loop + SFX. Initialized in `App.ngOnInit()` |
-| `NotificationService` | In-game toast notifications |
-| `TranslationService` | i18n string lookup |
-| `MarketService` | Buy/sell resource prices |
-| `MachineUnlockService` | Unlock conditions per machine |
-| `UpgradeProgressService` | Progress tracking for upgrade purchases |
+| Service                  | Responsibility                                                             |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `GameStateService`       | Current view signal: `'main-menu' \| 'game' \| 'options'`                  |
+| `ResourcesService`       | All resource amounts/capacities. Single source of truth for resources      |
+| `MachinesService`        | Machine state, activation, progress                                        |
+| `UpgradesService`        | Upgrade levels per `UpgradeId`                                             |
+| `ScrapGenerationService` | Manual click + automatic scrap tick                                        |
+| `GameLoopService`        | `setInterval` tick (1000ms). Runs machines, auto-scrap, triggers save      |
+| `SaveService`            | Load/save game state. Dirty flag pattern. Supports Electron + localStorage |
+| `AudioService`           | Music loop + SFX. Initialized in `App.ngOnInit()`                          |
+| `NotificationService`    | In-game toast notifications                                                |
+| `TranslationService`     | i18n string lookup                                                         |
+| `MarketService`          | Buy/sell resource prices                                                   |
+| `MachineUnlockService`   | Unlock conditions per machine                                              |
+| `UpgradeProgressService` | Progress tracking for upgrade purchases                                    |
 
 ### SaveService — Dirty Flag Pattern
+
 Services call `saveService.markDirty()` when state changes. `App` auto-saves every 10s only if dirty. Services receive `SaveService` via `setSaveService()` to avoid circular DI:
 
 ```typescript
@@ -58,7 +60,9 @@ this.machinesService.setSaveService(this.saveService);
 ```
 
 ### Electron IPC
+
 Check `window.electronApi` before using Electron-specific APIs:
+
 ```typescript
 private isElectron = typeof window !== 'undefined' && !!window.electronApi;
 if (this.isElectron) {
@@ -71,14 +75,17 @@ if (this.isElectron) {
 ## Domain Models
 
 ### Resource (`resource.model.ts`)
+
 ```typescript
 interface Resource { id: string; name: string; amount: number; capacity: number; icon: string; }
 enum ResourceType { SCRAP | METAL | PLASTIC | COMPONENTS | MONEY | RECYCLED_PLASTIC | ELECTRIC_COMPONENTS }
 ```
+
 - `capacity: Infinity` = unlimited (e.g., MONEY)
 - Capacity is expanded via storage upgrades (`UPG_STORE_*`)
 
 ### Machine (`machine.model.ts`)
+
 ```typescript
 interface Machine { id: string; name: string; level: number; baseSpeed: number;
   baseConsumption: MachineConsumption[]; baseProduction: MachineProduction; isActive: boolean; progress: number; }
@@ -86,6 +93,7 @@ enum MachineType { CRUSHER | SEPARATOR | SMELTER | ASSEMBLER | PACKAGER | ELECTR
 ```
 
 ### Upgrade (`upgrade.model.ts`)
+
 ```typescript
 enum UpgradeId {
   UPG_STORE_001..006,  // Storage capacity upgrades
@@ -162,6 +170,7 @@ components/
 ## SDD Notes
 
 When starting a new feature with `/sdd-new`:
+
 - **Explorer** should check `GameLoopService` for tick integration needs
 - **Designer** should consider dirty flag + SaveService integration
 - **Tasks** should include i18n strings as a separate task
