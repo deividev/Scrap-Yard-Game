@@ -1,10 +1,12 @@
 import { Injectable, signal, inject, Injector } from '@angular/core';
 import type { SaveService } from './save.service';
 
+export type WindowMode = 'windowed' | 'maximized' | 'fullscreen';
+
 export interface GameSettings {
   musicVolume: number; // 0-100
   sfxVolume: number; // 0-100
-  fullscreen: boolean;
+  windowMode: WindowMode;
   resolution: string; // '1920x1080', '1280x720', etc.
   language: 'es' | 'en';
 }
@@ -12,7 +14,7 @@ export interface GameSettings {
 const DEFAULT_SETTINGS: GameSettings = {
   musicVolume: 50,
   sfxVolume: 70,
-  fullscreen: false,
+  windowMode: 'windowed',
   resolution: '1920x1080',
   language: 'es',
 };
@@ -28,7 +30,7 @@ export class SettingsService {
   // Señales públicas para cada configuración
   musicVolume = signal(DEFAULT_SETTINGS.musicVolume);
   sfxVolume = signal(DEFAULT_SETTINGS.sfxVolume);
-  fullscreen = signal(DEFAULT_SETTINGS.fullscreen);
+  windowMode = signal<WindowMode>(DEFAULT_SETTINGS.windowMode);
   resolution = signal(DEFAULT_SETTINGS.resolution);
   language = signal<'es' | 'en'>(DEFAULT_SETTINGS.language);
 
@@ -42,25 +44,27 @@ export class SettingsService {
     if (!this._saveService) {
       try {
         // Import dinámico para evitar dependencia circular en tiempo de compilación
-        import('./save.service').then(({ SaveService }) => {
-          this._saveService = this.injector.get(SaveService);
-          if (this._saveService) {
-            console.log('[SettingsService] SaveService loaded successfully');
-            
-            // IMPORTANTE: Solo guardar si el juego ya ha sido iniciado
-            if (this._saveService.isGameStarted()) {
-              console.log('[SettingsService] Game started, saving settings immediately');
-              this._saveService.markDirty();
-              this._saveService.save().catch((e) => {
-                console.error('[SettingsService] Immediate save failed:', e);
-              });
-            } else {
-              console.log('[SettingsService] Game not started yet, settings only in memory');
+        import('./save.service')
+          .then(({ SaveService }) => {
+            this._saveService = this.injector.get(SaveService);
+            if (this._saveService) {
+              console.log('[SettingsService] SaveService loaded successfully');
+
+              // IMPORTANTE: Solo guardar si el juego ya ha sido iniciado
+              if (this._saveService.isGameStarted()) {
+                console.log('[SettingsService] Game started, saving settings immediately');
+                this._saveService.markDirty();
+                this._saveService.save().catch((e) => {
+                  console.error('[SettingsService] Immediate save failed:', e);
+                });
+              } else {
+                console.log('[SettingsService] Game not started yet, settings only in memory');
+              }
             }
-          }
-        }).catch((e) => {
-          console.warn('[SettingsService] Could not load SaveService:', e);
-        });
+          })
+          .catch((e) => {
+            console.warn('[SettingsService] Could not load SaveService:', e);
+          });
       } catch (e) {
         console.warn('[SettingsService] SaveService injection failed:', e);
       }
@@ -85,9 +89,15 @@ export class SettingsService {
     const current = this.settings();
     this.musicVolume.set(current.musicVolume);
     this.sfxVolume.set(current.sfxVolume);
-    this.fullscreen.set(current.fullscreen);
+    this.windowMode.set(current.windowMode ?? 'windowed');
     this.resolution.set(current.resolution);
     this.language.set(current.language);
+  }
+
+  private applyWindowMode(mode: WindowMode, resolution: string): void {
+    if (typeof window !== 'undefined' && window.electronApi?.setWindowMode) {
+      window.electronApi.setWindowMode({ mode, resolution }).catch(() => {});
+    }
   }
 
   /**
@@ -111,31 +121,24 @@ export class SettingsService {
   }
 
   /**
-   * Alterna pantalla completa (solo Electron)
+   * Establece el modo de ventana: windowed | maximized | fullscreen (solo Electron)
    */
-  toggleFullscreen(): void {
-    const newValue = !this.fullscreen();
-    this.settings.update((s) => ({ ...s, fullscreen: newValue }));
-    this.fullscreen.set(newValue);
+  setWindowMode(mode: WindowMode): void {
+    this.settings.update((s) => ({ ...s, windowMode: mode }));
+    this.windowMode.set(mode);
     this.markDirtyAndSave();
-
-    // Aplicar cambio en Electron
-    if (typeof window !== 'undefined' && window.electronApi?.toggleFullscreen) {
-      window.electronApi.toggleFullscreen();
-    }
+    this.applyWindowMode(mode, this.resolution());
   }
 
   /**
-   * Establece la resolución (solo Electron)
+   * Establece la resolución (solo Electron, solo activo en modo ventana)
    */
   setResolution(resolution: string): void {
     this.settings.update((s) => ({ ...s, resolution }));
     this.resolution.set(resolution);
     this.markDirtyAndSave();
-
-    // Aplicar cambio en Electron
-    if (typeof window !== 'undefined' && window.electronApi?.setResolution) {
-      window.electronApi.setResolution(resolution);
+    if (this.windowMode() === 'windowed') {
+      this.applyWindowMode('windowed', resolution);
     }
   }
 
@@ -168,7 +171,13 @@ export class SettingsService {
    * Establece el estado completo de las configuraciones (usado por SaveService)
    */
   setState(newSettings: GameSettings): void {
-    this.settings.set({ ...newSettings });
+    // Migración: saves anteriores usan fullscreen: boolean en lugar de windowMode
+    const migrated: GameSettings = { ...newSettings };
+    if (!migrated.windowMode) {
+      migrated.windowMode = (newSettings as any).fullscreen ? 'fullscreen' : 'windowed';
+    }
+    this.settings.set(migrated);
     this.updateSignals();
+    this.applyWindowMode(this.windowMode(), this.resolution());
   }
 }

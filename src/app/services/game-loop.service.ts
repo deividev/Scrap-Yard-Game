@@ -7,7 +7,9 @@ import { UpgradesService } from './upgrades.service';
 import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
 import { UpgradeId } from '../models/upgrade.model';
+import { ResourceType } from '../models/resource.model';
 import { AudioService } from './audio.service';
+import { StatisticsService } from './statistics.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +22,7 @@ export class GameLoopService {
   private upgradeProgressService = inject(UpgradeProgressService);
   private machineUnlockService = inject(MachineUnlockService);
   private audioService = inject(AudioService);
+  private statisticsService = inject(StatisticsService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
@@ -49,7 +52,15 @@ export class GameLoopService {
     this.tickCount.update((count) => count + 1);
 
     // Procesar generación de chatarra
+    const scrapBefore = this.resourcesService.getAmount(ResourceType.SCRAP);
     this.scrapGenerationService.processAutomaticGeneration();
+    const scrapGenerated = Math.max(
+      0,
+      this.resourcesService.getAmount(ResourceType.SCRAP) - scrapBefore,
+    );
+
+    // Actualizar estadísticas
+    this.statisticsService.tick(scrapGenerated);
 
     // Procesar producción de máquinas
     this.processProduction();

@@ -5,6 +5,7 @@ import { UpgradesPanelComponent } from './components/upgrades-panel/upgrades-pan
 import { NotificationContainerComponent } from './components/ui/notification-container/notification-container.component';
 import { MainMenuComponent } from './components/main-menu/main-menu.component';
 import { OptionsMenuComponent } from './components/options-menu/options-menu.component';
+import { StatisticsPanelComponent } from './components/statistics-panel/statistics-panel.component';
 import { CommonModule } from '@angular/common';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
@@ -24,6 +25,7 @@ import { AudioService } from './services/audio.service';
     NotificationContainerComponent,
     MainMenuComponent,
     OptionsMenuComponent,
+    StatisticsPanelComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

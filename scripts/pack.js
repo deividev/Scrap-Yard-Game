@@ -30,13 +30,7 @@ try {
 
   // Fix Angular base href for file:// (Electron) so assets load relative to index.html
   try {
-    const indexHtmlPath = path.join(
-      process.cwd(),
-      'dist',
-      'last-admin-online',
-      'browser',
-      'index.html',
-    );
+    const indexHtmlPath = path.join(process.cwd(), 'dist', 'scrap-yard', 'browser', 'index.html');
     if (fs.existsSync(indexHtmlPath)) {
       let html = fs.readFileSync(indexHtmlPath, 'utf8');
       if (html.includes('<base href="/">')) {

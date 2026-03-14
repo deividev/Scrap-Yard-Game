@@ -59,7 +59,7 @@ Thumbs.db
 **/app.asar
 
 # Build output
-/dist/last-admin-online
+/dist/scrap-yard
 
 # pnpm
 /.pnpm

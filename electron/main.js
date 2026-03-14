@@ -32,13 +32,7 @@ function createWindow() {
   });
 
   // Load from compiled files (independent mode)
-  const indexPath = path.join(
-    app.getAppPath(),
-    'dist',
-    'last-admin-online',
-    'browser',
-    'index.html',
-  );
+  const indexPath = path.join(app.getAppPath(), 'dist', 'scrap-yard', 'browser', 'index.html');
 
   console.log('[Electron] Loading from:', indexPath);
 
@@ -138,4 +132,35 @@ ipcMain.handle('get-save-path', async () => {
   const userDataPath = app.getPath('userData');
   console.log('[Electron] userData path:', userDataPath);
   return { success: true, path: userDataPath };
+});
+
+ipcMain.handle('set-window-mode', (event, { mode, resolution }) => {
+  if (!mainWindow) return;
+  if (mode === 'fullscreen') {
+    mainWindow.setFullScreen(true);
+    console.log('[Electron] Window mode: fullscreen');
+  } else if (mode === 'maximized') {
+    mainWindow.setFullScreen(false);
+    mainWindow.maximize();
+    console.log('[Electron] Window mode: maximized');
+  } else {
+    // windowed
+    mainWindow.setFullScreen(false);
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    const [w, h] = resolution.split('x').map(Number);
+    if (w && h) {
+      mainWindow.setSize(w, h);
+      mainWindow.center();
+    }
+    console.log('[Electron] Window mode: windowed at', resolution);
+  }
+});
+
+ipcMain.handle('set-resolution', (event, resolution) => {
+  if (!mainWindow || mainWindow.isFullScreen()) return;
+  const [w, h] = resolution.split('x').map(Number);
+  if (!w || !h) return;
+  mainWindow.setSize(w, h);
+  mainWindow.center();
+  console.log('[Electron] Resolution set to:', resolution);
 });

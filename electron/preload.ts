@@ -15,4 +15,10 @@ contextBridge.exposeInMainWorld('electronApi', {
 
   getSavePath: (): Promise<{ success: boolean; path: string }> =>
     ipcRenderer.invoke('get-save-path'),
+
+  setWindowMode: (params: { mode: string; resolution: string }): Promise<void> =>
+    ipcRenderer.invoke('set-window-mode', params),
+
+  setResolution: (resolution: string): Promise<void> =>
+    ipcRenderer.invoke('set-resolution', resolution),
 });

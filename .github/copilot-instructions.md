@@ -151,7 +151,7 @@ components/
 3. **`effect()` for cross-service side effects** — audio, analytics, derived persistence
 4. **Models are pure data** — no methods, no logic in model files
 5. **Config files for all balance numbers** — never hardcode game values in services
-6. **i18n all user-facing strings** — use `TranslationService.translate(key)`
+6. **i18n all user-facing strings** — use `translationService.t(key)` (method is `t()`, NOT `translate()`)
 7. **Check `isElectron`** before any `window.electronApi` call
 8. **markDirty()** after any state change that should be persisted
 9. **`@if` / `@for`** Angular 17+ control flow — never `*ngIf` / `*ngFor`

@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "last-admin-online": {
+    "scrap-yard": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -59,10 +59,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "last-admin-online:build:production"
+              "buildTarget": "scrap-yard:build:production"
             },
             "development": {
-              "buildTarget": "last-admin-online:build:development"
+              "buildTarget": "scrap-yard:build:development"
             }
           },
           "defaultConfiguration": "development"

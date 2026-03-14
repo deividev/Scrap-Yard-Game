@@ -111,6 +111,12 @@ export interface Translations {
   debug: {
     tick: string;
   };
+  statistics: {
+    title: string;
+    total_scrap: string;
+    play_time: string;
+    active_machines: string;
+  };
   common: {
     level_short: string;
     cycle_time: string;

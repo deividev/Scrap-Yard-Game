@@ -8,7 +8,11 @@
 
   <div class="app-body">
     <div class="column-left">
-      <app-machine-list></app-machine-list>
+      <app-statistics-panel></app-statistics-panel>
+
+      <div class="machines-scroll-area">
+        <app-machine-list></app-machine-list>
+      </div>
     </div>
 
     <div class="column-right" [class.hidden]="isPanelMinimized">

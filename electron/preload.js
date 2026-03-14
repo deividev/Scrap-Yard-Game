@@ -12,4 +12,9 @@ contextBridge.exposeInMainWorld('electronApi', {
   clearSave: () => ipcRenderer.invoke('clear-save'),
 
   getSavePath: () => ipcRenderer.invoke('get-save-path'),
+
+  setWindowMode: ({ mode, resolution }) =>
+    ipcRenderer.invoke('set-window-mode', { mode, resolution }),
+
+  setResolution: (resolution) => ipcRenderer.invoke('set-resolution', resolution),
 });

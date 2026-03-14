@@ -18,7 +18,12 @@ function createWindow() {
   if (process.env.ELECTRON_START_URL) {
     mainWindow.loadURL(process.env.ELECTRON_START_URL);
   } else {
-    mainWindow.loadFile(join(__dirname, '../dist/last-admin-online/index.html'));
+    const indexPath = join(app.getAppPath(), 'dist', 'scrap-yard', 'browser', 'index.html');
+    mainWindow.loadFile(indexPath).catch((err: Error) => {
+      console.error('[Electron] Failed to load app:', err.message);
+      console.error('[Electron] Expected path:', indexPath);
+      console.error('[Electron] Make sure to run: pnpm run build:electron');
+    });
   }
 
   mainWindow.on('closed', () => {
@@ -96,6 +101,38 @@ ipcMain.handle('clear-save', async () => {
 ipcMain.handle('get-save-path', async () => {
   const userDataPath = app.getPath('userData');
   return { success: true, path: userDataPath };
+});
+
+ipcMain.handle(
+  'set-window-mode',
+  (
+    event: Electron.IpcMainInvokeEvent,
+    { mode, resolution }: { mode: string; resolution: string },
+  ) => {
+    if (!mainWindow) return;
+    if (mode === 'fullscreen') {
+      mainWindow.setFullScreen(true);
+    } else if (mode === 'maximized') {
+      mainWindow.setFullScreen(false);
+      mainWindow.maximize();
+    } else {
+      mainWindow.setFullScreen(false);
+      if (mainWindow.isMaximized()) mainWindow.unmaximize();
+      const [w, h] = resolution.split('x').map(Number);
+      if (w && h) {
+        mainWindow.setSize(w, h);
+        mainWindow.center();
+      }
+    }
+  },
+);
+
+ipcMain.handle('set-resolution', (event: Electron.IpcMainInvokeEvent, resolution: string) => {
+  if (!mainWindow || mainWindow.isFullScreen() || mainWindow.isMaximized()) return;
+  const [w, h] = resolution.split('x').map(Number);
+  if (!w || !h) return;
+  mainWindow.setSize(w, h);
+  mainWindow.center();
 });
 
 app.whenReady().then(createWindow);

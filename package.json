@@ -62,7 +62,7 @@
       "buildResources": "build_resources"
     },
     "files": [
-      "dist/last-admin-online/**",
+      "dist/scrap-yard/**",
       "electron/**",
       "package.json"
     ],

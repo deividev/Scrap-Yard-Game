@@ -7,6 +7,7 @@ import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
 import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
+import { StatisticsService } from './statistics.service';
 import { SaveState } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 
@@ -22,6 +23,7 @@ export class SaveService {
   private machineUnlockService = inject(MachineUnlockService);
   private settingsService = inject(SettingsService);
   private translationService = inject(TranslationService);
+  private statisticsService = inject(StatisticsService);
 
   private isDirty = signal(false);
   private gameStarted = signal(false);
@@ -90,6 +92,7 @@ export class SaveService {
       lastSaveTimestamp: Date.now(),
       settings: this.settingsService.getState(),
       gameStarted: this.gameStarted(),
+      statistics: this.statisticsService.getState(),
     };
 
     // Custom replacer to handle Infinity values
@@ -241,6 +244,11 @@ export class SaveService {
           completedUpgrades,
         );
       }
+    }
+
+    // Restaurar estadísticas si están disponibles
+    if (saveState.statistics) {
+      this.statisticsService.loadState(saveState.statistics);
     }
 
     // Apply all storage upgrade effects after loading

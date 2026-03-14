@@ -19,6 +19,10 @@
     "sfx_volume": "Sound Effects Volume",
     "language": "Language",
     "fullscreen": "Fullscreen",
+    "window_mode": "Display Mode",
+    "window_mode_windowed": "Windowed",
+    "window_mode_maximized": "Maximized",
+    "window_mode_fullscreen": "Fullscreen",
     "resolution": "Resolution",
     "enabled": "Enabled",
     "disabled": "Disabled",
@@ -138,6 +142,12 @@
   },
   "debug": {
     "tick": "Tick"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "total_scrap": "Total scrap",
+    "play_time": "Play time",
+    "active_machines": "Active machines"
   },
   "common": {
     "level_short": "Lv",

@@ -11,7 +11,13 @@ import { TranslationService } from '../../services/translation.service';
 @Component({
   selector: 'app-options-menu',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppButtonComponent, BackgroundGridComponent, ConfirmationModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AppButtonComponent,
+    BackgroundGridComponent,
+    ConfirmationModalComponent,
+  ],
   template: `
     <div class="options-menu">
       <app-background-grid [opacity]="0.35"></app-background-grid>
@@ -80,31 +86,33 @@ import { TranslationService } from '../../services/translation.service';
             </select>
           </div>
 
-          <!-- Pantalla Completa (solo Electron) -->
+          <!-- Modo de Pantalla (solo Electron) -->
           <div class="option-item" *ngIf="isElectron">
             <label class="option-label">
-              {{ translationService.t('options.fullscreen') }}
+              {{ translationService.t('options.window_mode') }}
             </label>
-            <div class="toggle-container">
-              <button
-                class="toggle-button"
-                [class.active]="settingsService.fullscreen()"
-                (click)="toggleFullscreen()"
-              >
-                <span class="toggle-slider"></span>
-              </button>
-              <span class="toggle-text">
-                {{
-                  settingsService.fullscreen()
-                    ? translationService.t('options.enabled')
-                    : translationService.t('options.disabled')
-                }}
-              </span>
-            </div>
+            <select
+              class="select-input"
+              [value]="settingsService.windowMode()"
+              (change)="onWindowModeChange($event)"
+            >
+              <option value="windowed">
+                {{ translationService.t('options.window_mode_windowed') }}
+              </option>
+              <option value="maximized">
+                {{ translationService.t('options.window_mode_maximized') }}
+              </option>
+              <option value="fullscreen">
+                {{ translationService.t('options.window_mode_fullscreen') }}
+              </option>
+            </select>
           </div>
 
-          <!-- Resolución (solo Electron) -->
-          <div class="option-item" *ngIf="isElectron">
+          <!-- Resolución (solo Electron, solo en modo ventana) -->
+          <div
+            class="option-item"
+            *ngIf="isElectron && settingsService.windowMode() === 'windowed'"
+          >
             <label class="option-label">
               {{ translationService.t('options.resolution') }}
             </label>
@@ -158,7 +166,7 @@ import { TranslationService } from '../../services/translation.service';
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: 
+        background:
           linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, transparent 20%),
           linear-gradient(-135deg, rgba(255, 193, 7, 0.03) 0%, transparent 20%),
           radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 50%, #0f0f0f 100%);
@@ -169,7 +177,8 @@ import { TranslationService } from '../../services/translation.service';
         z-index: 10000;
         padding-top: var(--space-6);
         position: relative;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       /* Halos de luz en esquinas */
@@ -180,7 +189,7 @@ import { TranslationService } from '../../services/translation.service';
         left: 0;
         width: 100%;
         height: 100%;
-        background: 
+        background:
           radial-gradient(circle at 15% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
           radial-gradient(circle at 85% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
           radial-gradient(circle at 15% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
@@ -209,7 +218,7 @@ import { TranslationService } from '../../services/translation.service';
         height: 3px;
         background: rgba(255, 193, 7, 0.6);
         border-radius: 50%;
-        box-shadow: 
+        box-shadow:
           0 0 4px rgba(255, 193, 7, 0.8),
           0 0 8px rgba(255, 193, 7, 0.4);
         animation: float-up linear infinite;
@@ -241,7 +250,7 @@ import { TranslationService } from '../../services/translation.service';
         max-width: 700px;
         position: relative;
         z-index: 3;
-        padding: 0 var(--space-4);
+        padding: 0 var(--space-4) var(--space-6);
       }
 
       .options-title {
@@ -249,8 +258,8 @@ import { TranslationService } from '../../services/translation.service';
         font-weight: 700;
         color: var(--color-accent-main);
         text-align: center;
-        margin: 0 0 48px 0;
-        text-shadow: 
+        margin: 0 0 32px 0;
+        text-shadow:
           0 2px 8px rgba(255, 193, 7, 0.4),
           0 4px 16px rgba(255, 193, 7, 0.2);
         letter-spacing: 2px;
@@ -263,7 +272,7 @@ import { TranslationService } from '../../services/translation.service';
         border-radius: 12px;
         padding: 40px;
         margin-bottom: 40px;
-        box-shadow: 
+        box-shadow:
           0 8px 32px rgba(0, 0, 0, 0.6),
           inset 0 1px 0 rgba(255, 255, 255, 0.05);
       }
@@ -315,7 +324,7 @@ import { TranslationService } from '../../services/translation.service';
         border-radius: 50%;
         background: var(--color-accent-main);
         cursor: pointer;
-        box-shadow: 
+        box-shadow:
           0 2px 8px rgba(255, 193, 7, 0.5),
           0 0 0 2px rgba(255, 193, 7, 0.2);
         transition: all 0.2s ease;
@@ -323,7 +332,7 @@ import { TranslationService } from '../../services/translation.service';
 
       .slider::-webkit-slider-thumb:hover {
         background: var(--color-accent-light);
-        box-shadow: 
+        box-shadow:
           0 3px 12px rgba(255, 193, 7, 0.7),
           0 0 0 3px rgba(255, 193, 7, 0.3);
         transform: scale(1.1);
@@ -336,7 +345,7 @@ import { TranslationService } from '../../services/translation.service';
         background: var(--color-accent-main);
         cursor: pointer;
         border: none;
-        box-shadow: 
+        box-shadow:
           0 2px 8px rgba(255, 193, 7, 0.5),
           0 0 0 2px rgba(255, 193, 7, 0.2);
         transition: all 0.2s ease;
@@ -344,7 +353,7 @@ import { TranslationService } from '../../services/translation.service';
 
       .slider::-moz-range-thumb:hover {
         background: var(--color-accent-light);
-        box-shadow: 
+        box-shadow:
           0 3px 12px rgba(255, 193, 7, 0.7),
           0 0 0 3px rgba(255, 193, 7, 0.3);
         transform: scale(1.1);
@@ -459,6 +468,46 @@ import { TranslationService } from '../../services/translation.service';
         }
       }
 
+      @media (max-height: 800px) {
+        .options-menu {
+          padding-top: var(--space-3);
+        }
+
+        .options-title {
+          font-size: 32px;
+          margin-bottom: 20px;
+        }
+
+        .options-panel {
+          padding: 24px;
+          margin-bottom: 24px;
+        }
+
+        .option-item {
+          margin-bottom: 20px;
+        }
+      }
+
+      @media (max-height: 650px) {
+        .options-menu {
+          padding-top: var(--space-2);
+        }
+
+        .options-title {
+          font-size: 24px;
+          margin-bottom: 12px;
+        }
+
+        .options-panel {
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
+        .option-item {
+          margin-bottom: 14px;
+        }
+      }
+
       @media (max-width: 480px) {
         .options-title {
           font-size: 28px;
@@ -510,8 +559,9 @@ export class OptionsMenuComponent {
     this.translationService.setLanguage(lang);
   }
 
-  toggleFullscreen(): void {
-    this.settingsService.toggleFullscreen();
+  onWindowModeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.settingsService.setWindowMode(target.value as 'windowed' | 'maximized' | 'fullscreen');
   }
 
   onResolutionChange(event: Event): void {
