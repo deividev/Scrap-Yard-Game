@@ -17,4 +17,6 @@ contextBridge.exposeInMainWorld('electronApi', {
     ipcRenderer.invoke('set-window-mode', { mode, resolution }),
 
   setResolution: (resolution) => ipcRenderer.invoke('set-resolution', resolution),
+
+  quit: () => ipcRenderer.invoke('quit-app'),
 });

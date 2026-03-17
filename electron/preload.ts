@@ -21,4 +21,6 @@ contextBridge.exposeInMainWorld('electronApi', {
 
   setResolution: (resolution: string): Promise<void> =>
     ipcRenderer.invoke('set-resolution', resolution),
+
+  quit: (): Promise<void> => ipcRenderer.invoke('quit-app'),
 });

@@ -85,9 +85,9 @@ import { TranslationService } from '../../services/translation.service';
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         z-index: 10000;
-        padding-top: var(--space-6);
+        padding: clamp(8px, 2vh, 32px) 16px;
         position: relative;
         overflow: hidden;
       }
@@ -288,7 +288,7 @@ import { TranslationService } from '../../services/translation.service';
 
       .game-logo {
         text-align: center;
-        margin-bottom: 48px;
+        margin-bottom: clamp(16px, 3vh, 48px);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -299,7 +299,9 @@ import { TranslationService } from '../../services/translation.service';
       .logo-image {
         max-width: 600px;
         width: 90%;
+        max-height: 30vh;
         height: auto;
+        object-fit: contain;
         filter: drop-shadow(0 6px 16px rgba(255, 193, 7, 0.4));
         animation: logo-glow 3s ease-in-out infinite;
       }
@@ -316,7 +318,7 @@ import { TranslationService } from '../../services/translation.service';
 
       .game-subtitle {
         margin: 0;
-        font-size: 16px;
+        font-size: clamp(12px, 1.5vh, 16px);
         color: var(--color-text-secondary);
         font-weight: 500;
         letter-spacing: 1px;
@@ -327,7 +329,7 @@ import { TranslationService } from '../../services/translation.service';
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 16px;
+        gap: clamp(8px, 1.5vh, 16px);
       }
 
       .version-info {

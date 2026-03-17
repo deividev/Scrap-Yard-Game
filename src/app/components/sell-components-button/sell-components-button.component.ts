@@ -5,6 +5,7 @@ import { MarketService } from '../../services/market.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 import { TranslationService } from '../../services/translation.service';
+import { AudioService } from '../../services/audio.service';
 
 @Component({
   selector: 'app-sell-components-button',
@@ -44,6 +45,7 @@ export class SellComponentsButtonComponent {
     private resourcesService: ResourcesService,
     private marketService: MarketService,
     public translationService: TranslationService,
+    private audioService: AudioService,
   ) {}
 
   sellComponents(): void {
@@ -52,5 +54,6 @@ export class SellComponentsButtonComponent {
     }
 
     this.marketService.sellComponents(this.sellAmount);
+    this.audioService.playResourceSold();
   }
 }

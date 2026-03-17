@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, isDevMode } from '@angular/core';
 import esTranslations from '../../assets/i18n/es.json';
 import enTranslations from '../../assets/i18n/en.json';
 
@@ -128,6 +128,7 @@ export interface Translations {
 })
 export class TranslationService {
   private currentLanguage = signal<Language>('es');
+  private readonly isDev = isDevMode();
   private translationsMap: Record<Language, Translations> = {
     es: esTranslations as Translations,
     en: enTranslations as Translations,
@@ -135,14 +136,22 @@ export class TranslationService {
 
   private translations = computed(() => this.translationsMap[this.currentLanguage()]);
 
+  private debugLog(message: string, ...optionalParams: unknown[]): void {
+    if (!this.isDev) {
+      return;
+    }
+
+    console.log(message, ...optionalParams);
+  }
+
   constructor() {
-    console.log('TranslationService initialized with language:', this.currentLanguage());
-    console.log('Translations loaded:', this.translations());
+    this.debugLog('TranslationService initialized with language:', this.currentLanguage());
+    this.debugLog('Translations loaded:', this.translations());
   }
 
   setLanguage(lang: Language): void {
     this.currentLanguage.set(lang);
-    console.log('Language changed to:', lang);
+    this.debugLog('Language changed to:', lang);
   }
 
   getLanguage(): Language {

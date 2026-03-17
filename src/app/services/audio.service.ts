@@ -9,6 +9,7 @@ type AudioChannel = 'music' | 'sfx';
 export class AudioService {
   private settingsService = inject(SettingsService);
 
+  private readonly gameplayMusicSrc = 'assets/audio/ScrapYard_Game_Loop.mp3';
   private readonly ambienceLoopSrc = 'assets/audio/scrapyard_ambience_loop.wav';
   private readonly machineHumLoopSrc = 'assets/audio/machine_hum_loop.wav';
   private readonly mechanicalLayerSrc = [
@@ -22,6 +23,7 @@ export class AudioService {
   private musicGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
 
+  private gameplayMusicTrack: HTMLAudioElement | null = null;
   private ambienceTrack: HTMLAudioElement | null = null;
   private machineHumTrack: HTMLAudioElement | null = null;
   private mechanicalLayerIntervalId: number | null = null;
@@ -54,13 +56,13 @@ export class AudioService {
 
     this.shouldPlayGameAmbience = true;
     this.ensureGameAmbienceTracks();
-    this.startLoopTrack(this.ambienceTrack);
-    this.startLoopTrack(this.machineHumTrack);
-    this.startMechanicalLayerScheduler();
+    // Async path: ensures AudioContext is resumed before playing
+    void this.resumeAudioContextAndRetryGameTracks();
   }
 
   stopGameMusicLoop(): void {
     this.shouldPlayGameAmbience = false;
+    this.stopLoopTrack(this.gameplayMusicTrack);
     this.stopLoopTrack(this.ambienceTrack);
     this.stopLoopTrack(this.machineHumTrack);
     this.stopMechanicalLayerScheduler();
@@ -78,6 +80,22 @@ export class AudioService {
   playUpgradeCompleted(): void {
     this.playTone(520, 0.07, 0.4, 'triangle', 'sfx');
     this.playTone(780, 0.09, 0.35, 'triangle', 'sfx', 0.08);
+  }
+
+  playMachineComplete(): void {
+    if (!this.canPlayWithCooldown('machine-complete', 800)) {
+      return;
+    }
+    this.playTone(660, 0.05, 0.09, 'triangle', 'sfx');
+    this.playTone(880, 0.07, 0.07, 'triangle', 'sfx', 0.06);
+  }
+
+  playResourceSold(): void {
+    if (!this.canPlayWithCooldown('resource-sold', 200)) {
+      return;
+    }
+    this.playTone(880, 0.04, 0.07, 'triangle', 'sfx');
+    this.playTone(1047, 0.05, 0.06, 'triangle', 'sfx', 0.04);
   }
 
   playScrapGenerated(): void {
@@ -133,6 +151,12 @@ export class AudioService {
       return;
     }
 
+    if (!this.gameplayMusicTrack) {
+      this.gameplayMusicTrack = new Audio(this.gameplayMusicSrc);
+      this.gameplayMusicTrack.loop = true;
+      this.gameplayMusicTrack.preload = 'auto';
+    }
+
     if (!this.ambienceTrack) {
       this.ambienceTrack = new Audio(this.ambienceLoopSrc);
       this.ambienceTrack.loop = true;
@@ -178,6 +202,7 @@ export class AudioService {
       return;
     }
 
+    this.startLoopTrack(this.gameplayMusicTrack);
     this.startLoopTrack(this.ambienceTrack);
     this.startLoopTrack(this.machineHumTrack);
     this.startMechanicalLayerScheduler();
@@ -252,8 +277,12 @@ export class AudioService {
       this.sfxGain.gain.setValueAtTime(normalizedSfx, now);
     }
 
+    if (this.gameplayMusicTrack) {
+      this.gameplayMusicTrack.volume = normalizedMusic * 0.7;
+    }
+
     if (this.ambienceTrack) {
-      this.ambienceTrack.volume = normalizedMusic * 0.55;
+      this.ambienceTrack.volume = normalizedMusic * 0.35;
     }
 
     if (this.machineHumTrack) {

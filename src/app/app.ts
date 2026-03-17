@@ -14,6 +14,7 @@ import { UpgradesService } from './services/upgrades.service';
 import { ScrapGenerationService } from './services/scrap-generation.service';
 import { GameStateService } from './services/game-state.service';
 import { AudioService } from './services/audio.service';
+import { GameLoopService } from './services/game-loop.service';
 
 @Component({
   selector: 'app-root',
@@ -39,6 +40,7 @@ export class App implements OnInit, OnDestroy {
   private upgradesService = inject(UpgradesService);
   private scrapGenerationService = inject(ScrapGenerationService);
   private audioService = inject(AudioService);
+  private gameLoopService = inject(GameLoopService);
   gameStateService = inject(GameStateService);
 
   private autoSaveInterval?: number;
@@ -47,10 +49,12 @@ export class App implements OnInit, OnDestroy {
     const currentView = this.gameStateService.view();
     if (currentView === 'game') {
       this.audioService.playGameMusicLoop();
+      this.gameLoopService.start();
       return;
     }
 
     this.audioService.stopGameMusicLoop();
+    this.gameLoopService.stop();
   });
 
   private beforeUnloadHandler = (event: BeforeUnloadEvent) => {

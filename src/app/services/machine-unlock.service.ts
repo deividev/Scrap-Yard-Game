@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, isDevMode } from '@angular/core';
 import { MachinesService } from './machines.service';
 import { UpgradesService } from './upgrades.service';
 import { MachineType } from '../models/machine.model';
@@ -30,6 +30,15 @@ export class MachineUnlockService {
   private upgradesService = inject(UpgradesService);
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
+  private readonly isDev = isDevMode();
+
+  private debugLog(message: string): void {
+    if (!this.isDev) {
+      return;
+    }
+
+    console.log(message);
+  }
 
   /**
    * Gets the real level of a machine (from upgrades, not machine.level)
@@ -225,7 +234,7 @@ export class MachineUnlockService {
     const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     if (crusherLevel >= 2) {
       this.machinesService.upgradeLevel(MachineType.SMELTER);
-      console.log('[MachineUnlock] Smelter unlocked! (Crusher level 2 reached)');
+      this.debugLog('[MachineUnlock] Smelter unlocked! (Crusher level 2 reached)');
       const machineName = this.translationService.t('machines.smelter');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -247,7 +256,7 @@ export class MachineUnlockService {
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
     if (smelterLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.PACKAGER);
-      console.log('[MachineUnlock] Packager unlocked! (Smelter level 3 reached)');
+      this.debugLog('[MachineUnlock] Packager unlocked! (Smelter level 3 reached)');
       const machineName = this.translationService.t('machines.packager');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -269,7 +278,7 @@ export class MachineUnlockService {
     const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
     if (packagerLevel >= 2) {
       this.machinesService.upgradeLevel(MachineType.SEPARATOR);
-      console.log('[MachineUnlock] Separator unlocked! (Packager level 2 reached)');
+      this.debugLog('[MachineUnlock] Separator unlocked! (Packager level 2 reached)');
       const machineName = this.translationService.t('machines.separator');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -293,7 +302,7 @@ export class MachineUnlockService {
 
     if (separatorLevel >= 2 && smelterLevel >= 4) {
       this.machinesService.upgradeLevel(MachineType.ASSEMBLER);
-      console.log(
+      this.debugLog(
         '[MachineUnlock] Assembler unlocked! (Separator level 2 + Smelter level 4 reached)',
       );
       const machineName = this.translationService.t('machines.assembler');
@@ -317,7 +326,7 @@ export class MachineUnlockService {
     const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
     if (separatorLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.RECYCLER);
-      console.log('[MachineUnlock] Recycler unlocked! (Separator level 3 reached)');
+      this.debugLog('[MachineUnlock] Recycler unlocked! (Separator level 3 reached)');
       const machineName = this.translationService.t('machines.recycler');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -342,7 +351,7 @@ export class MachineUnlockService {
 
     if (recyclerLevel >= 2 && smelterLevel >= 5 && assemblerLevel >= 1) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_ASSEMBLER);
-      console.log(
+      this.debugLog(
         '[MachineUnlock] Electric Assembler unlocked! (Recycler level 2 + Smelter level 5 + Assembler unlocked)',
       );
       const machineName = this.translationService.t('machines.electric_assembler');
@@ -368,7 +377,7 @@ export class MachineUnlockService {
 
     if (electricAssemblerLevel >= 2 && packagerLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_PACKAGER);
-      console.log(
+      this.debugLog(
         '[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 2 + Packager level 3)',
       );
       const machineName = this.translationService.t('machines.electric_packager');

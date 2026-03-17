@@ -22,6 +22,10 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       class="machine-card"
       [class.selected]="isSelected()"
       [class.locked]="isLocked()"
+      [class.producing]="isProducing()"
+      [class.input-blocked]="isInputBlocked()"
+      [class.output-blocked]="isOutputBlocked()"
+      [class.unlock-ready]="isUnlockReady()"
       (click)="selectMachine()"
     >
       <div class="machine-header">
@@ -101,13 +105,11 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       <div class="machine-status">
         <span
           class="status-label"
-          [ngClass]="{
-            'status-produciendo': statusText() === translationService.t('status.produciendo'),
-            'status-parada': statusText() === translationService.t('status.parada'),
-            'status-bloqueada': statusText() === translationService.t('status.bloqueada'),
-            'status-input': statusText() === translationService.t('status.falta_input'),
-            'status-output': statusText() === translationService.t('status.output_lleno'),
-          }"
+          [class.status-produciendo]="isProducing()"
+          [class.status-parada]="isStopped()"
+          [class.status-bloqueada]="isLocked()"
+          [class.status-input]="isInputBlocked()"
+          [class.status-output]="isOutputBlocked()"
         >
           {{ statusText() }}
         </span>
@@ -161,8 +163,29 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 
       .machine-card.selected {
         border-color: var(--color-accent-main);
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-        background: rgba(139, 92, 246, 0.03);
+        box-shadow: 0 0 0 3px rgba(220, 174, 92, 0.22);
+        background: rgba(220, 174, 92, 0.06);
+      }
+
+      .machine-card.producing {
+        border-color: rgba(34, 197, 94, 0.45);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.2);
+      }
+
+      .machine-card.producing .progress-bar-fill {
+        background: linear-gradient(90deg, #3ea85a 0%, #63be7f 45%, #7ad695 100%);
+        background-size: 180% 100%;
+        animation: machine-flow 1.1s linear infinite;
+      }
+
+      .machine-card.input-blocked,
+      .machine-card.output-blocked {
+        border-style: dashed;
+      }
+
+      .machine-card.unlock-ready {
+        border-color: rgba(245, 158, 11, 0.45);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.2);
       }
 
       .machine-header {
@@ -300,6 +323,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         color: #22c55e !important;
         background: rgba(34, 197, 94, 0.15) !important;
         border-color: rgba(34, 197, 94, 0.3) !important;
+        animation: status-pulse 1.2s ease-in-out infinite;
       }
 
       .status-parada {
@@ -324,6 +348,25 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         color: #ef4444 !important;
         background: rgba(239, 68, 68, 0.15) !important;
         border-color: rgba(239, 68, 68, 0.3) !important;
+      }
+
+      @keyframes machine-flow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      @keyframes status-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.02);
+        }
       }
     `,
   ],
@@ -435,6 +478,69 @@ export class MachineCardComponent {
     return speed > 0 ? 1 / speed : 0;
   });
 
+  private machineAvailability = computed(() => {
+    const machine = this.currentMachine();
+    const consumptionMultiplier = this.upgradesService.calculateConsumptionMultiplier(machine.id);
+    const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
+
+    const hasInputs = machine.baseConsumption.every((c) =>
+      this.resourcesService.hasEnough(c.resourceId, c.amount * consumptionMultiplier),
+    );
+
+    const outputAmount = machine.baseProduction.amount * productionMultiplier;
+    const outputResourceId = machine.baseProduction.resourceId;
+    const availableSpace = this.resourcesService.getAvailableSpace(outputResourceId);
+    const hasSpace = !isFinite(availableSpace) || availableSpace >= outputAmount;
+
+    return {
+      hasInputs,
+      hasSpace,
+    };
+  });
+
+  isProducing = computed(() => {
+    const machine = this.currentMachine();
+    if (machine.level === 0 || !machine.isActive) {
+      return false;
+    }
+
+    if (machine.progress > 0) {
+      return true;
+    }
+
+    const availability = this.machineAvailability();
+    return availability.hasInputs && availability.hasSpace;
+  });
+
+  isStopped = computed(() => {
+    const machine = this.currentMachine();
+    return machine.level > 0 && !machine.isActive;
+  });
+
+  isInputBlocked = computed(() => {
+    const machine = this.currentMachine();
+    if (machine.level === 0 || !machine.isActive || machine.progress > 0) {
+      return false;
+    }
+
+    return !this.machineAvailability().hasInputs;
+  });
+
+  isOutputBlocked = computed(() => {
+    const machine = this.currentMachine();
+    if (machine.level === 0 || !machine.isActive || machine.progress > 0) {
+      return false;
+    }
+
+    const availability = this.machineAvailability();
+    return availability.hasInputs && !availability.hasSpace;
+  });
+
+  isUnlockReady = computed(() => {
+    const info = this.unlockInfo();
+    return this.isLocked() && info.requirements.some((req) => req.isMet);
+  });
+
   remainingCycleTime = computed(() => {
     const machine = this.currentMachine();
     const cycleTime = this.effectiveCycleTime();
@@ -494,23 +600,10 @@ export class MachineCardComponent {
     }
 
     // Si está en progress = 0, verificar si puede empezar un nuevo ciclo
-    const consumptionMultiplier = this.upgradesService.calculateConsumptionMultiplier(machine.id);
-    const productionMultiplier = this.upgradesService.calculateProductionMultiplier(machine.id);
+    const availability = this.machineAvailability();
 
-    const hasInputs = machine.baseConsumption.every((c) =>
-      this.resourcesService.hasEnough(c.resourceId, c.amount * consumptionMultiplier),
-    );
-
-    const outputAmount = machine.baseProduction.amount * productionMultiplier;
-    const outputResourceId = machine.baseProduction.resourceId;
-    const availableSpace = this.resourcesService.getAvailableSpace(outputResourceId);
-
-    // Para recursos con capacidad infinita (Infinity), siempre hay espacio
-    // Para recursos finitos, verificar que haya suficiente espacio
-    const hasSpace = !isFinite(availableSpace) || availableSpace >= outputAmount;
-
-    if (!hasInputs) return this.translationService.t('status.falta_input');
-    if (!hasSpace) return this.translationService.t('status.output_lleno');
+    if (!availability.hasInputs) return this.translationService.t('status.falta_input');
+    if (!availability.hasSpace) return this.translationService.t('status.output_lleno');
 
     // Máquina lista esperando para producir
     return this.translationService.t('status.produciendo');

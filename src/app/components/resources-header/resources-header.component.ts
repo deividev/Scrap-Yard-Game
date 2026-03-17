@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
@@ -33,7 +33,13 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   ],
   template: `
     <header class="resources-header">
-      <div class="resource-item money">
+      <!-- Fila 1: dinero + todos los recursos -->
+      <div class="resources-row">
+        <div
+          class="resource-item money"
+        [class.feedback-up]="isFeedback(moneyResource().id, 'up')"
+        [class.feedback-down]="isFeedback(moneyResource().id, 'down')"
+      >
         <app-tooltip
           [text]="translationService.t('resources.money')"
           [inline]="true"
@@ -47,7 +53,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       <div class="resources-container">
         <!-- Chatarra -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
+            [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(scrapResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.scrap')"
               [inline]="true"
@@ -67,7 +78,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
         <!-- Metal -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(metalResource().id, 'up')"
+            [class.feedback-down]="isFeedback(metalResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(metalResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.metal')"
               [inline]="true"
@@ -87,7 +103,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
         <!-- Componentes -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
+            [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(componentsResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.components')"
               [inline]="true"
@@ -111,7 +132,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
         <!-- Plástico -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
+            [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(plasticResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.plastic')"
               [inline]="true"
@@ -130,7 +156,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
         <!-- Plástico Reciclado -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(recycledPlasticResource().id, 'up')"
+            [class.feedback-down]="isFeedback(recycledPlasticResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(recycledPlasticResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.recycled_plastic')"
               [inline]="true"
@@ -155,7 +186,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
         <!-- Componentes Eléctricos -->
         <div class="resource-column">
-          <div class="resource-item">
+          <div
+            class="resource-item"
+            [class.feedback-up]="isFeedback(electricComponentsResource().id, 'up')"
+            [class.feedback-down]="isFeedback(electricComponentsResource().id, 'down')"
+            [class.capacity-pop]="isCapacityPop(electricComponentsResource().id)"
+          >
             <app-tooltip
               [text]="translationService.t('resources.electric_components')"
               [inline]="true"
@@ -180,17 +216,21 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           </div>
         </div>
       </div>
+      </div>
 
-      <app-progression-hint></app-progression-hint>
+      <!-- Fila 2: hint de progresión + botones de control -->
+      <div class="controls-row">
+        <app-progression-hint></app-progression-hint>
 
-      <div class="header-actions">
-        <app-button
-          [label]="translationService.t('main_menu.back_to_menu')"
-          variant="ghost"
-          size="sm"
-          (clicked)="returnToMenu()"
-        />
-        <app-debug-controls></app-debug-controls>
+        <div class="header-actions">
+          <app-button
+            [label]="translationService.t('main_menu.back_to_menu')"
+            variant="ghost"
+            size="sm"
+            (clicked)="returnToMenu()"
+          />
+          <app-debug-controls></app-debug-controls>
+        </div>
       </div>
     </header>
   `,
@@ -199,10 +239,22 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       .resources-header {
         background: var(--color-bg-panel);
         border-bottom: 2px solid var(--color-border);
-        padding: var(--space-4);
+        padding: var(--space-2) var(--space-4);
         display: flex;
-        gap: var(--space-4);
-        align-items: start;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .resources-row {
+        display: flex;
+        gap: var(--space-3);
+        align-items: center;
+      }
+
+      .controls-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
       }
 
       .resource-item {
@@ -210,6 +262,13 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         align-items: center;
         gap: var(--space-2);
         min-height: 28px;
+        border: 1px solid transparent;
+        border-radius: var(--border-radius-small);
+        padding: 2px 6px;
+        transition:
+          background-color 0.2s ease,
+          border-color 0.2s ease,
+          transform 0.2s ease;
       }
 
       .resource-item.money {
@@ -218,11 +277,13 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         color: var(--color-accent-main);
         padding-right: var(--space-4);
         border-right: 1px solid var(--color-border);
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .resources-container {
         display: flex;
-        gap: var(--space-2);
+        gap: var(--space-3);
         flex: 1;
       }
 
@@ -239,23 +300,111 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         display: flex;
         gap: var(--space-2);
         align-items: center;
+        flex-shrink: 0;
       }
 
       .resource-icon {
         width: 56px;
         height: 56px;
         object-fit: contain;
+        transition: transform 0.2s ease;
+      }
+
+      @media (max-width: 1400px) {
+        .resource-icon { width: 40px; height: 40px; }
+        .resource-item.money { font-size: 16px; }
+        .resources-row { gap: var(--space-2); }
+        .resources-container { gap: var(--space-2); }
+      }
+
+      @media (max-width: 1100px) {
+        .resource-icon { width: 28px; height: 28px; }
+        .resource-item.money { font-size: 14px; }
+        .resources-row { gap: var(--space-1); }
+        .resources-container { gap: var(--space-1); }
       }
 
       .resource-amount {
         font-weight: 600;
         color: var(--color-text-primary);
-        transition: color 0.2s ease;
+        transition:
+          color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .resource-item.feedback-up {
+        animation: resource-gain 0.46s ease-out;
+        background: rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.3);
+      }
+
+      .resource-item.feedback-up .resource-amount {
+        color: #22c55e;
+        transform: translateY(-1px);
+      }
+
+      .resource-item.feedback-up .resource-icon {
+        transform: scale(1.05);
+      }
+
+      .resource-item.feedback-down {
+        animation: resource-loss 0.46s ease-out;
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+
+      .resource-item.feedback-down .resource-amount {
+        color: #f87171;
+        transform: translateY(1px);
+      }
+
+      .resource-item.feedback-down .resource-icon {
+        transform: scale(0.97);
+      }
+
+      .resource-item.capacity-pop {
+        animation: capacity-bump 0.72s ease-in-out;
       }
 
       .resource-amount.full {
         color: #f59e0b;
         animation: pulse-warning 1.5s ease-in-out infinite;
+      }
+
+      @keyframes resource-gain {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        40% {
+          transform: translateY(-2px) scale(1.01);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes resource-loss {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        40% {
+          transform: translateY(2px) scale(0.99);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes capacity-bump {
+        0% {
+          box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+        }
+        50% {
+          box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35);
+        }
+        100% {
+          box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+        }
       }
 
       @keyframes pulse-warning {
@@ -270,20 +419,102 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resource-capacity {
         color: var(--color-text-secondary);
-        font-size: 13px;
+        font-size: clamp(10px, 0.9vw, 13px);
+        white-space: nowrap;
       }
     `,
   ],
 })
-export class ResourcesHeaderComponent {
+export class ResourcesHeaderComponent implements OnDestroy {
+  readonly ResourceType = ResourceType;
+
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
+  private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
+  private capacityPopState = signal<Record<string, boolean>>({});
+  private previousAmounts = new Map<string, number>();
+  private feedbackTimers = new Map<string, number>();
+  private capacityTimers = new Map<string, number>();
 
   constructor(
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
     public translationService: TranslationService,
-  ) {}
+  ) {
+    effect(() => {
+      const resources = this.resourcesService.getAll();
+
+      for (const resource of resources) {
+        const previous = this.previousAmounts.get(resource.id);
+
+        if (previous !== undefined) {
+          if (resource.amount > previous) {
+            this.triggerFeedback(resource.id, 'up');
+          } else if (resource.amount < previous) {
+            this.triggerFeedback(resource.id, 'down');
+          }
+
+          const hasFiniteCapacity = Number.isFinite(resource.capacity) && resource.capacity > 0;
+          if (
+            hasFiniteCapacity &&
+            previous < resource.capacity &&
+            resource.amount >= resource.capacity
+          ) {
+            this.triggerCapacityPop(resource.id);
+          }
+        }
+
+        this.previousAmounts.set(resource.id, resource.amount);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.feedbackTimers.forEach((timerId) => clearTimeout(timerId));
+    this.capacityTimers.forEach((timerId) => clearTimeout(timerId));
+    this.feedbackTimers.clear();
+    this.capacityTimers.clear();
+  }
+
+  isFeedback(resourceId: string, state: 'up' | 'down'): boolean {
+    return this.feedbackState()[resourceId] === state;
+  }
+
+  isCapacityPop(resourceId: string): boolean {
+    return this.capacityPopState()[resourceId] === true;
+  }
+
+  private triggerFeedback(resourceId: string, state: 'up' | 'down'): void {
+    const previousTimer = this.feedbackTimers.get(resourceId);
+    if (previousTimer) {
+      clearTimeout(previousTimer);
+    }
+
+    this.feedbackState.update((current) => ({ ...current, [resourceId]: state }));
+
+    const timerId = window.setTimeout(() => {
+      this.feedbackState.update((current) => ({ ...current, [resourceId]: 'idle' }));
+      this.feedbackTimers.delete(resourceId);
+    }, 460);
+
+    this.feedbackTimers.set(resourceId, timerId);
+  }
+
+  private triggerCapacityPop(resourceId: string): void {
+    const previousTimer = this.capacityTimers.get(resourceId);
+    if (previousTimer) {
+      clearTimeout(previousTimer);
+    }
+
+    this.capacityPopState.update((current) => ({ ...current, [resourceId]: true }));
+
+    const timerId = window.setTimeout(() => {
+      this.capacityPopState.update((current) => ({ ...current, [resourceId]: false }));
+      this.capacityTimers.delete(resourceId);
+    }, 720);
+
+    this.capacityTimers.set(resourceId, timerId);
+  }
 
   getResourceIcon(resourceId: string): string {
     const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);

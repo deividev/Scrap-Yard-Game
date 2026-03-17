@@ -14,6 +14,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
+    title: 'Scrap Yard Idle',
     frame: true,
     webPreferences: {
       preload: preloadPath,
@@ -163,4 +164,8 @@ ipcMain.handle('set-resolution', (event, resolution) => {
   mainWindow.setSize(w, h);
   mainWindow.center();
   console.log('[Electron] Resolution set to:', resolution);
+});
+
+ipcMain.handle('quit-app', () => {
+  app.quit();
 });

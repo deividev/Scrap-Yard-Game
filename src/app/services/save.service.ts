@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, isDevMode, signal } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { MachinesService } from './machines.service';
 import { UpgradesService } from './upgrades.service';
@@ -28,11 +28,12 @@ export class SaveService {
   private isDirty = signal(false);
   private gameStarted = signal(false);
   private isElectron = typeof window !== 'undefined' && !!window.electronApi;
+  private readonly isDev = isDevMode();
 
   constructor() {
-    console.log('[SaveService] Initialized');
-    console.log('[SaveService] Is Electron:', this.isElectron);
-    console.log('[SaveService] window.electronApi:', window.electronApi);
+    this.debugLog('[SaveService] Initialized');
+    this.debugLog('[SaveService] Is Electron:', this.isElectron);
+    this.debugLog('[SaveService] window.electronApi:', window.electronApi);
 
     if (this.isElectron) {
       this.logSavePath();
@@ -43,15 +44,23 @@ export class SaveService {
     try {
       const result = await window.electronApi!.getSavePath();
       if (result.success) {
-        console.log('[SaveService] Save location:', result.path + '\\save.json');
+        this.debugLog('[SaveService] Save location:', result.path + '\\save.json');
       }
     } catch (error) {
       console.error('[SaveService] Could not get save path:', error);
     }
   }
 
+  private debugLog(message: string, ...optionalParams: unknown[]): void {
+    if (!this.isDev) {
+      return;
+    }
+
+    console.log(message, ...optionalParams);
+  }
+
   markDirty(): void {
-    console.log('[SaveService] State marked as dirty');
+    this.debugLog('[SaveService] State marked as dirty');
     this.isDirty.set(true);
   }
 
@@ -75,13 +84,13 @@ export class SaveService {
   isGameStarted = this.gameStarted.asReadonly();
 
   async save(): Promise<void> {
-    console.log('[SaveService] save() called. isDirty:', this.isDirty());
+    this.debugLog('[SaveService] save() called. isDirty:', this.isDirty());
 
     if (!this.isDirty()) {
       return;
     }
 
-    console.log('[SaveService] Preparing to save...');
+    this.debugLog('[SaveService] Preparing to save...');
 
     const saveState: SaveState = {
       resources: this.resourcesService.getState(),
@@ -105,20 +114,20 @@ export class SaveService {
 
     try {
       if (this.isElectron) {
-        console.log('[SaveService] Saving via Electron API...');
+        this.debugLog('[SaveService] Saving via Electron API...');
         const result = await window.electronApi!.saveGame(serialized);
-        console.log('[SaveService] Electron save result:', result);
+        this.debugLog('[SaveService] Electron save result:', result);
         if (!result.success) {
           console.error('Failed to save game via Electron:', result.error);
           return;
         }
-        console.log('[SaveService] Save successful via Electron');
+        this.debugLog('[SaveService] Save successful via Electron');
       } else {
-        console.log('[SaveService] Saving via localStorage...');
+        this.debugLog('[SaveService] Saving via localStorage...');
         localStorage.setItem('scrapyard_save_tmp', serialized);
         localStorage.setItem('scrapyard_save', serialized);
         localStorage.removeItem('scrapyard_save_tmp');
-        console.log('[SaveService] Save successful via localStorage');
+        this.debugLog('[SaveService] Save successful via localStorage');
       }
 
       this.isDirty.set(false);
@@ -199,7 +208,7 @@ export class SaveService {
       // El rate guardado es 0 pero hay niveles en el upgrade, recalcular
       const correctRate = this.scrapGenerationService.getAutoRateByLevel(autoUpgradeLevel);
       this.scrapGenerationService.setAutomaticGenerationRate(correctRate);
-      console.log(
+      this.debugLog(
         `[SaveService] Rate de generación automática recalculado: ${correctRate} (nivel ${autoUpgradeLevel})`,
       );
     } else {
@@ -239,7 +248,7 @@ export class SaveService {
       }
 
       if (completedUpgrades.length > 0) {
-        console.log(
+        this.debugLog(
           `[SaveService] ${completedUpgrades.length} upgrades completados offline:`,
           completedUpgrades,
         );

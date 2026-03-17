@@ -135,6 +135,10 @@ ipcMain.handle('set-resolution', (event: Electron.IpcMainInvokeEvent, resolution
   mainWindow.center();
 });
 
+ipcMain.handle('quit-app', () => {
+  app.quit();
+});
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
