@@ -9,8 +9,8 @@
 // ============================================
 
 export const UPGRADE_COST_FORMULAS = {
-  DEFAULT_MULTIPLIER: 1.15,
-  SCRAP_MULTIPLIER: 1.25,
+  DEFAULT_MULTIPLIER: 1.22,
+  SCRAP_MULTIPLIER: 1.35,
   STORAGE_MULTIPLIER: 1.2,
 };
 
@@ -47,9 +47,9 @@ export const SCRAP_GENERATION_CONFIG = {
   MANUAL_COST: 1, // Coste en dinero por cada click manual de chatarra
   MAX_LEVEL: 10,
   BASE_COST_MONEY: 150,
-  COST_MULTIPLIER: 1.25,
+  COST_MULTIPLIER: 1.4,
   COMPONENTS_START_LEVEL: 6,
-  AUTO_GENERATION_RATES: [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
+  AUTO_GENERATION_RATES: [0.0, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0],
 };
 
 // ============================================
@@ -58,7 +58,7 @@ export const SCRAP_GENERATION_CONFIG = {
 
 export const MACHINE_UPGRADE_CONFIG = {
   MAX_LEVEL: 50,
-  COST_MULTIPLIER: 1.15,
+  COST_MULTIPLIER: 1.22,
   COMPONENTS_START_LEVEL: 4,
   SPEED_BONUS_PER_LEVEL: 0.1,
   PRODUCTION_BONUS_EVERY_N_LEVELS: 10,
@@ -81,7 +81,7 @@ export const MACHINE_UPGRADE_CONFIG = {
 export const MACHINE_BASE_SPEEDS = {
   CRUSHER: 0.5,
   SEPARATOR: 0.5,
-  SMELTER: 0.25,
+  SMELTER: 0.35,
   ASSEMBLER: 0.17,
   PACKAGER: 0.1,
   ELECTRIC_PACKAGER: 0.1,
@@ -103,10 +103,10 @@ export const GAME_LOOP_CONFIG = {
 // ============================================
 
 export const INITIAL_CAPACITIES = {
-  SCRAP: 50,
-  METAL: 30,
-  PLASTIC: 30,
-  COMPONENTS: 10,
+  SCRAP: 30,
+  METAL: 20,
+  PLASTIC: 15,
+  COMPONENTS: 8,
   MONEY: Infinity,
   RECYCLED_PLASTIC: 20,
   ELECTRIC_COMPONENTS: 10,

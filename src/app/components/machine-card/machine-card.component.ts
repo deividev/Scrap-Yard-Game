@@ -1,4 +1,12 @@
-import { Component, Input, computed, ViewEncapsulation, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  computed,
+  ViewEncapsulation,
+  inject,
+  signal,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Machine, MachineType } from '../../models/machine.model';
 import { ResourcesService } from '../../services/resources.service';
@@ -26,6 +34,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       [class.input-blocked]="isInputBlocked()"
       [class.output-blocked]="isOutputBlocked()"
       [class.unlock-ready]="isUnlockReady()"
+      [class.just-unlocked]="justUnlocked()"
       (click)="selectMachine()"
     >
       <div class="machine-header">
@@ -120,7 +129,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
     `
       .machine-card {
         background: var(--color-bg-panel);
-        border: 1px solid var(--color-border);
+        border: 1px solid rgba(255, 152, 0, 0.18);
         border-radius: var(--border-radius-medium);
         padding: var(--space-4);
         display: flex;
@@ -129,11 +138,49 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         cursor: pointer;
         transition:
           border-color 0.2s ease,
-          box-shadow 0.2s ease;
+          box-shadow 0.2s ease,
+          transform 0.18s ease;
       }
 
       .machine-card:hover {
         border-color: var(--color-accent-main);
+        transform: translateY(-3px);
+        box-shadow:
+          0 6px 18px rgba(0, 0, 0, 0.35),
+          0 0 0 1px var(--color-accent-main);
+      }
+
+      .machine-card.just-unlocked {
+        animation: card-appear 1.6s ease-out forwards;
+      }
+
+      @keyframes card-appear {
+        0% {
+          transform: scale(0.93) translateY(6px);
+          opacity: 0.4;
+          box-shadow: 0 0 0px rgba(34, 197, 94, 0);
+          border-color: rgba(34, 197, 94, 0.3);
+        }
+        18% {
+          transform: scale(1.03) translateY(-2px);
+          opacity: 1;
+          box-shadow:
+            0 0 28px rgba(34, 197, 94, 0.55),
+            0 0 0 2px rgba(34, 197, 94, 0.6);
+          border-color: rgba(34, 197, 94, 0.8);
+        }
+        45% {
+          transform: scale(1.01) translateY(-1px);
+          box-shadow:
+            0 0 18px rgba(34, 197, 94, 0.4),
+            0 0 0 1px rgba(34, 197, 94, 0.45);
+          border-color: rgba(34, 197, 94, 0.6);
+        }
+        100% {
+          transform: scale(1) translateY(0);
+          box-shadow: none;
+          border-color: var(--color-border);
+        }
       }
 
       .machine-card.locked {
@@ -178,9 +225,43 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         animation: machine-flow 1.1s linear infinite;
       }
 
-      .machine-card.input-blocked,
+      .machine-card.producing .progress-bar-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -55%;
+        width: 45%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          transparent 100%
+        );
+        animation: progress-shine 2.4s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      @keyframes progress-shine {
+        0% {
+          left: -55%;
+        }
+        100% {
+          left: 110%;
+        }
+      }
+
+      .machine-card.input-blocked {
+        border-style: dashed;
+        border-color: rgba(245, 158, 11, 0.5);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.15);
+      }
+
       .machine-card.output-blocked {
         border-style: dashed;
+        border-color: rgba(239, 68, 68, 0.5);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.15);
       }
 
       .machine-card.unlock-ready {
@@ -377,12 +458,28 @@ export class MachineCardComponent {
   private upgradesService = inject(UpgradesService);
   private machineUnlockService = inject(MachineUnlockService);
 
+  justUnlocked = signal(false);
+  private wasLocked: boolean | null = null;
+
   constructor(
     private resourcesService: ResourcesService,
     private machinesService: MachinesService,
     private machineSelectionService: MachineSelectionService,
     public translationService: TranslationService,
-  ) {}
+  ) {
+    effect(() => {
+      const locked = this.isLocked();
+      if (this.wasLocked === null) {
+        this.wasLocked = locked;
+        return;
+      }
+      if (this.wasLocked && !locked) {
+        this.justUnlocked.set(true);
+        setTimeout(() => this.justUnlocked.set(false), 1600);
+      }
+      this.wasLocked = locked;
+    });
+  }
 
   private currentMachine = computed(
     () => this.machinesService.getMachine(this.machine.id) || this.machine,

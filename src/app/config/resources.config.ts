@@ -5,7 +5,7 @@ export const INITIAL_RESOURCES: Resource[] = [
   {
     id: ResourceType.SCRAP,
     name: 'Chatarra',
-    amount: 50,
+    amount: 30,
     capacity: INITIAL_CAPACITIES.SCRAP,
     icon: 'assets/icons/scrap_resource.png',
   },

@@ -20,7 +20,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.METAL,
-      amount: 1,
+      amount: 2,
     },
     isActive: false,
     progress: 0,
@@ -47,16 +47,16 @@ export const INITIAL_MACHINES: Machine[] = [
     id: MachineType.SMELTER,
     name: 'Fundidora',
     level: 0,
-    baseSpeed: 0.25,
+    baseSpeed: 0.35,
     baseConsumption: [
       {
         resourceId: ResourceType.METAL,
-        amount: 2,
+        amount: 5,
       },
     ],
     baseProduction: {
       resourceId: ResourceType.COMPONENTS,
-      amount: 1,
+      amount: 2,
     },
     isActive: false,
     progress: 0,

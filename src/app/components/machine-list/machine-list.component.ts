@@ -30,9 +30,15 @@ import { TranslationService } from '../../services/translation.service';
 
       .section-title {
         margin: 0 0 var(--space-4) 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--color-text-primary);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border-left: 3px solid var(--color-accent-main);
+        padding-left: 10px;
+        padding-top: 2px;
+        padding-bottom: 2px;
       }
 
       .machines-container {

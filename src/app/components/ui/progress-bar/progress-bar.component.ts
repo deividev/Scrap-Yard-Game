@@ -67,19 +67,36 @@ import { CommonModule } from '@angular/common';
       }
 
       .progress-bar-wrapper.completing .progress-bar-fill {
-        animation: pulse-complete 0.4s ease-in-out;
+        animation: pulse-complete 0.55s ease-in-out;
+      }
+
+      .progress-bar-wrapper.completing {
+        animation: wrapper-flash 0.55s ease-in-out;
       }
 
       @keyframes pulse-complete {
         0% {
-          opacity: 1;
+          filter: brightness(1);
         }
-        50% {
-          opacity: 0.85;
-          box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+        35% {
+          filter: brightness(1.55);
         }
         100% {
-          opacity: 1;
+          filter: brightness(1);
+        }
+      }
+
+      @keyframes wrapper-flash {
+        0% {
+          box-shadow: inset 0 0 0px rgba(76, 175, 80, 0);
+        }
+        35% {
+          box-shadow:
+            inset 0 0 14px rgba(76, 175, 80, 0.55),
+            0 0 8px rgba(76, 175, 80, 0.3);
+        }
+        100% {
+          box-shadow: inset 0 0 0px rgba(76, 175, 80, 0);
         }
       }
 

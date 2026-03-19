@@ -68,52 +68,73 @@ export class AudioService {
     this.stopMechanicalLayerScheduler();
   }
 
+  // Snappy mechanical click with brief resonance
   playUiClick(): void {
-    this.playTone(650, 0.035, 0.3, 'square', 'sfx');
+    this.playTone(750, 0.04, 0.07, 'square', 'sfx');
+    this.playTone(380, 0.05, 0.04, 'square', 'sfx', 0.025);
   }
 
+  // Quick two-tone confirm ping
   playUpgradeStarted(): void {
-    this.playTone(420, 0.06, 0.35, 'triangle', 'sfx');
-    this.playTone(620, 0.05, 0.25, 'triangle', 'sfx', 0.05);
+    this.playTone(440, 0.1, 0.055, 'triangle', 'sfx');
+    this.playTone(660, 0.08, 0.055, 'triangle', 'sfx', 0.07);
   }
 
+  // Rewarding ascending triad (C-E-G)
   playUpgradeCompleted(): void {
-    this.playTone(520, 0.07, 0.4, 'triangle', 'sfx');
-    this.playTone(780, 0.09, 0.35, 'triangle', 'sfx', 0.08);
+    this.playTone(523, 0.28, 0.06, 'triangle', 'sfx');
+    this.playTone(659, 0.25, 0.065, 'triangle', 'sfx', 0.07);
+    this.playTone(784, 0.28, 0.07, 'triangle', 'sfx', 0.14);
   }
 
+  // Celebration fanfare when a new machine is unlocked (C-E-G-C)
+  playMachineUnlocked(): void {
+    this.playTone(523, 0.32, 0.07, 'triangle', 'sfx');
+    this.playTone(659, 0.3, 0.07, 'triangle', 'sfx', 0.09);
+    this.playTone(784, 0.28, 0.08, 'triangle', 'sfx', 0.18);
+    this.playTone(1047, 0.4, 0.09, 'triangle', 'sfx', 0.28);
+  }
+
+  // Industrial thud (lowpass noise) + metallic ring
   playMachineComplete(): void {
     if (!this.canPlayWithCooldown('machine-complete', 800)) {
       return;
     }
-    this.playTone(660, 0.05, 0.09, 'triangle', 'sfx');
-    this.playTone(880, 0.07, 0.07, 'triangle', 'sfx', 0.06);
+    this.playNoiseBurst(0.1, 0.055, 350, 'lowpass', 'sfx');
+    this.playTone(440, 0.18, 0.045, 'sawtooth', 'sfx', 0.02);
+    this.playTone(660, 0.12, 0.032, 'triangle', 'sfx', 0.05);
   }
 
+  // Ascending cha-ching (3-note coin toss)
   playResourceSold(): void {
     if (!this.canPlayWithCooldown('resource-sold', 200)) {
       return;
     }
-    this.playTone(880, 0.04, 0.07, 'triangle', 'sfx');
-    this.playTone(1047, 0.05, 0.06, 'triangle', 'sfx', 0.04);
+    this.playTone(880, 0.13, 0.055, 'triangle', 'sfx');
+    this.playTone(1108, 0.11, 0.06, 'triangle', 'sfx', 0.065);
+    this.playTone(1320, 0.13, 0.065, 'triangle', 'sfx', 0.13);
   }
 
+  // Metallic clink: bandpass noise burst + resonant ring
   playScrapGenerated(): void {
-    this.playTone(240, 0.04, 0.22, 'sawtooth', 'sfx');
+    this.playNoiseBurst(0.06, 0.07, 2200, 'bandpass', 'sfx');
+    this.playTone(1100, 0.14, 0.045, 'triangle', 'sfx', 0.01);
   }
 
+  // Subtle industrial tick (ambient presence, barely audible)
   playProductionTick(): void {
     if (!this.canPlayWithCooldown('production', 400)) {
       return;
     }
-    this.playTone(180, 0.03, 0.2, 'square', 'sfx');
+    this.playNoiseBurst(0.04, 0.022, 1000, 'bandpass', 'sfx');
   }
 
+  // "Bwomp" — harsh frequency sweep 320Hz → 60Hz, completely distinct from all other sounds
   playError(): void {
     if (!this.canPlayWithCooldown('error', 250)) {
       return;
     }
-    this.playTone(160, 0.06, 0.22, 'sawtooth', 'sfx');
+    this.playSweep(320, 60, 0.28, 0.09, 'sawtooth', 'sfx');
   }
 
   private isBrowser(): boolean {
@@ -300,6 +321,93 @@ export class AudioService {
 
     this.cooldowns.set(key, now);
     return true;
+  }
+
+  private playSweep(
+    startFreq: number,
+    endFreq: number,
+    durationSeconds: number,
+    gainAmount: number,
+    type: OscillatorType,
+    channel: AudioChannel,
+  ): void {
+    this.ensureAudioGraph();
+
+    if (!this.audioContext || this.audioContext.state !== 'running') {
+      return;
+    }
+
+    const channelGain = channel === 'music' ? this.musicGain : this.sfxGain;
+    if (!channelGain) {
+      return;
+    }
+
+    const now = this.audioContext.currentTime;
+    const endTime = now + durationSeconds;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(startFreq, now);
+    oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), endTime);
+
+    gainNode.gain.setValueAtTime(gainAmount, now);
+    gainNode.gain.setValueAtTime(gainAmount, now + durationSeconds * 0.6);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(channelGain);
+
+    oscillator.start(now);
+    oscillator.stop(endTime + 0.01);
+  }
+
+  private playNoiseBurst(
+    durationSeconds: number,
+    gainAmount: number,
+    filterFreq: number,
+    filterType: BiquadFilterType,
+    channel: AudioChannel,
+  ): void {
+    this.ensureAudioGraph();
+
+    if (!this.audioContext || this.audioContext.state !== 'running') {
+      return;
+    }
+
+    const channelGain = channel === 'music' ? this.musicGain : this.sfxGain;
+    if (!channelGain) {
+      return;
+    }
+
+    const sampleRate = this.audioContext.sampleRate;
+    const bufferSize = Math.ceil(sampleRate * durationSeconds);
+    const buffer = this.audioContext.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const source = this.audioContext.createBufferSource();
+    source.buffer = buffer;
+
+    const filter = this.audioContext.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.setValueAtTime(filterFreq, this.audioContext.currentTime);
+    filter.Q.setValueAtTime(1.5, this.audioContext.currentTime);
+
+    const gainNode = this.audioContext.createGain();
+    const now = this.audioContext.currentTime;
+    gainNode.gain.setValueAtTime(gainAmount, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + durationSeconds);
+
+    source.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(channelGain);
+
+    source.start(now);
+    source.stop(now + durationSeconds + 0.01);
   }
 
   private playTone(

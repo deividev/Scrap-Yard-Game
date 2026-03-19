@@ -1,6 +1,7 @@
 .statistics-panel {
   background-color: var(--color-bg-panel);
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-accent-main);
   width: 100%;
   flex-shrink: 0;
 }
@@ -27,10 +28,10 @@
 
 .statistics-title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  color: var(--color-accent-main);
   margin: 0;
 }
 

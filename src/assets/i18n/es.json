@@ -4,7 +4,7 @@
   },
   "main_menu": {
     "title": "SCRAP YARD IDLE",
-    "subtitle": "Gestiona tu desguace y aprovecha la chatarra",
+    "subtitle": "Construye tu imperio del reciclaje. Este desguace no se gestiona solo. Todavía no.",
     "play": "Jugar",
     "continue": "Continuar",
     "new_game": "Nueva Partida",
@@ -53,11 +53,11 @@
     "electric_assembler": "Ensambladora eléctrica"
   },
   "status": {
-    "parada": "Detenida",
+    "parada": "Apagada",
     "bloqueada": "Bloqueada",
-    "falta_input": "Esperando materiales",
-    "output_lleno": "Almacén lleno",
-    "produciendo": "Produciendo"
+    "falta_input": "Sin suministro",
+    "output_lleno": "Depósito lleno",
+    "produciendo": "En marcha"
   },
   "buttons": {
     "activa": "Activa",
@@ -65,8 +65,8 @@
     "mejorar": "Mejorar",
     "start": "Iniciar",
     "stop": "Pausar",
-    "chatarra": "Generar Chatarra",
-    "venderComponentes": "Vender Componente"
+    "chatarra": "Descargar Chatarra",
+    "venderComponentes": "Despachar Componentes"
   },
   "tooltips": {
     "generate_scrap": "Generar {amount} chatarra por {cost} dinero",
@@ -76,8 +76,8 @@
     "machine_multiplier": "Produce ×{production} pero consume ×{consumption} materiales por ciclo"
   },
   "notifications": {
-    "upgrade_completed": "{name} Nv {level}",
-    "machine_unlocked": "{name} desbloqueada"
+    "upgrade_completed": "⬆ {name} — Nv {level}",
+    "machine_unlocked": "🏭 ¡{name} en línea!"
   },
   "progression": {
     "next_unlock": "Próximo desbloqueo: {machine} ({requirement} Nv {level})",
@@ -94,7 +94,7 @@
     "max_level": "Nivel máximo alcanzado",
     "upgrading": "Mejorando",
     "scrap_auto": {
-      "name": "Llegada Automática de Chatarra",
+      "name": "Camión Automático de Chatarra",
       "manual": "Manual: +1 chatarra por clic",
       "automatic": "Automático",
       "per_second": "/s",
@@ -104,12 +104,12 @@
       "name": "Descarga Manual Mejorada"
     },
     "storage": {
-      "scrap": "Capacidad de Chatarra",
-      "metal": "Capacidad de Metal",
-      "plastic": "Capacidad de Plástico",
-      "components": "Capacidad de Componentes",
-      "recycled_plastic": "Capacidad de Plástico Reciclado",
-      "electric_components": "Capacidad de Componentes Eléctricos"
+      "scrap": "Ampliar Silo de Chatarra",
+      "metal": "Ampliar Depósito de Metal",
+      "plastic": "Ampliar Almacén de Plástico",
+      "components": "Ampliar Estantería de Componentes",
+      "recycled_plastic": "Ampliar Silo de Plástico Reciclado",
+      "electric_components": "Ampliar Rack Eléctrico"
     },
     "capacity_label": "Capacidad:",
     "machine_tab": {
@@ -145,9 +145,9 @@
   },
   "statistics": {
     "title": "Estadísticas",
-    "total_scrap": "Chatarra total",
-    "play_time": "Tiempo jugado",
-    "active_machines": "Máquinas activas"
+    "total_scrap": "Chatarra procesada",
+    "play_time": "Tiempo operativo",
+    "active_machines": "Líneas activas"
   },
   "common": {
     "level_short": "Nv",

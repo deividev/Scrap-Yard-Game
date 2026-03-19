@@ -3,6 +3,7 @@
 <app-options-menu *ngIf="gameStateService.view() === 'options'"></app-options-menu>
 
 <div class="app-layout" *ngIf="gameStateService.view() === 'game'">
+  <app-background-grid [opacity]="0.5"></app-background-grid>
   <app-notification-container></app-notification-container>
   <app-resources-header></app-resources-header>
 

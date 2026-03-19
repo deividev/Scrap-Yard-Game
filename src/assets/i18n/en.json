@@ -4,7 +4,7 @@
   },
   "main_menu": {
     "title": "SCRAP YARD IDLE",
-    "subtitle": "Manage your scrapyard and process the scrap",
+    "subtitle": "Build your recycling empire. This scrap yard won't run itself. Not yet.",
     "play": "Play",
     "continue": "Continue",
     "new_game": "New Game",
@@ -53,11 +53,11 @@
     "electric_assembler": "Electric Assembler"
   },
   "status": {
-    "parada": "Stopped",
+    "parada": "Offline",
     "bloqueada": "Locked",
-    "falta_input": "Waiting for materials",
-    "output_lleno": "Storage full",
-    "produciendo": "Producing"
+    "falta_input": "No supply",
+    "output_lleno": "Bin full",
+    "produciendo": "Running"
   },
   "buttons": {
     "activa": "Active",
@@ -65,8 +65,8 @@
     "mejorar": "Upgrade",
     "start": "Start",
     "stop": "Pause",
-    "chatarra": "Generate Scrap",
-    "venderComponentes": "Sell Component"
+    "chatarra": "Unload Scrap",
+    "venderComponentes": "Dispatch Components"
   },
   "tooltips": {
     "generate_scrap": "Generate {amount} scrap for {cost} money",
@@ -76,8 +76,8 @@
     "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle"
   },
   "notifications": {
-    "upgrade_completed": "{name} Lv {level}",
-    "machine_unlocked": "{name} unlocked"
+    "upgrade_completed": "⬆ {name} — Lv {level}",
+    "machine_unlocked": "🏭 {name} is online!"
   },
   "progression": {
     "next_unlock": "Next unlock: {machine} ({requirement} Lv {level})",
@@ -94,7 +94,7 @@
     "max_level": "Maximum level reached",
     "upgrading": "Upgrading",
     "scrap_auto": {
-      "name": "Automatic Scrap Generation",
+      "name": "Automated Scrap Truck",
       "manual": "Manual: +1 scrap per click",
       "automatic": "Automatic",
       "per_second": "/s",
@@ -104,12 +104,12 @@
       "name": "Improved Manual Unloading"
     },
     "storage": {
-      "scrap": "Scrap Capacity",
-      "metal": "Metal Capacity",
-      "plastic": "Plastic Capacity",
-      "components": "Components Capacity",
-      "recycled_plastic": "Recycled Plastic Capacity",
-      "electric_components": "Electric Components Capacity"
+      "scrap": "Expand Scrap Silo",
+      "metal": "Expand Metal Depot",
+      "plastic": "Expand Plastic Warehouse",
+      "components": "Expand Components Rack",
+      "recycled_plastic": "Expand Recycled Plastic Silo",
+      "electric_components": "Expand Electric Parts Rack"
     },
     "capacity_label": "Capacity:",
     "machine_tab": {
@@ -145,9 +145,9 @@
   },
   "statistics": {
     "title": "Statistics",
-    "total_scrap": "Total scrap",
-    "play_time": "Play time",
-    "active_machines": "Active machines"
+    "total_scrap": "Scrap processed",
+    "play_time": "Time on shift",
+    "active_machines": "Active lines"
   },
   "common": {
     "level_short": "Lv",

@@ -37,185 +37,189 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       <div class="resources-row">
         <div
           class="resource-item money"
-        [class.feedback-up]="isFeedback(moneyResource().id, 'up')"
-        [class.feedback-down]="isFeedback(moneyResource().id, 'down')"
-      >
-        <app-tooltip
-          [text]="translationService.t('resources.money')"
-          [inline]="true"
-          [position]="'bottom'"
+          [class.feedback-up]="isFeedback(moneyResource().id, 'up')"
+          [class.feedback-down]="isFeedback(moneyResource().id, 'down')"
         >
-          <img [src]="moneyResource().icon" class="resource-icon" alt="Money" />
-        </app-tooltip>
-        <span class="resource-amount">{{ moneyResource().amount }}</span>
-      </div>
-
-      <div class="resources-container">
-        <!-- Chatarra -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
-            [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(scrapResource().id)"
+          <app-tooltip
+            [text]="translationService.t('resources.money')"
+            [inline]="true"
+            [position]="'bottom'"
           >
-            <app-tooltip
-              [text]="translationService.t('resources.scrap')"
-              [inline]="true"
-              [position]="'bottom'"
-            >
-              <img [src]="scrapResource().icon" class="resource-icon" alt="Chatarra" />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="scrapResource().amount >= scrapResource().capacity"
-              >{{ scrapResource().amount | formatNumber }}</span
-            >
-            <span class="resource-capacity">/ {{ scrapResource().capacity | formatNumber }}</span>
-          </div>
-          <app-scrap-button></app-scrap-button>
+            <img [src]="moneyResource().icon" class="resource-icon" alt="Money" />
+          </app-tooltip>
+          <span class="resource-amount">{{ moneyResource().amount }}</span>
         </div>
 
-        <!-- Metal -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(metalResource().id, 'up')"
-            [class.feedback-down]="isFeedback(metalResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(metalResource().id)"
-          >
-            <app-tooltip
-              [text]="translationService.t('resources.metal')"
-              [inline]="true"
-              [position]="'bottom'"
+        <div class="resources-container">
+          <!-- Chatarra -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
+              [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(scrapResource().id)"
             >
-              <img [src]="metalResource().icon" class="resource-icon" alt="Metal" />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="metalResource().amount >= metalResource().capacity"
-              >{{ metalResource().amount | formatNumber }}</span
-            >
-            <span class="resource-capacity">/ {{ metalResource().capacity | formatNumber }}</span>
+              <app-tooltip
+                [text]="translationService.t('resources.scrap')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img [src]="scrapResource().icon" class="resource-icon" alt="Chatarra" />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="scrapResource().amount >= scrapResource().capacity"
+                >{{ scrapResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity">/ {{ scrapResource().capacity | formatNumber }}</span>
+            </div>
+            <app-scrap-button></app-scrap-button>
           </div>
-          <app-sell-metal-button></app-sell-metal-button>
-        </div>
 
-        <!-- Componentes -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
-            [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(componentsResource().id)"
-          >
-            <app-tooltip
-              [text]="translationService.t('resources.components')"
-              [inline]="true"
-              [position]="'bottom'"
+          <!-- Metal -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(metalResource().id, 'up')"
+              [class.feedback-down]="isFeedback(metalResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(metalResource().id)"
             >
-              <img [src]="componentsResource().icon" class="resource-icon" alt="Componentes" />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="componentsResource().amount >= componentsResource().capacity"
-              >{{ componentsResource().amount | formatNumber }}</span
-            >
-            <span class="resource-capacity"
-              >/ {{ componentsResource().capacity | formatNumber }}</span
-            >
+              <app-tooltip
+                [text]="translationService.t('resources.metal')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img [src]="metalResource().icon" class="resource-icon" alt="Metal" />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="metalResource().amount >= metalResource().capacity"
+                >{{ metalResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity">/ {{ metalResource().capacity | formatNumber }}</span>
+            </div>
+            <app-sell-metal-button></app-sell-metal-button>
           </div>
-          @if (isSmelterUnlocked()) {
-            <app-sell-components-button></app-sell-components-button>
-          }
-        </div>
 
-        <!-- Plástico -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
-            [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(plasticResource().id)"
-          >
-            <app-tooltip
-              [text]="translationService.t('resources.plastic')"
-              [inline]="true"
-              [position]="'bottom'"
+          <!-- Componentes -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
+              [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(componentsResource().id)"
             >
-              <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="plasticResource().amount >= plasticResource().capacity"
-              >{{ plasticResource().amount | formatNumber }}</span
-            >
-            <span class="resource-capacity">/ {{ plasticResource().capacity | formatNumber }}</span>
+              <app-tooltip
+                [text]="translationService.t('resources.components')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img [src]="componentsResource().icon" class="resource-icon" alt="Componentes" />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="componentsResource().amount >= componentsResource().capacity"
+                >{{ componentsResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ componentsResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (isSmelterUnlocked()) {
+              <app-sell-components-button></app-sell-components-button>
+            }
           </div>
-        </div>
 
-        <!-- Plástico Reciclado -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(recycledPlasticResource().id, 'up')"
-            [class.feedback-down]="isFeedback(recycledPlasticResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(recycledPlasticResource().id)"
-          >
-            <app-tooltip
-              [text]="translationService.t('resources.recycled_plastic')"
-              [inline]="true"
-              [position]="'bottom'"
+          <!-- Plástico -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
+              [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(plasticResource().id)"
             >
-              <img
-                [src]="recycledPlasticResource().icon"
-                class="resource-icon"
-                alt="Plástico reciclado"
-              />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="recycledPlasticResource().amount >= recycledPlasticResource().capacity"
-              >{{ recycledPlasticResource().amount | formatNumber }}</span
-            >
-            <span class="resource-capacity"
-              >/ {{ recycledPlasticResource().capacity | formatNumber }}</span
-            >
+              <app-tooltip
+                [text]="translationService.t('resources.plastic')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="plasticResource().amount >= plasticResource().capacity"
+                >{{ plasticResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ plasticResource().capacity | formatNumber }}</span
+              >
+            </div>
           </div>
-        </div>
 
-        <!-- Componentes Eléctricos -->
-        <div class="resource-column">
-          <div
-            class="resource-item"
-            [class.feedback-up]="isFeedback(electricComponentsResource().id, 'up')"
-            [class.feedback-down]="isFeedback(electricComponentsResource().id, 'down')"
-            [class.capacity-pop]="isCapacityPop(electricComponentsResource().id)"
-          >
-            <app-tooltip
-              [text]="translationService.t('resources.electric_components')"
-              [inline]="true"
-              [position]="'bottom'"
+          <!-- Plástico Reciclado -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(recycledPlasticResource().id, 'up')"
+              [class.feedback-down]="isFeedback(recycledPlasticResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(recycledPlasticResource().id)"
             >
-              <img
-                [src]="electricComponentsResource().icon"
-                class="resource-icon"
-                alt="Componentes eléctricos"
-              />
-            </app-tooltip>
-            <span
-              class="resource-amount"
-              [class.full]="
-                electricComponentsResource().amount >= electricComponentsResource().capacity
-              "
-              >{{ electricComponentsResource().amount | formatNumber }}</span
+              <app-tooltip
+                [text]="translationService.t('resources.recycled_plastic')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="recycledPlasticResource().icon"
+                  class="resource-icon"
+                  alt="Plástico reciclado"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="
+                  recycledPlasticResource().amount >= recycledPlasticResource().capacity
+                "
+                >{{ recycledPlasticResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ recycledPlasticResource().capacity | formatNumber }}</span
+              >
+            </div>
+          </div>
+
+          <!-- Componentes Eléctricos -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(electricComponentsResource().id, 'up')"
+              [class.feedback-down]="isFeedback(electricComponentsResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(electricComponentsResource().id)"
             >
-            <span class="resource-capacity"
-              >/ {{ electricComponentsResource().capacity | formatNumber }}</span
-            >
+              <app-tooltip
+                [text]="translationService.t('resources.electric_components')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="electricComponentsResource().icon"
+                  class="resource-icon"
+                  alt="Componentes eléctricos"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="
+                  electricComponentsResource().amount >= electricComponentsResource().capacity
+                "
+                >{{ electricComponentsResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ electricComponentsResource().capacity | formatNumber }}</span
+              >
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       <!-- Fila 2: hint de progresión + botones de control -->
@@ -238,7 +242,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
     `
       .resources-header {
         background: var(--color-bg-panel);
-        border-bottom: 2px solid var(--color-border);
+        border-bottom: 2px solid rgba(255, 152, 0, 0.35);
+        border-top: 2px solid var(--color-accent-main);
         padding: var(--space-2) var(--space-4);
         display: flex;
         flex-direction: column;
@@ -311,17 +316,35 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       @media (max-width: 1400px) {
-        .resource-icon { width: 40px; height: 40px; }
-        .resource-item.money { font-size: 16px; }
-        .resources-row { gap: var(--space-2); }
-        .resources-container { gap: var(--space-2); }
+        .resource-icon {
+          width: 40px;
+          height: 40px;
+        }
+        .resource-item.money {
+          font-size: 16px;
+        }
+        .resources-row {
+          gap: var(--space-2);
+        }
+        .resources-container {
+          gap: var(--space-2);
+        }
       }
 
       @media (max-width: 1100px) {
-        .resource-icon { width: 28px; height: 28px; }
-        .resource-item.money { font-size: 14px; }
-        .resources-row { gap: var(--space-1); }
-        .resources-container { gap: var(--space-1); }
+        .resource-icon {
+          width: 28px;
+          height: 28px;
+        }
+        .resource-item.money {
+          font-size: 14px;
+        }
+        .resources-row {
+          gap: var(--space-1);
+        }
+        .resources-container {
+          gap: var(--space-1);
+        }
       }
 
       .resource-amount {
@@ -333,33 +356,37 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.feedback-up {
-        animation: resource-gain 0.46s ease-out;
-        background: rgba(34, 197, 94, 0.1);
-        border-color: rgba(34, 197, 94, 0.3);
+        animation: resource-gain 0.52s ease-out;
+        background: rgba(34, 197, 94, 0.18);
+        border-color: rgba(34, 197, 94, 0.45);
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.18);
       }
 
       .resource-item.feedback-up .resource-amount {
         color: #22c55e;
-        transform: translateY(-1px);
+        animation: amount-pop 0.52s ease-out;
       }
 
       .resource-item.feedback-up .resource-icon {
-        transform: scale(1.05);
+        transform: scale(1.14);
+        filter: drop-shadow(0 0 5px rgba(34, 197, 94, 0.55));
       }
 
       .resource-item.feedback-down {
-        animation: resource-loss 0.46s ease-out;
-        background: rgba(239, 68, 68, 0.1);
-        border-color: rgba(239, 68, 68, 0.3);
+        animation: resource-loss 0.52s ease-out;
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.12);
       }
 
       .resource-item.feedback-down .resource-amount {
         color: #f87171;
-        transform: translateY(1px);
+        animation: amount-drop 0.52s ease-out;
       }
 
       .resource-item.feedback-down .resource-icon {
-        transform: scale(0.97);
+        transform: scale(0.94);
+        filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.4));
       }
 
       .resource-item.capacity-pop {
@@ -374,21 +401,58 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       @keyframes resource-gain {
         0% {
           transform: translateY(0) scale(1);
+          filter: brightness(1);
         }
-        40% {
-          transform: translateY(-2px) scale(1.01);
+        28% {
+          transform: translateY(-5px) scale(1.04);
+          filter: brightness(1.22);
+        }
+        60% {
+          transform: translateY(-2px) scale(1.015);
+          filter: brightness(1.08);
         }
         100% {
           transform: translateY(0) scale(1);
+          filter: brightness(1);
         }
       }
 
       @keyframes resource-loss {
         0% {
           transform: translateY(0) scale(1);
+          filter: brightness(1);
         }
-        40% {
-          transform: translateY(2px) scale(0.99);
+        28% {
+          transform: translateY(4px) scale(0.97);
+          filter: brightness(0.88);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+          filter: brightness(1);
+        }
+      }
+
+      @keyframes amount-pop {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        30% {
+          transform: translateY(-4px) scale(1.12);
+        }
+        65% {
+          transform: translateY(-1px) scale(1.04);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes amount-drop {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        30% {
+          transform: translateY(3px) scale(0.94);
         }
         100% {
           transform: translateY(0) scale(1);

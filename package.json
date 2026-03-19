@@ -2,7 +2,7 @@
   "name": "scrap-yard",
   "version": "0.0.0",
   "main": "electron/main.js",
-  "description": "SCRAP YARD - MVP",
+  "description": "Scrap Yard Idle — Industrial idle game. Turn scrap into profit, machine by machine.",
   "author": "Unknown",
   "scripts": {
     "ng": "ng",

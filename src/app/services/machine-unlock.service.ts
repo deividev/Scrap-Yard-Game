@@ -4,6 +4,7 @@ import { UpgradesService } from './upgrades.service';
 import { MachineType } from '../models/machine.model';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
+import { AudioService } from './audio.service';
 
 export interface UnlockRequirement {
   machineType: MachineType;
@@ -30,6 +31,7 @@ export class MachineUnlockService {
   private upgradesService = inject(UpgradesService);
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
+  private audioService = inject(AudioService);
   private readonly isDev = isDevMode();
 
   private debugLog(message: string): void {
@@ -114,21 +116,28 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.CRUSHER,
-        requiredLevel: 2,
+        requiredLevel: 3,
         currentLevel,
-        isMet: currentLevel >= 2,
+        isMet: currentLevel >= 3,
       },
     ];
   }
 
   private getPackagerRequirements(): UnlockRequirement[] {
-    const currentLevel = this.getMachineLevel(MachineType.SMELTER);
+    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
+    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     return [
+      {
+        machineType: MachineType.CRUSHER,
+        requiredLevel: 5,
+        currentLevel: crusherLevel,
+        isMet: crusherLevel >= 5,
+      },
       {
         machineType: MachineType.SMELTER,
         requiredLevel: 3,
-        currentLevel,
-        isMet: currentLevel >= 3,
+        currentLevel: smelterLevel,
+        isMet: smelterLevel >= 3,
       },
     ];
   }
@@ -138,9 +147,9 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.PACKAGER,
-        requiredLevel: 2,
+        requiredLevel: 3,
         currentLevel,
-        isMet: currentLevel >= 2,
+        isMet: currentLevel >= 3,
       },
     ];
   }
@@ -223,7 +232,7 @@ export class MachineUnlockService {
 
   /**
    * DESBLOQUEO 0: Fundidora
-   * Condición: Trituradora nivel 2
+   * Condición: Trituradora nivel 3
    */
   private checkSmelterUnlock(): void {
     const smelter = this.machinesService.getMachine(MachineType.SMELTER);
@@ -232,7 +241,7 @@ export class MachineUnlockService {
     }
 
     const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
-    if (crusherLevel >= 2) {
+    if (crusherLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.SMELTER);
       this.debugLog('[MachineUnlock] Smelter unlocked! (Crusher level 2 reached)');
       const machineName = this.translationService.t('machines.smelter');
@@ -240,12 +249,13 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
   /**
    * DESBLOQUEO 1: Empaquetadora
-   * Condición: Fundidora nivel 3
+   * Condición: Trituradora nivel 5 + Fundidora nivel 3
    */
   private checkPackagerUnlock(): void {
     const packager = this.machinesService.getMachine(MachineType.PACKAGER);
@@ -253,8 +263,9 @@ export class MachineUnlockService {
       return; // Already unlocked or doesn't exist
     }
 
+    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    if (smelterLevel >= 3) {
+    if (crusherLevel >= 5 && smelterLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.PACKAGER);
       this.debugLog('[MachineUnlock] Packager unlocked! (Smelter level 3 reached)');
       const machineName = this.translationService.t('machines.packager');
@@ -262,12 +273,13 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
   /**
    * DESBLOQUEO 2: Separador
-   * Condición: Empaquetadora nivel 2
+   * Condición: Empaquetadora nivel 3
    */
   private checkSeparatorUnlock(): void {
     const separator = this.machinesService.getMachine(MachineType.SEPARATOR);
@@ -276,7 +288,7 @@ export class MachineUnlockService {
     }
 
     const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
-    if (packagerLevel >= 2) {
+    if (packagerLevel >= 3) {
       this.machinesService.upgradeLevel(MachineType.SEPARATOR);
       this.debugLog('[MachineUnlock] Separator unlocked! (Packager level 2 reached)');
       const machineName = this.translationService.t('machines.separator');
@@ -284,6 +296,7 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
@@ -310,6 +323,7 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
@@ -332,6 +346,7 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
@@ -359,6 +374,7 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 
@@ -385,6 +401,7 @@ export class MachineUnlockService {
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
         'unlock',
       );
+      this.audioService.playMachineUnlocked();
     }
   }
 }

@@ -7,6 +7,7 @@ import { MainMenuComponent } from './components/main-menu/main-menu.component';
 import { OptionsMenuComponent } from './components/options-menu/options-menu.component';
 import { StatisticsPanelComponent } from './components/statistics-panel/statistics-panel.component';
 import { CommonModule } from '@angular/common';
+import { BackgroundGridComponent } from './components/ui/background-grid/background-grid.component';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
 import { MachinesService } from './services/machines.service';
@@ -27,6 +28,7 @@ import { GameLoopService } from './services/game-loop.service';
     MainMenuComponent,
     OptionsMenuComponent,
     StatisticsPanelComponent,
+    BackgroundGridComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

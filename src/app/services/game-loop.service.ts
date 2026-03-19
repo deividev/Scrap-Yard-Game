@@ -170,7 +170,11 @@ export class GameLoopService {
       // At cycle END: Produce outputs immediately, but reset progress with delay for visual feedback
       this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
       producedInThisTick = true;
-      this.audioService.playMachineComplete();
+      if (updatedMachine.baseProduction.resourceId === ResourceType.MONEY) {
+        this.audioService.playResourceSold();
+      } else {
+        this.audioService.playMachineComplete();
+      }
       setTimeout(() => {
         this.machinesService.consumeProgress(updatedMachine.id, 1);
       }, 500);

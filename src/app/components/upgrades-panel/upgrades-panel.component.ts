@@ -541,8 +541,9 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
   styles: [
     `
       .upgrades-panel {
-        background: var(--color-bg-panel);
+        background: transparent;
         border-left: 2px solid var(--color-border);
+        border-top: 2px solid var(--color-accent-main);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -554,6 +555,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background: var(--color-bg-panel);
         border-bottom: 1px solid var(--color-border);
       }
 
@@ -565,9 +567,11 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 
       .section-title {
         margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--color-text-primary);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-accent-main);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
       }
 
       .panel-content {
