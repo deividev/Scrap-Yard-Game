@@ -11,6 +11,7 @@
     "options": "Opciones",
     "exit": "Salir",
     "confirm_new_game": "¿Estás seguro de que quieres comenzar una nueva partida? Se perderá tu progreso actual.",
+    "new_game_confirm": "Empezar de Cero",
     "back_to_menu": "Menú Principal"
   },
   "options": {
@@ -77,7 +78,7 @@
   },
   "notifications": {
     "upgrade_completed": "⬆ {name} — Nv {level}",
-    "machine_unlocked": "🏭 ¡{name} en línea!"
+    "machine_unlocked": "¡{name} en línea!"
   },
   "progression": {
     "next_unlock": "Próximo desbloqueo: {machine} ({requirement} Nv {level})",

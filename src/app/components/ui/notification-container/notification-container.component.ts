@@ -9,7 +9,16 @@ import { NotificationService } from '../../../services/notification.service';
     <div class="notification-container">
       @for (notification of notificationService.notifications$(); track notification.id) {
         <div class="notification" [class]="'notification-' + notification.type">
-          {{ notification.message }}
+          <span class="notification-icon">
+            @if (notification.type === 'unlock') {
+              🔓
+            } @else if (notification.type === 'success') {
+              ✅
+            } @else {
+              ℹ️
+            }
+          </span>
+          <span class="notification-message">{{ notification.message }}</span>
         </div>
       }
     </div>
@@ -18,34 +27,53 @@ import { NotificationService } from '../../../services/notification.service';
     .notification-container {
       position: fixed;
       top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
+      right: var(--space-6, 24px);
       z-index: 2000;
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
       pointer-events: none;
+      align-items: flex-end;
     }
 
     .notification {
-      background: var(--color-bg-panel);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      background: rgba(18, 20, 24, 0.92);
+      backdrop-filter: blur(8px);
       color: var(--color-text-primary);
       padding: var(--space-3) var(--space-4);
       border-radius: var(--border-radius-medium);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      border-left: 3px solid var(--color-accent-main);
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+      border-left: 5px solid var(--color-accent-main);
       font-size: 14px;
       font-weight: 500;
-      min-width: 280px;
-      max-width: 400px;
-      text-align: center;
+      min-width: 260px;
+      max-width: 360px;
       animation:
-        slideIn 0.3s ease-out,
+        slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1),
         fadeOut 0.3s ease-in 2.2s forwards;
     }
 
+    .notification-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .notification-message {
+      flex: 1;
+      line-height: 1.4;
+    }
+
     .notification-success {
-      border-left-color: var(--color-accent-positive);
+      border-left-color: #22c55e;
+      box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(34, 197, 94, 0.15);
     }
 
     .notification-info {
@@ -54,26 +82,31 @@ import { NotificationService } from '../../../services/notification.service';
 
     .notification-unlock {
       border-left-color: #ff9800;
-      background: linear-gradient(135deg, var(--color-bg-panel) 0%, rgba(255, 152, 0, 0.1) 100%);
+      background: rgba(18, 20, 24, 0.95);
+      box-shadow:
+        0 4px 24px rgba(255, 152, 0, 0.25),
+        0 0 0 1px rgba(255, 152, 0, 0.2);
     }
 
-    @keyframes slideIn {
+    @keyframes slideInRight {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateX(40px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
       }
     }
 
     @keyframes fadeOut {
       from {
         opacity: 1;
+        transform: translateX(0);
       }
       to {
         opacity: 0;
+        transform: translateX(16px);
       }
     }
   `,

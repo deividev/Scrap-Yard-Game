@@ -10,6 +10,9 @@ import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
 import { SaveState } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
+import { INITIAL_RESOURCES } from '../config/resources.config';
+import { INITIAL_MACHINES } from '../config/machines.config';
+import { UPGRADE_DEFINITIONS } from '../config/upgrade-definitions.config';
 
 @Injectable({
   providedIn: 'root',
@@ -318,6 +321,16 @@ export class SaveService {
     }
     this.isDirty.set(false);
     this.gameStarted.set(false);
+  }
+
+  async resetToNewGame(): Promise<void> {
+    await this.clearSave();
+    this.resourcesService.setState(INITIAL_RESOURCES.map((r) => ({ ...r })));
+    this.machinesService.setState(INITIAL_MACHINES.map((m) => ({ ...m })));
+    this.upgradesService.setState(UPGRADE_DEFINITIONS.map((d) => ({ id: d.id, level: 1 })));
+    this.scrapGenerationService.setAutomaticGenerationRate(0);
+    this.upgradeProgressService.reset();
+    this.statisticsService.reset();
   }
 
   async getSavePath(): Promise<string | null> {

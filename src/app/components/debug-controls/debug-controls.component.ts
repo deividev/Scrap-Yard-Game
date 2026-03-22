@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, isDevMode } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { ScrapGenerationService } from '../../services/scrap-generation.service';
@@ -15,51 +15,32 @@ import { SCRAP_GENERATION_CONFIG } from '../../config/game-balance.config';
   standalone: true,
   imports: [CommonModule, AppButtonComponent],
   template: `
-    <div class="debug-controls">
-      <span class="tick-counter">{{ translationService.t('debug.tick') }}: {{ tickCount() }}</span>
-      <app-button
-        [label]="'🌐 ' + currentLang()"
-        variant="secondary"
-        size="sm"
-        (clicked)="toggleLanguage()"
-      />
-      <app-button
-        [label]="'♻️ ' + translationService.t('buttons.chatarra')"
-        variant="primary"
-        size="sm"
-        (clicked)="generateScrap()"
-        [disabled]="!canGenerateScrap()"
-      />
-      @if (isSmelterUnlocked()) {
+    @if (isDev) {
+      <div class="debug-controls">
+        <span class="tick-counter"
+          >{{ translationService.t('debug.tick') }}: {{ tickCount() }}</span
+        >
         <app-button
+          [label]="'♻️ ' + translationService.t('buttons.chatarra')"
           variant="primary"
           size="sm"
-          (clicked)="sellComponents()"
-          [disabled]="!canSellComponents()"
-        >
-          <span style="display: inline-flex; align-items: center; gap: 4px;">
-            <img
-              src="assets/icons/gold_resource.png"
-              style="width: 20px; height: 20px; vertical-align: middle;"
-              alt="Money"
-            />
-            <span>{{ translationService.t('buttons.venderComponentes') }}</span>
-          </span>
-        </app-button>
-      }
-      <app-button
-        [label]="'▶ ' + translationService.t('buttons.start')"
-        variant="secondary"
-        size="sm"
-        (clicked)="startLoop()"
-      />
-      <app-button
-        [label]="'⏸ ' + translationService.t('buttons.stop')"
-        variant="secondary"
-        size="sm"
-        (clicked)="stopLoop()"
-      />
-    </div>
+          (clicked)="generateScrap()"
+          [disabled]="!canGenerateScrap()"
+        />
+        <app-button
+          [label]="'▶ ' + translationService.t('buttons.start')"
+          variant="secondary"
+          size="sm"
+          (clicked)="startLoop()"
+        />
+        <app-button
+          [label]="'⏸ ' + translationService.t('buttons.stop')"
+          variant="secondary"
+          size="sm"
+          (clicked)="stopLoop()"
+        />
+      </div>
+    }
   `,
   styles: [
     `
@@ -83,6 +64,7 @@ import { SCRAP_GENERATION_CONFIG } from '../../config/game-balance.config';
   ],
 })
 export class DebugControlsComponent {
+  readonly isDev = false;
   private resourcesService = inject(ResourcesService);
 
   constructor(

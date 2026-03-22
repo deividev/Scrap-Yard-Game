@@ -1,7 +1,8 @@
-import { Component, inject, computed, OnInit } from '@angular/core';
+import { Component, inject, computed, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { BackgroundGridComponent } from '../ui/background-grid/background-grid.component';
+import { ConfirmationModalComponent } from '../ui/confirmation-modal/confirmation-modal.component';
 import { GameStateService } from '../../services/game-state.service';
 import { SaveService } from '../../services/save.service';
 import { TranslationService } from '../../services/translation.service';
@@ -9,7 +10,7 @@ import { TranslationService } from '../../services/translation.service';
 @Component({
   selector: 'app-main-menu',
   standalone: true,
-  imports: [CommonModule, AppButtonComponent, BackgroundGridComponent],
+  imports: [CommonModule, AppButtonComponent, BackgroundGridComponent, ConfirmationModalComponent],
   template: `
     <div class="main-menu">
       <app-background-grid [opacity]="0.35"></app-background-grid>
@@ -68,6 +69,18 @@ import { TranslationService } from '../../services/translation.service';
           <span>v0.2.0 - Phase 2</span>
         </div>
       </div>
+
+      <!-- Modal Nueva Partida -->
+      <app-confirmation-modal
+        *ngIf="showNewGameModal()"
+        titleKey="main_menu.new_game"
+        messageKey="main_menu.confirm_new_game"
+        confirmLabelKey="main_menu.new_game_confirm"
+        cancelLabelKey="options.reset_cancel"
+        confirmVariant="primary"
+        (confirmed)="confirmNewGame()"
+        (cancelled)="showNewGameModal.set(false)"
+      />
     </div>
   `,
   styles: [
@@ -405,6 +418,7 @@ export class MainMenuComponent implements OnInit {
   // Computed reactivo que lee directamente del SaveService
   hasSavedGame = computed(() => this.saveService.isGameStarted());
   isElectron = typeof window !== 'undefined' && !!window.electronApi;
+  showNewGameModal = signal(false);
 
   // Partículas flotantes
   particles = [
@@ -436,21 +450,20 @@ export class MainMenuComponent implements OnInit {
 
   newGame(): void {
     if (this.hasSavedGame()) {
-      // Confirmar antes de borrar la partida
-      const confirmed = confirm(this.translationService.t('main_menu.confirm_new_game'));
-      if (!confirmed) return;
-
-      // Limpiar el save y recargar la página para empezar desde cero
-      this.saveService.clearSave().then(() => {
-        window.location.reload();
-      });
+      this.showNewGameModal.set(true);
     } else {
-      // No hay partida guardada, marcar juego iniciado e iniciar
       this.saveService.markGameStarted();
-      // Guardar inmediatamente para persistir settings y estado inicial
       this.saveService.save();
       this.gameStateService.startGame();
     }
+  }
+
+  async confirmNewGame(): Promise<void> {
+    this.showNewGameModal.set(false);
+    await this.saveService.resetToNewGame();
+    this.saveService.markGameStarted();
+    this.saveService.save();
+    this.gameStateService.startGame();
   }
 
   openOptions(): void {

@@ -33,7 +33,29 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   ],
   template: `
     <header class="resources-header">
-      <!-- Fila 1: dinero + todos los recursos -->
+      <!-- Barra superior: hint centrado + nav derecha -->
+      <div class="header-topbar">
+        <div class="topbar-hint">
+          <app-progression-hint></app-progression-hint>
+        </div>
+        <div class="header-actions">
+          <app-button
+            [label]="'🌐 ' + currentLang()"
+            variant="ghost"
+            size="sm"
+            (clicked)="toggleLanguage()"
+          />
+          <app-button
+            [label]="translationService.t('main_menu.back_to_menu')"
+            variant="ghost"
+            size="sm"
+            (clicked)="returnToMenu()"
+          />
+          <app-debug-controls></app-debug-controls>
+        </div>
+      </div>
+
+      <!-- Fila de recursos: iconos + sell buttons debajo de cada uno -->
       <div class="resources-row">
         <div
           class="resource-item money"
@@ -221,21 +243,6 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           </div>
         </div>
       </div>
-
-      <!-- Fila 2: hint de progresión + botones de control -->
-      <div class="controls-row">
-        <app-progression-hint></app-progression-hint>
-
-        <div class="header-actions">
-          <app-button
-            [label]="translationService.t('main_menu.back_to_menu')"
-            variant="ghost"
-            size="sm"
-            (clicked)="returnToMenu()"
-          />
-          <app-debug-controls></app-debug-controls>
-        </div>
-      </div>
     </header>
   `,
   styles: [
@@ -244,22 +251,29 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         background: var(--color-bg-panel);
         border-bottom: 2px solid rgba(255, 152, 0, 0.35);
         border-top: 2px solid var(--color-accent-main);
-        padding: var(--space-2) var(--space-4);
+        padding: var(--space-1) var(--space-4) var(--space-2);
         display: flex;
         flex-direction: column;
+        gap: var(--space-1);
+      }
+
+      .header-topbar {
+        display: flex;
+        align-items: center;
         gap: var(--space-2);
+        min-height: 28px;
+      }
+
+      .topbar-hint {
+        flex: 1;
+        display: flex;
+        justify-content: center;
       }
 
       .resources-row {
         display: flex;
         gap: var(--space-3);
-        align-items: center;
-      }
-
-      .controls-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
+        align-items: flex-start;
       }
 
       .resource-item {
@@ -687,6 +701,13 @@ export class ResourcesHeaderComponent implements OnDestroy {
     const smelter = this.machinesService.getMachine(MachineType.SMELTER);
     return smelter ? smelter.level > 0 : false;
   });
+
+  currentLang = computed(() => this.translationService.getLanguage().toUpperCase());
+
+  toggleLanguage(): void {
+    const current = this.translationService.getLanguage();
+    this.translationService.setLanguage(current === 'es' ? 'en' : 'es');
+  }
 
   returnToMenu(): void {
     // Guardar el juego antes de volver al menú

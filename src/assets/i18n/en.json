@@ -11,6 +11,7 @@
     "options": "Options",
     "exit": "Exit",
     "confirm_new_game": "Are you sure you want to start a new game? Your current progress will be lost.",
+    "new_game_confirm": "Start Fresh",
     "back_to_menu": "Main Menu"
   },
   "options": {
@@ -77,7 +78,7 @@
   },
   "notifications": {
     "upgrade_completed": "⬆ {name} — Lv {level}",
-    "machine_unlocked": "🏭 {name} is online!"
+    "machine_unlocked": "{name} is online!"
   },
   "progression": {
     "next_unlock": "Next unlock: {machine} ({requirement} Lv {level})",
