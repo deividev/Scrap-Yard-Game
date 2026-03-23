@@ -116,9 +116,9 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.CRUSHER,
-        requiredLevel: 3,
+        requiredLevel: 4,
         currentLevel,
-        isMet: currentLevel >= 3,
+        isMet: currentLevel >= 4,
       },
     ];
   }
@@ -129,15 +129,15 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.CRUSHER,
-        requiredLevel: 5,
+        requiredLevel: 8,
         currentLevel: crusherLevel,
-        isMet: crusherLevel >= 5,
+        isMet: crusherLevel >= 8,
       },
       {
         machineType: MachineType.SMELTER,
-        requiredLevel: 3,
+        requiredLevel: 5,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 3,
+        isMet: smelterLevel >= 5,
       },
     ];
   }
@@ -147,9 +147,9 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.PACKAGER,
-        requiredLevel: 3,
+        requiredLevel: 5,
         currentLevel,
-        isMet: currentLevel >= 3,
+        isMet: currentLevel >= 5,
       },
     ];
   }
@@ -160,27 +160,34 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.SEPARATOR,
-        requiredLevel: 2,
+        requiredLevel: 4,
         currentLevel: separatorLevel,
-        isMet: separatorLevel >= 2,
+        isMet: separatorLevel >= 4,
       },
       {
         machineType: MachineType.SMELTER,
-        requiredLevel: 4,
+        requiredLevel: 7,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 4,
+        isMet: smelterLevel >= 7,
       },
     ];
   }
 
   private getRecyclerRequirements(): UnlockRequirement[] {
-    const currentLevel = this.getMachineLevel(MachineType.SEPARATOR);
+    const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
+    const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
     return [
       {
         machineType: MachineType.SEPARATOR,
+        requiredLevel: 5,
+        currentLevel: separatorLevel,
+        isMet: separatorLevel >= 5,
+      },
+      {
+        machineType: MachineType.ASSEMBLER,
         requiredLevel: 3,
-        currentLevel,
-        isMet: currentLevel >= 3,
+        currentLevel: assemblerLevel,
+        isMet: assemblerLevel >= 3,
       },
     ];
   }
@@ -192,21 +199,21 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.RECYCLER,
-        requiredLevel: 2,
+        requiredLevel: 4,
         currentLevel: recyclerLevel,
-        isMet: recyclerLevel >= 2,
+        isMet: recyclerLevel >= 4,
       },
       {
         machineType: MachineType.SMELTER,
-        requiredLevel: 5,
+        requiredLevel: 8,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 5,
+        isMet: smelterLevel >= 8,
       },
       {
         machineType: MachineType.ASSEMBLER,
-        requiredLevel: 1,
+        requiredLevel: 4,
         currentLevel: assemblerLevel,
-        isMet: assemblerLevel >= 1,
+        isMet: assemblerLevel >= 4,
       },
     ];
   }
@@ -217,15 +224,15 @@ export class MachineUnlockService {
     return [
       {
         machineType: MachineType.ELECTRIC_ASSEMBLER,
-        requiredLevel: 2,
+        requiredLevel: 5,
         currentLevel: electricAssemblerLevel,
-        isMet: electricAssemblerLevel >= 2,
+        isMet: electricAssemblerLevel >= 5,
       },
       {
         machineType: MachineType.PACKAGER,
-        requiredLevel: 3,
+        requiredLevel: 8,
         currentLevel: packagerLevel,
-        isMet: packagerLevel >= 3,
+        isMet: packagerLevel >= 8,
       },
     ];
   }
@@ -241,9 +248,9 @@ export class MachineUnlockService {
     }
 
     const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
-    if (crusherLevel >= 3) {
+    if (crusherLevel >= 4) {
       this.machinesService.upgradeLevel(MachineType.SMELTER);
-      this.debugLog('[MachineUnlock] Smelter unlocked! (Crusher level 2 reached)');
+      this.debugLog('[MachineUnlock] Smelter unlocked! (Crusher level 4 reached)');
       const machineName = this.translationService.t('machines.smelter');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -265,9 +272,11 @@ export class MachineUnlockService {
 
     const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    if (crusherLevel >= 5 && smelterLevel >= 3) {
+    if (crusherLevel >= 8 && smelterLevel >= 5) {
       this.machinesService.upgradeLevel(MachineType.PACKAGER);
-      this.debugLog('[MachineUnlock] Packager unlocked! (Smelter level 3 reached)');
+      this.debugLog(
+        '[MachineUnlock] Packager unlocked! (Crusher level 8 + Smelter level 5 reached)',
+      );
       const machineName = this.translationService.t('machines.packager');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -288,9 +297,9 @@ export class MachineUnlockService {
     }
 
     const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
-    if (packagerLevel >= 3) {
+    if (packagerLevel >= 5) {
       this.machinesService.upgradeLevel(MachineType.SEPARATOR);
-      this.debugLog('[MachineUnlock] Separator unlocked! (Packager level 2 reached)');
+      this.debugLog('[MachineUnlock] Separator unlocked! (Packager level 5 reached)');
       const machineName = this.translationService.t('machines.separator');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -313,10 +322,10 @@ export class MachineUnlockService {
     const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
 
-    if (separatorLevel >= 2 && smelterLevel >= 4) {
+    if (separatorLevel >= 3 && smelterLevel >= 5) {
       this.machinesService.upgradeLevel(MachineType.ASSEMBLER);
       this.debugLog(
-        '[MachineUnlock] Assembler unlocked! (Separator level 2 + Smelter level 4 reached)',
+        '[MachineUnlock] Assembler unlocked! (Separator level 3 + Smelter level 5 reached)',
       );
       const machineName = this.translationService.t('machines.assembler');
       this.notificationService.show(
@@ -338,9 +347,9 @@ export class MachineUnlockService {
     }
 
     const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
-    if (separatorLevel >= 3) {
+    if (separatorLevel >= 4) {
       this.machinesService.upgradeLevel(MachineType.RECYCLER);
-      this.debugLog('[MachineUnlock] Recycler unlocked! (Separator level 3 reached)');
+      this.debugLog('[MachineUnlock] Recycler unlocked! (Separator level 4 reached)');
       const machineName = this.translationService.t('machines.recycler');
       this.notificationService.show(
         this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
@@ -364,10 +373,10 @@ export class MachineUnlockService {
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
     const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
 
-    if (recyclerLevel >= 2 && smelterLevel >= 5 && assemblerLevel >= 1) {
+    if (recyclerLevel >= 3 && smelterLevel >= 6 && assemblerLevel >= 2) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_ASSEMBLER);
       this.debugLog(
-        '[MachineUnlock] Electric Assembler unlocked! (Recycler level 2 + Smelter level 5 + Assembler unlocked)',
+        '[MachineUnlock] Electric Assembler unlocked! (Recycler level 3 + Smelter level 6 + Assembler level 2)',
       );
       const machineName = this.translationService.t('machines.electric_assembler');
       this.notificationService.show(
@@ -391,10 +400,10 @@ export class MachineUnlockService {
     const electricAssemblerLevel = this.getMachineLevel(MachineType.ELECTRIC_ASSEMBLER);
     const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
 
-    if (electricAssemblerLevel >= 2 && packagerLevel >= 3) {
+    if (electricAssemblerLevel >= 3 && packagerLevel >= 5) {
       this.machinesService.upgradeLevel(MachineType.ELECTRIC_PACKAGER);
       this.debugLog(
-        '[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 2 + Packager level 3)',
+        '[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 3 + Packager level 5)',
       );
       const machineName = this.translationService.t('machines.electric_packager');
       this.notificationService.show(

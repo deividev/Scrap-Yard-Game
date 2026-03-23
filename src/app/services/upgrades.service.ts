@@ -290,10 +290,9 @@ export class UpgradesService {
       return 1;
     }
 
-    // Progresión A - Agresiva (valores enteros):
-    // L10-19: x3, L20-29: x5, L30-39: x7, L40-50: x10
+    // Progresión lineal: L10-19: x2, L20-29: x3, L30-39: x4, L40-50: x5
     const tier = Math.floor(upgrades / MACHINE_UPGRADE_CONFIG.PRODUCTION_BONUS_EVERY_N_LEVELS);
-    const productionValues = [1, 3, 5, 7, 10]; // tier 0-4
+    const productionValues = [1, 2, 3, 4, 5]; // tier 0-4
     return productionValues[Math.min(tier, 4)] || 1;
   }
 

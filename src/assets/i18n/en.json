@@ -102,7 +102,8 @@
       "none": "—"
     },
     "scrap_manual": {
-      "name": "Improved Manual Unloading"
+      "name": "Improved Manual Unloading",
+      "locked_hint": "Available once you unlock the Packager"
     },
     "storage": {
       "scrap": "Expand Scrap Silo",

@@ -7,6 +7,7 @@ export interface Machine {
   baseProduction: MachineProduction;
   isActive: boolean;
   progress: number;
+  icon?: string;
 }
 
 export interface MachineConsumption {

@@ -10,6 +10,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.CRUSHER,
     name: 'Trituradora',
+    icon: 'assets/icons/machines/crusher_machine.png',
     level: 1,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -28,6 +29,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SEPARATOR,
     name: 'Separador',
+    icon: 'assets/icons/machines/separator_machine.png',
     level: 0,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -46,12 +48,13 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SMELTER,
     name: 'Fundidora',
+    icon: 'assets/icons/machines/smelter_machine.png',
     level: 0,
-    baseSpeed: 0.35,
+    baseSpeed: 0.25,
     baseConsumption: [
       {
         resourceId: ResourceType.METAL,
-        amount: 5,
+        amount: 4,
       },
     ],
     baseProduction: {
@@ -64,6 +67,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ASSEMBLER,
     name: 'Ensambladora',
+    icon: 'assets/icons/machines/assembler_machine.png',
     level: 0,
     baseSpeed: 0.17,
     baseConsumption: [
@@ -86,6 +90,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.PACKAGER,
     name: 'Empaquetadora',
+    icon: 'assets/icons/machines/packager_machine.png',
     level: 0,
     baseSpeed: 0.1,
     baseConsumption: [
@@ -96,7 +101,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 20,
+      amount: 22,
     },
     isActive: false,
     progress: 0,
@@ -104,6 +109,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ELECTRIC_PACKAGER,
     name: 'Empaquetadora eléctrica',
+    icon: 'assets/icons/machines/electric_packager_machine.png',
     level: 0,
     baseSpeed: 0.1,
     baseConsumption: [
@@ -114,7 +120,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 40,
+      amount: 65,
     },
     isActive: false,
     progress: 0,
@@ -122,6 +128,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.RECYCLER,
     name: 'Recicladora',
+    icon: 'assets/icons/machines/recycler_machine.png',
     level: 0,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -140,6 +147,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ELECTRIC_ASSEMBLER,
     name: 'Ensambladora eléctrica',
+    icon: 'assets/icons/machines/electric_assembler_machine.png',
     level: 0,
     baseSpeed: 0.12,
     baseConsumption: [

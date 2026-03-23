@@ -66,7 +66,7 @@ import { TranslationService } from '../../services/translation.service';
         </div>
 
         <div class="version-info">
-          <span>v0.2.0 - Phase 2</span>
+          <span>v0.9 Beta</span>
         </div>
       </div>
 

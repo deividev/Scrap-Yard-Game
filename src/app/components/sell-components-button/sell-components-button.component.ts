@@ -15,13 +15,13 @@ import { AudioService } from '../../services/audio.service';
     <app-tooltip [text]="translationService.t('tooltips.sell_components')" [position]="'bottom'">
       <app-button variant="primary" size="sm" [disabled]="!canSell()" (clicked)="sellComponents()">
         <span style="display: inline-flex; align-items: center; gap: 4px;">
-          <span>-1</span>
+          <span>-{{ sellAmount }}</span>
           <img
             src="assets/icons/components_resource.png"
             style="width: 28px; height: 28px; vertical-align: middle;"
             alt="Components"
           />
-          <span>+3</span>
+          <span>+{{ moneyGain() }}</span>
           <img
             src="assets/icons/gold_resource.png"
             style="width: 28px; height: 28px; vertical-align: middle;"
@@ -35,7 +35,10 @@ import { AudioService } from '../../services/audio.service';
 })
 export class SellComponentsButtonComponent {
   sellAmount = 1;
-  moneyGain = 3;
+
+  moneyGain = computed(
+    () => this.marketService.getPrice(ResourceType.COMPONENTS) * this.sellAmount,
+  );
 
   canSell = computed(() => {
     return this.resourcesService.hasEnough(ResourceType.COMPONENTS, this.sellAmount);

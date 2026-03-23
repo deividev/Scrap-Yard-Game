@@ -39,6 +39,11 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
     >
       <div class="machine-header">
         <div class="machine-title-group">
+          @if (machineIcon()) {
+            <div class="machine-icon-badge" [class.locked]="isLocked()">
+              <img [src]="machineIcon()!" class="machine-icon" alt="" />
+            </div>
+          }
           <h3 class="machine-name">{{ translatedMachineName() }}</h3>
           <span class="machine-level" *ngIf="!isLocked()"
             >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
@@ -269,6 +274,10 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.2);
       }
 
+      .machine-card.locked {
+        opacity: 0.7;
+      }
+
       .machine-header {
         display: flex;
         justify-content: space-between;
@@ -343,6 +352,44 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         display: flex;
         align-items: center;
         gap: 2px;
+      }
+
+      .machine-icon-badge {
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+        background: radial-gradient(
+          circle at 40% 35%,
+          rgba(220, 174, 92, 0.18) 0%,
+          rgba(30, 30, 30, 0.7) 70%
+        );
+        border: 1.5px solid rgba(220, 174, 92, 0.35);
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(220, 174, 92, 0.12);
+        transition: opacity 0.3s ease;
+      }
+
+      .machine-icon-badge.locked {
+        opacity: 0.6;
+        filter: grayscale(0.35);
+        border-color: rgba(158, 158, 158, 0.25);
+        background: radial-gradient(
+          circle at 40% 35%,
+          rgba(100, 100, 100, 0.15) 0%,
+          rgba(20, 20, 20, 0.7) 70%
+        );
+      }
+
+      .machine-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .resource-icon {
@@ -539,6 +586,10 @@ export class MachineCardComponent {
     // El ID de la máquina ya es el tipo (crusher, separator, etc.)
     return this.translationService.t(`machines.${this.machine.id}`);
   });
+
+  machineIcon(): string | null {
+    return this.machine.icon ?? null;
+  }
 
   productionMultiplier = computed(() => {
     const machine = this.currentMachine();

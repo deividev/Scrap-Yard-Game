@@ -1,9 +1,9 @@
 {
   "name": "scrap-yard",
-  "version": "0.0.0",
+  "version": "0.9.0",
   "main": "electron/main.js",
   "description": "Scrap Yard Idle — Industrial idle game. Turn scrap into profit, machine by machine.",
-  "author": "Unknown",
+  "author": "David",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -13,7 +13,7 @@
     "build": "ng build",
     "build:electron": "ng build --base-href ./",
     "dist": "ng build --configuration production",
-    "electron:build": "ng build --configuration production && electron-builder",
+    "electron:build": "ng build --configuration production --base-href ./ && electron-builder",
     "clean": "node ./scripts/clean.js",
     "package:win": "node ./scripts/pack.js",
     "watch": "ng build --watch --configuration development",
@@ -59,7 +59,7 @@
     "productName": "Scrap Yard",
     "directories": {
       "output": "dist_electron",
-      "buildResources": "build_resources"
+      "buildResources": "build"
     },
     "files": [
       "dist/scrap-yard/**",

@@ -21,9 +21,9 @@ import { ResourceType } from '../models/resource.model';
 })
 export class MarketService {
   // Base prices according to MVP_BALANCING_TABLE (for future use)
-  private readonly METAL_PRICE = 2;
-  private readonly PLASTIC_PRICE = 2;
-  private readonly COMPONENTS_PRICE = 3; // Early game: 1 component = 2 money
+  private readonly METAL_PRICE = 1;
+  private readonly PLASTIC_PRICE = 1;
+  private readonly COMPONENTS_PRICE = 3; // Early game: 1 component = 3 money
 
   constructor(private resourcesService: ResourcesService) {}
 

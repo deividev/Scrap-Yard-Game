@@ -146,7 +146,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     id: UpgradeId.UPG_SCRAP_001,
     category: UpgradeCategory.SCRAP,
     name: 'Descarga Manual Mejorada',
-    baseCostMoney: 50,
+    baseCostMoney: 70,
     description: '+1 Chatarra adicional por acción manual por nivel',
     effectType: 'scrap_manual',
   },

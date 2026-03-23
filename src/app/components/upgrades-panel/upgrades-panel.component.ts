@@ -12,6 +12,7 @@ import { ScrapGenerationService } from '../../services/scrap-generation.service'
 import { TranslationService } from '../../services/translation.service';
 import { UpgradeId } from '../../models/upgrade.model';
 import { ResourceType } from '../../models/resource.model';
+import { Machine, MachineType } from '../../models/machine.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
 import { TooltipComponent } from '../ui/tooltip/tooltip.component';
@@ -55,74 +56,85 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         <div class="tab-content">
           <div *ngIf="activeTab() === 'scrap'" class="scrap-upgrades">
             <!-- Manual Scrap Boost Upgrade -->
-            <div class="upgrade-item">
-              <div class="upgrade-header">
-                <span class="upgrade-icon">🔨</span>
-                <div class="upgrade-info">
-                  <h4 class="upgrade-name">{{ scrapManualUpgrade().name }}</h4>
-                  <p class="upgrade-description">
-                    {{ translationService.t('upgrades.nivel') }} {{ scrapManualUpgrade().level }}
+            <div class="upgrade-item" [class.upgrade-item--locked]="scrapManualUpgrade().isLocked">
+              <div *ngIf="scrapManualUpgrade().isLocked" class="upgrade-locked-overlay">
+                <span class="upgrade-locked-icon">🔒</span>
+                <span class="upgrade-locked-name">{{ scrapManualUpgrade().name }}</span>
+                <span class="upgrade-locked-hint">{{
+                  translationService.t('upgrades.scrap_manual.locked_hint')
+                }}</span>
+              </div>
+              <ng-container *ngIf="!scrapManualUpgrade().isLocked">
+                <div class="upgrade-header">
+                  <span class="upgrade-icon">🔨</span>
+                  <div class="upgrade-info">
+                    <h4 class="upgrade-name">{{ scrapManualUpgrade().name }}</h4>
+                    <p class="upgrade-description">
+                      {{ translationService.t('upgrades.nivel') }} {{ scrapManualUpgrade().level }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="upgrade-details">
+                  <p class="detail-line">
+                    <strong>{{
+                      translationService.t('upgrades.scrap_details.manual_label')
+                    }}</strong>
+                    +{{ scrapManualUpgrade().currentGeneration }}
+                    {{ translationService.t('upgrades.scrap_details.per_click') }}
+                  </p>
+                  <p class="detail-line" *ngIf="!scrapManualUpgrade().isMaxLevel">
+                    <strong>{{
+                      translationService.t('upgrades.scrap_details.next_level_label')
+                    }}</strong>
+                    +{{ scrapManualUpgrade().nextGeneration }}
+                    {{ translationService.t('upgrades.scrap_details.per_click') }}
                   </p>
                 </div>
-              </div>
 
-              <div class="upgrade-details">
-                <p class="detail-line">
-                  <strong>{{ translationService.t('upgrades.scrap_details.manual_label') }}</strong>
-                  +{{ scrapManualUpgrade().currentGeneration }}
-                  {{ translationService.t('upgrades.scrap_details.per_click') }}
-                </p>
-                <p class="detail-line" *ngIf="!scrapManualUpgrade().isMaxLevel">
-                  <strong>{{
-                    translationService.t('upgrades.scrap_details.next_level_label')
-                  }}</strong>
-                  +{{ scrapManualUpgrade().nextGeneration }}
-                  {{ translationService.t('upgrades.scrap_details.per_click') }}
-                </p>
-              </div>
+                <div class="upgrade-cost">
+                  <span class="cost-item">
+                    <app-tooltip [text]="translationService.t('resources.money')" [inline]="true">
+                      <img src="assets/icons/gold_resource.png" class="cost-icon" alt="Money" />
+                    </app-tooltip>
+                    {{ scrapManualUpgrade().cost.money | formatNumber }}
+                  </span>
+                  <span *ngIf="scrapManualUpgrade().cost.components > 0" class="cost-item">
+                    <app-tooltip
+                      [text]="translationService.t('resources.components')"
+                      [inline]="true"
+                    >
+                      <img
+                        src="assets/icons/components_resource.png"
+                        class="cost-icon"
+                        alt="Components"
+                      />
+                    </app-tooltip>
+                    {{ scrapManualUpgrade().cost.components | formatNumber }}
+                  </span>
+                </div>
 
-              <div class="upgrade-cost">
-                <span class="cost-item">
-                  <app-tooltip [text]="translationService.t('resources.money')" [inline]="true">
-                    <img src="assets/icons/gold_resource.png" class="cost-icon" alt="Money" />
-                  </app-tooltip>
-                  {{ scrapManualUpgrade().cost.money | formatNumber }}
-                </span>
-                <span *ngIf="scrapManualUpgrade().cost.components > 0" class="cost-item">
-                  <app-tooltip
-                    [text]="translationService.t('resources.components')"
-                    [inline]="true"
-                  >
-                    <img
-                      src="assets/icons/components_resource.png"
-                      class="cost-icon"
-                      alt="Components"
-                    />
-                  </app-tooltip>
-                  {{ scrapManualUpgrade().cost.components | formatNumber }}
-                </span>
-              </div>
+                <!-- Barra de progreso -->
+                <app-progress-bar
+                  *ngIf="isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)"
+                  [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_001)"
+                  [label]="
+                    translationService.t('upgrades.upgrading') +
+                    ': ' +
+                    formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_001))
+                  "
+                />
 
-              <!-- Barra de progreso -->
-              <app-progress-bar
-                *ngIf="isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)"
-                [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_001)"
-                [label]="
-                  translationService.t('upgrades.upgrading') +
-                  ': ' +
-                  formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_001))
-                "
-              />
-
-              <app-button
-                [label]="translationService.t('buttons.mejorar')"
-                variant="primary"
-                size="sm"
-                [disabled]="
-                  !scrapManualUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)
-                "
-                (clicked)="purchaseScrapManualUpgrade()"
-              />
+                <app-button
+                  [label]="translationService.t('buttons.mejorar')"
+                  variant="primary"
+                  size="sm"
+                  [disabled]="
+                    !scrapManualUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)
+                  "
+                  (clicked)="purchaseScrapManualUpgrade()"
+                />
+              </ng-container>
             </div>
 
             <!-- Automatic Scrap Generation Upgrade -->
@@ -275,264 +287,121 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
           </div>
 
           <div *ngIf="activeTab() === 'machine'">
-            <div *ngIf="selectedMachine(); else allMachinesView" class="machine-info">
-              <div class="machine-focused-header">
-                <h3 class="focused-title">
-                  {{ translationService.t('upgrades.machine_tab.showing_upgrades_for') }}:
-                  {{ translatedMachineName() }}
-                </h3>
-                <app-button
-                  [label]="translationService.t('upgrades.machine_tab.view_all_machines')"
-                  variant="ghost"
-                  size="sm"
-                  (clicked)="clearMachineSelection()"
-                />
-              </div>
-              <div class="upgrade-item">
-                <div class="upgrade-header">
-                  <img src="assets/icons/metal_resource.png" class="upgrade-icon" alt="Machine" />
-                  <div class="upgrade-info">
-                    <h4 class="upgrade-name">{{ translatedMachineName() }}</h4>
-                    <p class="upgrade-description">
-                      {{ translationService.t('upgrades.nivel') }}
-                      {{ machineUpgrade().level }} / {{ machineUpgrade().maxLevel }}
+            <div class="all-machines-view">
+              <div class="machines-grid">
+                <div
+                  *ngFor="let machineUpgrade of allMachineUpgrades()"
+                  class="machine-upgrade-card"
+                  [class.locked]="machineUpgrade.isLocked"
+                  [class.highlighted]="machineUpgrade.machineId === selectedMachine()?.id"
+                >
+                  <div class="machine-card-header">
+                    <div class="machine-card-title-group">
+                      <div
+                        *ngIf="machineUpgrade.icon"
+                        class="machine-icon-badge sm"
+                        [class.locked]="machineUpgrade.isLocked"
+                      >
+                        <img [src]="machineUpgrade.icon" class="machine-icon" alt="" />
+                      </div>
+                      <h4 class="machine-card-name">{{ machineUpgrade.machineName }}</h4>
+                    </div>
+                    <span class="machine-card-level" *ngIf="!machineUpgrade.isLocked">
+                      Nv {{ machineUpgrade.level }} / {{ machineUpgrade.maxLevel }}
+                    </span>
+                    <span class="machine-card-locked" *ngIf="machineUpgrade.isLocked">
+                      🔒 {{ translationService.t('status.bloqueada') }}
+                    </span>
+                  </div>
+
+                  <div class="machine-card-body" *ngIf="!machineUpgrade.isLocked">
+                    <div class="upgrade-stat">
+                      <span class="stat-label"
+                        >{{ translationService.t('upgrades.machine_tab.speed_label') }}:</span
+                      >
+                      <span class="stat-value">
+                        {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} c/s
+                        <span class="bonus" *ngIf="(machineUpgrade.speedBonus || 0) > 0">
+                          (+{{ ((machineUpgrade.speedBonus || 0) * 100).toFixed(0) }}%)
+                        </span>
+                      </span>
+                    </div>
+
+                    <div
+                      class="upgrade-stat"
+                      *ngIf="(machineUpgrade.productionMultiplier || 1) > 1"
+                    >
+                      <span class="stat-label"
+                        >{{ translationService.t('upgrades.machine_tab.production_label') }}:</span
+                      >
+                      <span class="stat-value efficiency-gain"
+                        >×{{ machineUpgrade.productionMultiplier || 1 }}</span
+                      >
+                    </div>
+
+                    <div
+                      class="upgrade-stat"
+                      *ngIf="(machineUpgrade.nextBonusAt || 0) > 0 && !machineUpgrade.isMaxLevel"
+                    >
+                      <span class="stat-label"
+                        >{{ translationService.t('upgrades.machine_tab.next_bonus_label') }}:</span
+                      >
+                      <span class="stat-value"
+                        >{{ machineUpgrade.nextBonusAt || 0 }}
+                        {{ translationService.t('upgrades.machine_tab.levels') }}</span
+                      >
+                    </div>
+
+                    <div
+                      class="machine-card-cost"
+                      *ngIf="!machineUpgrade.isMaxLevel && machineUpgrade.cost"
+                    >
+                      <span class="cost-item">
+                        <app-tooltip
+                          [text]="translationService.t('resources.money')"
+                          [inline]="true"
+                        >
+                          <img src="assets/icons/gold_resource.png" class="cost-icon" alt="Money" />
+                        </app-tooltip>
+                        {{ machineUpgrade.cost.money || 0 | formatNumber }}
+                      </span>
+                      <span *ngIf="(machineUpgrade.cost.components || 0) > 0" class="cost-item">
+                        <app-tooltip
+                          [text]="translationService.t('resources.components')"
+                          [inline]="true"
+                        >
+                          <img
+                            src="assets/icons/components_resource.png"
+                            class="cost-icon"
+                            alt="Components"
+                          />
+                        </app-tooltip>
+                        {{ machineUpgrade.cost.components || 0 | formatNumber }}
+                      </span>
+                    </div>
+
+                    <app-progress-bar
+                      *ngIf="machineUpgrade.isInProgress && machineUpgrade.upgradeId"
+                      [progress]="getUpgradeProgress(machineUpgrade.upgradeId)"
+                      [label]="formatTime(getRemainingTime(machineUpgrade.upgradeId))"
+                    />
+
+                    <app-button
+                      *ngIf="!machineUpgrade.isMaxLevel"
+                      [label]="translationService.t('buttons.mejorar')"
+                      variant="primary"
+                      size="sm"
+                      [disabled]="!machineUpgrade.canAfford || machineUpgrade.isInProgress"
+                      (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
+                    />
+
+                    <p *ngIf="machineUpgrade.isMaxLevel" class="max-level">
+                      {{ translationService.t('upgrades.max_level') }}
                     </p>
                   </div>
                 </div>
-
-                <div class="upgrade-details">
-                  <p class="detail-line">
-                    <strong>{{
-                      translationService.t('upgrades.machine_tab.base_speed_label')
-                    }}</strong>
-                    {{ machineUpgrade().baseSpeed }}
-                    {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
-                  </p>
-                  <p class="detail-line">
-                    <strong>{{
-                      translationService.t('upgrades.machine_tab.effective_speed_label')
-                    }}</strong>
-                    {{ machineUpgrade().effectiveSpeed.toFixed(2) }}
-                    {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
-                    <span class="bonus"
-                      >(+{{ (machineUpgrade().speedBonus * 100).toFixed(0) }}%)</span
-                    >
-                  </p>
-                  <p
-                    class="detail-line"
-                    *ngIf="
-                      machineUpgrade().consumptionMultiplier > 1 ||
-                      machineUpgrade().productionMultiplier > 1
-                    "
-                  >
-                    <strong>{{
-                      translationService.t('upgrades.machine_tab.efficiency_label')
-                    }}</strong>
-                    <span *ngIf="machineUpgrade().consumptionMultiplier > 1">
-                      {{ translationService.t('upgrades.machine_tab.consumption_label') }}: ×{{
-                        machineUpgrade().consumptionMultiplier
-                      }}
-                    </span>
-                    <span
-                      *ngIf="machineUpgrade().productionMultiplier > 1"
-                      [class.efficiency-gain]="
-                        machineUpgrade().productionMultiplier >
-                        machineUpgrade().consumptionMultiplier
-                      "
-                    >
-                      {{ translationService.t('upgrades.machine_tab.production_label') }}: ×{{
-                        machineUpgrade().productionMultiplier
-                      }}
-                    </span>
-                  </p>
-                  <p
-                    class="detail-line"
-                    *ngIf="!machineUpgrade().isMaxLevel && machineUpgrade().nextBonusAt > 0"
-                  >
-                    <strong>{{
-                      translationService.t('upgrades.machine_tab.next_bonus_label')
-                    }}</strong>
-                    {{ translationService.t('upgrades.machine_tab.in_levels').replace('{{count}}',
-                    machineUpgrade().nextBonusAt.toString()) }}
-                  </p>
-                </div>
-
-                <div class="upgrade-cost" *ngIf="!machineUpgrade().isMaxLevel">
-                  <span class="cost-item">
-                    <app-tooltip [text]="translationService.t('resources.money')" [inline]="true">
-                      <img src="assets/icons/gold_resource.png" class="cost-icon" alt="Money" />
-                    </app-tooltip>
-                    {{ machineUpgrade().cost.money | formatNumber }}
-                  </span>
-                  <span *ngIf="machineUpgrade().cost.components > 0" class="cost-item">
-                    <app-tooltip
-                      [text]="translationService.t('resources.components')"
-                      [inline]="true"
-                    >
-                      <img
-                        src="assets/icons/components_resource.png"
-                        class="cost-icon"
-                        alt="Components"
-                      />
-                    </app-tooltip>
-                    {{ machineUpgrade().cost.components | formatNumber }}
-                  </span>
-                </div>
-
-                <!-- Barra de progreso -->
-                <app-progress-bar
-                  *ngIf="
-                    currentMachineUpgradeId() && isUpgradeInProgress(currentMachineUpgradeId()!)
-                  "
-                  [progress]="getUpgradeProgress(currentMachineUpgradeId()!)"
-                  [label]="
-                    translationService.t('upgrades.upgrading') +
-                    ': ' +
-                    formatTime(getRemainingTime(currentMachineUpgradeId()!))
-                  "
-                />
-
-                <app-button
-                  *ngIf="!machineUpgrade().isMaxLevel"
-                  [label]="translationService.t('buttons.mejorar')"
-                  variant="primary"
-                  size="sm"
-                  [disabled]="
-                    !machineUpgrade().canAfford ||
-                    (currentMachineUpgradeId()
-                      ? isUpgradeInProgress(currentMachineUpgradeId()!)
-                      : false)
-                  "
-                  (clicked)="purchaseMachineUpgrade()"
-                />
-
-                <p *ngIf="machineUpgrade().isMaxLevel" class="max-level">
-                  {{ translationService.t('upgrades.max_level') }}
-                </p>
               </div>
             </div>
-            <ng-template #allMachinesView>
-              <div class="all-machines-view">
-                <div class="global-view-header">
-                  <h3>{{ translationService.t('upgrades.machine_tab.all_machines_title') }}</h3>
-                  <p class="hint">
-                    {{ translationService.t('upgrades.machine_tab.click_machine_hint') }}
-                  </p>
-                </div>
-
-                <div class="machines-grid">
-                  <div
-                    *ngFor="let machineUpgrade of allMachineUpgrades()"
-                    class="machine-upgrade-card"
-                    [class.locked]="machineUpgrade.isLocked"
-                  >
-                    <div class="machine-card-header">
-                      <h4 class="machine-card-name">{{ machineUpgrade.machineName }}</h4>
-                      <span class="machine-card-level" *ngIf="!machineUpgrade.isLocked">
-                        Nv {{ machineUpgrade.level }} / {{ machineUpgrade.maxLevel }}
-                      </span>
-                      <span class="machine-card-locked" *ngIf="machineUpgrade.isLocked">
-                        🔒 {{ translationService.t('status.bloqueada') }}
-                      </span>
-                    </div>
-
-                    <div class="machine-card-body" *ngIf="!machineUpgrade.isLocked">
-                      <div class="upgrade-stat">
-                        <span class="stat-label"
-                          >{{ translationService.t('upgrades.machine_tab.speed_label') }}:</span
-                        >
-                        <span class="stat-value">
-                          {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} c/s
-                          <span class="bonus" *ngIf="(machineUpgrade.speedBonus || 0) > 0">
-                            (+{{ ((machineUpgrade.speedBonus || 0) * 100).toFixed(0) }}%)
-                          </span>
-                        </span>
-                      </div>
-
-                      <div
-                        class="upgrade-stat"
-                        *ngIf="(machineUpgrade.productionMultiplier || 1) > 1"
-                      >
-                        <span class="stat-label"
-                          >{{
-                            translationService.t('upgrades.machine_tab.production_label')
-                          }}:</span
-                        >
-                        <span class="stat-value efficiency-gain"
-                          >×{{ machineUpgrade.productionMultiplier || 1 }}</span
-                        >
-                      </div>
-
-                      <div
-                        class="upgrade-stat"
-                        *ngIf="(machineUpgrade.nextBonusAt || 0) > 0 && !machineUpgrade.isMaxLevel"
-                      >
-                        <span class="stat-label"
-                          >{{
-                            translationService.t('upgrades.machine_tab.next_bonus_label')
-                          }}:</span
-                        >
-                        <span class="stat-value"
-                          >{{ machineUpgrade.nextBonusAt || 0 }}
-                          {{ translationService.t('upgrades.machine_tab.levels') }}</span
-                        >
-                      </div>
-
-                      <div
-                        class="machine-card-cost"
-                        *ngIf="!machineUpgrade.isMaxLevel && machineUpgrade.cost"
-                      >
-                        <span class="cost-item">
-                          <app-tooltip
-                            [text]="translationService.t('resources.money')"
-                            [inline]="true"
-                          >
-                            <img
-                              src="assets/icons/gold_resource.png"
-                              class="cost-icon"
-                              alt="Money"
-                            />
-                          </app-tooltip>
-                          {{ machineUpgrade.cost.money || 0 | formatNumber }}
-                        </span>
-                        <span *ngIf="(machineUpgrade.cost.components || 0) > 0" class="cost-item">
-                          <app-tooltip
-                            [text]="translationService.t('resources.components')"
-                            [inline]="true"
-                          >
-                            <img
-                              src="assets/icons/components_resource.png"
-                              class="cost-icon"
-                              alt="Components"
-                            />
-                          </app-tooltip>
-                          {{ machineUpgrade.cost.components || 0 | formatNumber }}
-                        </span>
-                      </div>
-
-                      <app-progress-bar
-                        *ngIf="machineUpgrade.isInProgress && machineUpgrade.upgradeId"
-                        [progress]="getUpgradeProgress(machineUpgrade.upgradeId)"
-                        [label]="formatTime(getRemainingTime(machineUpgrade.upgradeId))"
-                      />
-
-                      <app-button
-                        *ngIf="!machineUpgrade.isMaxLevel"
-                        [label]="translationService.t('buttons.mejorar')"
-                        variant="primary"
-                        size="sm"
-                        [disabled]="!machineUpgrade.canAfford || machineUpgrade.isInProgress"
-                        (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
-                      />
-
-                      <p *ngIf="machineUpgrade.isMaxLevel" class="max-level">
-                        {{ translationService.t('upgrades.max_level') }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ng-template>
           </div>
         </div>
       </div>
@@ -731,6 +600,11 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         border-color: var(--color-accent-main);
       }
 
+      .machine-upgrade-card.highlighted {
+        border-color: var(--color-accent-main);
+        box-shadow: 0 0 0 2px rgba(220, 174, 92, 0.2);
+      }
+
       .machine-upgrade-card.locked {
         opacity: 0.6;
       }
@@ -741,6 +615,55 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         align-items: center;
         padding-bottom: var(--space-2);
         border-bottom: 1px solid var(--color-border);
+      }
+
+      .machine-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .machine-icon-badge {
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+        background: radial-gradient(
+          circle at 40% 35%,
+          rgba(220, 174, 92, 0.18) 0%,
+          rgba(30, 30, 30, 0.7) 70%
+        );
+        border: 1.5px solid rgba(220, 174, 92, 0.35);
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(220, 174, 92, 0.12);
+        transition: opacity 0.3s ease;
+      }
+
+      .machine-icon-badge.sm {
+        width: 38px;
+        height: 38px;
+      }
+
+      .machine-icon-badge.locked {
+        opacity: 0.6;
+        filter: grayscale(0.35);
+        border-color: rgba(158, 158, 158, 0.25);
+        background: radial-gradient(
+          circle at 40% 35%,
+          rgba(100, 100, 100, 0.15) 0%,
+          rgba(20, 20, 20, 0.7) 70%
+        );
+      }
+
+      .machine-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .machine-card-name {
@@ -803,6 +726,37 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         display: flex;
         flex-direction: column;
         gap: var(--space-3);
+      }
+
+      .upgrade-item--locked {
+        opacity: 0.6;
+        border-style: dashed;
+        border-color: rgba(255, 193, 7, 0.3);
+      }
+
+      .upgrade-locked-overlay {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) 0;
+        text-align: center;
+      }
+
+      .upgrade-locked-icon {
+        font-size: 24px;
+      }
+
+      .upgrade-locked-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+
+      .upgrade-locked-hint {
+        font-size: 12px;
+        color: var(--color-text-secondary);
+        font-style: italic;
       }
 
       .upgrade-header {
@@ -920,7 +874,18 @@ export class UpgradesPanelComponent {
   readonly UpgradeId = UpgradeId; // Exponer enum para usar en template
 
   isMinimized = signal(false);
-  activeTab = signal('scrap');
+  activeTab = signal('machine');
+
+  private readonly machineOrder = [
+    MachineType.CRUSHER,
+    MachineType.SMELTER,
+    MachineType.PACKAGER,
+    MachineType.SEPARATOR,
+    MachineType.ASSEMBLER,
+    MachineType.RECYCLER,
+    MachineType.ELECTRIC_ASSEMBLER,
+    MachineType.ELECTRIC_PACKAGER,
+  ];
 
   constructor(
     private machineSelectionService: MachineSelectionService,
@@ -990,8 +955,11 @@ export class UpgradesPanelComponent {
 
   allMachineUpgrades = computed(() => {
     const allMachines = this.machinesService.getAll();
+    const ordered = this.machineOrder
+      .map((id) => allMachines.find((m) => m.id === id))
+      .filter((m): m is Machine => m !== undefined);
 
-    return allMachines.map((machine) => {
+    return ordered.map((machine) => {
       const upgradeId = this.upgradesService.getMachineUpgradeIdByMachineType(machine.id);
       const machineName = this.translationService.t(`machines.${machine.id}`);
 
@@ -999,6 +967,7 @@ export class UpgradesPanelComponent {
         return {
           machineId: machine.id,
           machineName,
+          icon: machine.icon,
           upgradeId: null,
           level: machine.level,
           isLocked: machine.level === 0,
@@ -1036,6 +1005,7 @@ export class UpgradesPanelComponent {
         cost: cost || { money: 0, components: 0 },
         canAfford,
         isMaxLevel,
+        icon: machine.icon,
         isInProgress: upgradeId
           ? this.upgradeProgressService.isUpgradeInProgress(upgradeId)
           : false,
@@ -1207,6 +1177,8 @@ export class UpgradesPanelComponent {
   scrapManualUpgrade = computed(() => {
     const level = this.upgradesService.getLevel(UpgradeId.UPG_SCRAP_001);
     const cost = this.upgradesService.getCostForNextLevel(UpgradeId.UPG_SCRAP_001);
+    const packager = this.machinesService.getMachine(MachineType.PACKAGER);
+    const isLocked = !packager || packager.level === 0;
 
     // Level 1 is base state (no upgrades), so bonus = level - 1
     const currentGeneration = SCRAP_GENERATION_CONFIG.MANUAL_GENERATION + (level - 1);
@@ -1224,7 +1196,8 @@ export class UpgradesPanelComponent {
       nextGeneration,
       cost: cost || { money: 0, components: 0 },
       canAfford,
-      isMaxLevel: false, // No max level for manual boost
+      isMaxLevel: false,
+      isLocked,
     };
   });
 

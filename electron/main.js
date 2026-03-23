@@ -7,15 +7,15 @@ app.name = 'Scrap Yard';
 let mainWindow = null;
 
 function createWindow() {
-  console.log('[Electron] Creating window...');
   const preloadPath = path.join(app.getAppPath(), 'electron', 'preload.js');
-  console.log('[Electron] Preload path:', preloadPath);
 
   mainWindow = new BrowserWindow({
-    width: 1920,
-    height: 1080,
+    width: 1280,
+    height: 720,
     title: 'Scrap Yard Idle',
     frame: true,
+    show: false,
+    fullscreen: true,
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -25,26 +25,23 @@ function createWindow() {
   // Remove the default application menu (File/Edit/View/Window/Help)
   Menu.setApplicationMenu(null);
 
-  // Allow exiting fullscreen or closing with Escape (convenience during testing)
+  // Escape only exits fullscreen, never closes the app
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'Escape') {
-      mainWindow.close();
+    if (input.key === 'Escape' && mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
     }
   });
 
   // Load from compiled files (independent mode)
   const indexPath = path.join(app.getAppPath(), 'dist', 'scrap-yard', 'browser', 'index.html');
 
-  console.log('[Electron] Loading from:', indexPath);
-
   mainWindow
     .loadFile(indexPath)
     .then(() => {
-      console.log('[Electron] Window loaded successfully');
+      mainWindow.show();
     })
     .catch((err) => {
       console.error('[Electron] Failed to load file:', err);
-      console.error('[Electron] Make sure to run: pnpm run build');
     });
 
   mainWindow.on('closed', () => {
@@ -68,15 +65,11 @@ ipcMain.handle('save-game', async (event, data) => {
     const savePath = path.join(userDataPath, 'save.json');
     const tempPath = path.join(userDataPath, 'save.tmp');
 
-    console.log('[Electron] Saving to:', savePath);
-
     await fs.writeFile(tempPath, data, 'utf-8');
     await fs.rename(tempPath, savePath);
 
-    console.log('[Electron] Save successful');
     return { success: true };
   } catch (error) {
-    console.error('[Electron] Failed to save game:', error);
     return { success: false, error: String(error) };
   }
 });
@@ -92,7 +85,6 @@ ipcMain.handle('load-game', async () => {
     if (error.code === 'ENOENT') {
       return { success: false, error: 'FILE_NOT_FOUND' };
     }
-    console.error('[Electron] Failed to load game:', error);
     return { success: false, error: String(error) };
   }
 });
@@ -124,14 +116,12 @@ ipcMain.handle('clear-save', async () => {
 
     return { success: true };
   } catch (error) {
-    console.error('[Electron] Failed to clear save:', error);
     return { success: false, error: String(error) };
   }
 });
 
 ipcMain.handle('get-save-path', async () => {
   const userDataPath = app.getPath('userData');
-  console.log('[Electron] userData path:', userDataPath);
   return { success: true, path: userDataPath };
 });
 
@@ -139,11 +129,9 @@ ipcMain.handle('set-window-mode', (event, { mode, resolution }) => {
   if (!mainWindow) return;
   if (mode === 'fullscreen') {
     mainWindow.setFullScreen(true);
-    console.log('[Electron] Window mode: fullscreen');
   } else if (mode === 'maximized') {
     mainWindow.setFullScreen(false);
     mainWindow.maximize();
-    console.log('[Electron] Window mode: maximized');
   } else {
     // windowed
     mainWindow.setFullScreen(false);
@@ -153,7 +141,6 @@ ipcMain.handle('set-window-mode', (event, { mode, resolution }) => {
       mainWindow.setSize(w, h);
       mainWindow.center();
     }
-    console.log('[Electron] Window mode: windowed at', resolution);
   }
 });
 
@@ -163,7 +150,6 @@ ipcMain.handle('set-resolution', (event, resolution) => {
   if (!w || !h) return;
   mainWindow.setSize(w, h);
   mainWindow.center();
-  console.log('[Electron] Resolution set to:', resolution);
 });
 
 ipcMain.handle('quit-app', () => {
