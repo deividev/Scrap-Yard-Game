@@ -1093,14 +1093,14 @@ export class UpgradesPanelComponent {
         nameKey: 'upgrades.storage.metal',
       },
       {
-        id: UpgradeId.UPG_STORE_003,
-        resourceId: ResourceType.PLASTIC,
-        nameKey: 'upgrades.storage.plastic',
-      },
-      {
         id: UpgradeId.UPG_STORE_004,
         resourceId: ResourceType.COMPONENTS,
         nameKey: 'upgrades.storage.components',
+      },
+      {
+        id: UpgradeId.UPG_STORE_003,
+        resourceId: ResourceType.PLASTIC,
+        nameKey: 'upgrades.storage.plastic',
       },
       {
         id: UpgradeId.UPG_STORE_005,
