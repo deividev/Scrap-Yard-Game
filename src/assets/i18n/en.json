@@ -81,7 +81,7 @@
     "machine_unlocked": "{name} is online!"
   },
   "progression": {
-    "next_unlock": "Next unlock: {machine} ({requirement} Lv {level})",
+    "next_unlock": "Next unlock: {machine} ({requirements})",
     "all_unlocked": "🎉 All machines unlocked!"
   },
   "upgrades": {

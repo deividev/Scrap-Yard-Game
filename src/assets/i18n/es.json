@@ -81,7 +81,7 @@
     "machine_unlocked": "¡{name} en línea!"
   },
   "progression": {
-    "next_unlock": "Próximo desbloqueo: {machine} ({requirement} Nv {level})",
+    "next_unlock": "Próximo desbloqueo: {machine} ({requirements})",
     "all_unlocked": "🎉 ¡Todas las máquinas desbloqueadas!"
   },
   "upgrades": {

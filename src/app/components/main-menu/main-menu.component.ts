@@ -6,6 +6,7 @@ import { ConfirmationModalComponent } from '../ui/confirmation-modal/confirmatio
 import { GameStateService } from '../../services/game-state.service';
 import { SaveService } from '../../services/save.service';
 import { TranslationService } from '../../services/translation.service';
+import { APP_VERSION_LABEL } from '../../config/app-meta.config';
 
 @Component({
   selector: 'app-main-menu',
@@ -66,7 +67,7 @@ import { TranslationService } from '../../services/translation.service';
         </div>
 
         <div class="version-info">
-          <span>v0.9 Beta</span>
+          <span>{{ appVersionLabel }}</span>
         </div>
       </div>
 
@@ -411,6 +412,7 @@ import { TranslationService } from '../../services/translation.service';
   ],
 })
 export class MainMenuComponent implements OnInit {
+  readonly appVersionLabel = APP_VERSION_LABEL;
   translationService = inject(TranslationService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);

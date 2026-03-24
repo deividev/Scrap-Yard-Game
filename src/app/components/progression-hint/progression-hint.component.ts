@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MachinesService } from '../../services/machines.service';
-import { MachineUnlockService } from '../../services/machine-unlock.service';
+import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
 import { TranslationService } from '../../services/translation.service';
 import { MachineType } from '../../models/machine.model';
 
@@ -68,20 +68,27 @@ export class ProgressionHintComponent {
       if (!unlockInfo.isUnlocked && unlockInfo.requirements.length > 0) {
         const machineName = this.translationService.t(`machines.${machineType}`);
 
-        // Encontrar el primer requisito que no está cumplido
-        const unmetReq = unlockInfo.requirements.find((r) => !r.isMet);
-        if (unmetReq) {
-          const reqMachineName = this.translationService.t(`machines.${unmetReq.machineType}`);
-          return this.translationService.tp('progression.next_unlock', {
-            machine: machineName,
-            requirement: reqMachineName,
-            level: unmetReq.requiredLevel.toString(),
-          });
-        }
+        return this.translationService.tp('progression.next_unlock', {
+          machine: machineName,
+          requirements: this.formatRequirements(unlockInfo.requirements),
+        });
       }
     }
 
     // Si todas las máquinas están desbloqueadas, mostrar mensaje de felicitación
     return this.translationService.t('progression.all_unlocked');
   });
+
+  private formatRequirements(requirements: UnlockRequirement[]): string {
+    const levelText = this.translationService.t('common.level_short');
+    const showStatusMarker = requirements.length > 1;
+
+    return requirements
+      .map((requirement) => {
+        const machineName = this.translationService.t(`machines.${requirement.machineType}`);
+        const status = requirement.isMet ? '✓ ' : '○ ';
+        return `${showStatusMarker ? status : ''}${machineName} ${levelText} ${requirement.requiredLevel} (${requirement.currentLevel}/${requirement.requiredLevel})`;
+      })
+      .join(' • ');
+  }
 }
