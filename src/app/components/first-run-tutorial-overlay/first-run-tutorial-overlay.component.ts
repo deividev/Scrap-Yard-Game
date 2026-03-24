@@ -123,8 +123,7 @@ type SpotlightRect = {
       .tutorial-panel {
         position: fixed;
         width: min(360px, calc(100vw - 32px));
-        background:
-          linear-gradient(180deg, rgba(30, 33, 36, 0.98), rgba(16, 18, 20, 0.98));
+        background: linear-gradient(180deg, rgba(30, 33, 36, 0.98), rgba(16, 18, 20, 0.98));
         border: 1px solid rgba(255, 193, 7, 0.5);
         border-radius: 16px;
         box-shadow:
@@ -277,10 +276,7 @@ export class FirstRunTutorialOverlayComponent {
     const preferredLeft = rect.left + rect.width + gap;
     const fitsRight = preferredLeft + 360 <= viewport.width - 16;
     const left = fitsRight ? preferredLeft : Math.max(16, rect.left - 378);
-    const top = Math.min(
-      Math.max(16, rect.top + rect.height / 2 - 110),
-      viewport.height - 220,
-    );
+    const top = Math.min(Math.max(16, rect.top + rect.height / 2 - 110), viewport.height - 220);
 
     return { top, left };
   });

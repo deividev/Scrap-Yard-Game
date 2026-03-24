@@ -390,7 +390,9 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                     <div
                       *ngIf="!machineUpgrade.isMaxLevel"
                       class="tutorial-button-anchor"
-                      [attr.data-tutorial-id]="tutorialMachineUpgradeButtonId(machineUpgrade.machineId)"
+                      [attr.data-tutorial-id]="
+                        tutorialMachineUpgradeButtonId(machineUpgrade.machineId)
+                      "
                     >
                       <app-button
                         [label]="translationService.t('buttons.mejorar')"

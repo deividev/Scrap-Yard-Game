@@ -29,9 +29,7 @@ export class FirstRunTutorialService {
   readonly currentStepId = computed(() => this.state().currentStepId);
   readonly currentStep = computed(() => {
     const currentStepId = this.state().currentStepId;
-    return currentStepId
-      ? this.steps.find((step) => step.id === currentStepId) ?? null
-      : null;
+    return currentStepId ? (this.steps.find((step) => step.id === currentStepId) ?? null) : null;
   });
   readonly progress = computed(() => {
     const completedSteps = this.state().seenStepIds.length;
@@ -137,7 +135,9 @@ export class FirstRunTutorialService {
     nextState.currentStepId = validStepIds.has(savedState.currentStepId as TutorialStepId)
       ? savedState.currentStepId
       : null;
-    nextState.seenStepIds = (savedState.seenStepIds ?? []).filter((stepId) => validStepIds.has(stepId));
+    nextState.seenStepIds = (savedState.seenStepIds ?? []).filter((stepId) =>
+      validStepIds.has(stepId),
+    );
     nextState.flags = {
       ...nextState.flags,
       ...(savedState.flags ?? {}),
