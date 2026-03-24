@@ -28,6 +28,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
   template: `
     <div
       class="machine-card"
+      [attr.data-tutorial-id]="machineTutorialId()"
       [class.selected]="isSelected()"
       [class.locked]="isLocked()"
       [class.producing]="isProducing()"
@@ -52,6 +53,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         <div class="machine-controls">
           <app-button
             *ngIf="!isLocked()"
+            [attr.data-tutorial-id]="machineToggleTutorialId()"
             [label]="
               currentIsActive()
                 ? translationService.t('buttons.activa')
@@ -110,11 +112,13 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         </app-tooltip>
       </div>
 
-      <app-progress-bar
-        [progress]="progressPercent() / 100"
-        [label]="progressLabel()"
-        [inline]="true"
-      />
+      <div [attr.data-tutorial-id]="machineProgressTutorialId()">
+        <app-progress-bar
+          [progress]="progressPercent() / 100"
+          [label]="progressLabel()"
+          [inline]="true"
+        />
+      </div>
 
       <div class="machine-status">
         <span
@@ -761,6 +765,18 @@ export class MachineCardComponent {
     if (!this.isLocked()) {
       this.machineSelectionService.selectMachine(this.machine.id);
     }
+  }
+
+  machineTutorialId(): string | null {
+    return this.machine?.id === MachineType.CRUSHER ? 'machine-card-crusher' : null;
+  }
+
+  machineProgressTutorialId(): string | null {
+    return this.machine?.id === MachineType.CRUSHER ? 'machine-progress-crusher' : null;
+  }
+
+  machineToggleTutorialId(): string | null {
+    return this.machine?.id === MachineType.CRUSHER ? 'machine-toggle-crusher' : null;
   }
 
   toggleMachine(): void {

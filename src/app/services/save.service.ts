@@ -8,6 +8,7 @@ import { MachineUnlockService } from './machine-unlock.service';
 import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 import { SaveState } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 import { INITIAL_RESOURCES } from '../config/resources.config';
@@ -27,6 +28,7 @@ export class SaveService {
   private settingsService = inject(SettingsService);
   private translationService = inject(TranslationService);
   private statisticsService = inject(StatisticsService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
 
   private isDirty = signal(false);
   private gameStarted = signal(false);
@@ -105,6 +107,7 @@ export class SaveService {
       settings: this.settingsService.getState(),
       gameStarted: this.gameStarted(),
       statistics: this.statisticsService.getState(),
+      firstRunTutorial: this.firstRunTutorialService.serialize(),
     };
 
     // Custom replacer to handle Infinity values
@@ -263,6 +266,8 @@ export class SaveService {
       this.statisticsService.loadState(saveState.statistics);
     }
 
+    this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
+
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
 
@@ -321,6 +326,7 @@ export class SaveService {
     }
     this.isDirty.set(false);
     this.gameStarted.set(false);
+    this.firstRunTutorialService.reset();
   }
 
   async resetToNewGame(): Promise<void> {
@@ -331,6 +337,7 @@ export class SaveService {
     this.scrapGenerationService.setAutomaticGenerationRate(0);
     this.upgradeProgressService.reset();
     this.statisticsService.reset();
+    this.firstRunTutorialService.reset();
   }
 
   async getSavePath(): Promise<string | null> {

@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 /**
  * MarketService - PLACEHOLDER
@@ -24,8 +25,8 @@ export class MarketService {
   private readonly METAL_PRICE = 1;
   private readonly PLASTIC_PRICE = 1;
   private readonly COMPONENTS_PRICE = 3; // Early game: 1 component = 3 money
-
-  constructor(private resourcesService: ResourcesService) {}
+  private resourcesService = inject(ResourcesService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
 
   /**
    * NOT CALLED - Placeholder for future auto-sell functionality.
@@ -86,6 +87,7 @@ export class MarketService {
     if (success) {
       const moneyEarned = amount * this.METAL_PRICE;
       this.resourcesService.add(ResourceType.MONEY, moneyEarned);
+      this.firstRunTutorialService.recordEvent('metal-sold');
       return true;
     }
 

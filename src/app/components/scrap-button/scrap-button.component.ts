@@ -13,6 +13,9 @@ import { UpgradeId } from '../../models/upgrade.model';
   selector: 'app-scrap-button',
   imports: [AppButtonComponent, TooltipComponent],
   standalone: true,
+  host: {
+    'data-tutorial-id': 'scrap-button',
+  },
   template: `
     <app-tooltip [text]="tooltipText()" [position]="'bottom'">
       <app-button variant="primary" size="sm" [disabled]="!canAfford()" (clicked)="generateScrap()">

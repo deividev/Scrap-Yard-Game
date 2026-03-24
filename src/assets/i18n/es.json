@@ -84,6 +84,56 @@
     "next_unlock": "Próximo desbloqueo: {machine} ({requirements})",
     "all_unlocked": "🎉 ¡Todas las máquinas desbloqueadas!"
   },
+  "tutorial": {
+    "step_counter": "Paso {current} de {total}",
+    "waiting_for_action": "Haz la acción marcada para que el tutorial avance automáticamente.",
+    "actions": {
+      "start": "Poner la planta en marcha",
+      "continue": "Entendido",
+      "next_step": "Siguiente paso",
+      "finish": "Seguir operando",
+      "close": "Cerrar tutorial",
+      "skip": "Saltar tutorial"
+    },
+    "steps": {
+      "welcome": {
+        "title": "Puesta en marcha",
+        "body": "Bienvenido al desguace. Este tutorial te guía por el primer bucle real: generar chatarra, poner la trituradora a trabajar, vender metal y comprar tu primera mejora."
+      },
+      "generate_scrap": {
+        "title": "Genera chatarra",
+        "body": "Empieza descargando chatarra manualmente. El botón resaltado consume dinero y llena el silo de entrada para la trituradora."
+      },
+      "activate_crusher": {
+        "title": "Activa la trituradora",
+        "body": "Ahora enciende la trituradora. Si tiene chatarra disponible, arrancará su ciclo y transformará material bruto en metal."
+      },
+      "watch_crusher_progress": {
+        "title": "Sigue el ciclo",
+        "body": "Observa la barra de progreso. Cuando complete un ciclo, la línea habrá producido su primera unidad de metal."
+      },
+      "collect_metal": {
+        "title": "Metal listo",
+        "body": "El metal ya aparece en la cabecera superior. Esa fila te dice qué está entrando y qué está listo para monetizar o procesar."
+      },
+      "sell_metal": {
+        "title": "Haz caja",
+        "body": "Vende una unidad de metal para recuperar dinero. En la fase inicial esta venta manual sostiene el flujo mientras desbloqueas más líneas."
+      },
+      "buy_first_upgrade": {
+        "title": "Compra una mejora",
+        "body": "Abre el ritmo de progresión comprando la primera mejora de la trituradora. El panel derecho es tu centro de inversión y escalado."
+      },
+      "check_next_goal": {
+        "title": "Lee el próximo objetivo",
+        "body": "Fíjate en la pista de progresión superior. Ahí se resumen las condiciones del siguiente desbloqueo y te marca el cuello de botella actual."
+      },
+      "complete": {
+        "title": "Turno completado",
+        "body": "Ya has recorrido el bucle base del desguace. Desde aquí el objetivo es escalar producción, abrir nuevas máquinas y mantener el flujo estable."
+      }
+    }
+  },
   "upgrades": {
     "title": "Mejoras",
     "tabs": {

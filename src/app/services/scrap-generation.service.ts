@@ -5,6 +5,7 @@ import { SCRAP_GENERATION_CONFIG } from '../config/game-balance.config';
 import { UpgradesService } from './upgrades.service';
 import { UpgradeId } from '../models/upgrade.model';
 import { AudioService } from './audio.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,7 @@ export class ScrapGenerationService {
   private saveService?: any;
   private upgradesService = inject(UpgradesService);
   private audioService = inject(AudioService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
 
   constructor(private resourcesService: ResourcesService) {}
 
@@ -49,6 +51,7 @@ export class ScrapGenerationService {
     // Generar chatarra
     this.resourcesService.add(ResourceType.SCRAP, totalGeneration);
     this.audioService.playScrapGenerated();
+    this.firstRunTutorialService.recordEvent('manual-scrap-generated');
 
     return true;
   }

@@ -77,6 +77,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           <div class="resource-column">
             <div
               class="resource-item"
+              data-tutorial-id="resource-scrap"
               [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
               [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(scrapResource().id)"
@@ -102,6 +103,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           <div class="resource-column">
             <div
               class="resource-item"
+              data-tutorial-id="resource-metal"
               [class.feedback-up]="isFeedback(metalResource().id, 'up')"
               [class.feedback-down]="isFeedback(metalResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(metalResource().id)"

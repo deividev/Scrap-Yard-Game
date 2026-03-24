@@ -2,6 +2,7 @@ import { Resource } from './resource.model';
 import { Machine } from './machine.model';
 import { UpgradeState } from './upgrade.model';
 import { UpgradeProgress } from './upgrade-progress.model';
+import { FirstRunTutorialState } from './tutorial-step.model';
 import { GameSettings } from '../services/settings.service';
 
 export interface SaveState {
@@ -14,4 +15,5 @@ export interface SaveState {
   settings?: GameSettings; // Configuración del juego
   gameStarted?: boolean; // Indica si el usuario ha iniciado el juego (true) o solo ha guardado configuraciones (false/undefined)
   statistics?: { totalScrapGenerated: number; playTimeSeconds: number };
+  firstRunTutorial?: FirstRunTutorialState;
 }

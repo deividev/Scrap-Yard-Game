@@ -9,6 +9,9 @@ import { MachineType } from '../../models/machine.model';
   selector: 'app-progression-hint',
   standalone: true,
   imports: [CommonModule],
+  host: {
+    'data-tutorial-id': 'progression-hint',
+  },
   template: `
     <div class="progression-hint" *ngIf="hintText()">
       <span class="hint-icon">🎯</span>

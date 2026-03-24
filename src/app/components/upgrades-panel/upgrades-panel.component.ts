@@ -28,7 +28,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
     TooltipComponent,
   ],
   template: `
-    <div class="upgrades-panel" [class.minimized]="isMinimized()">
+    <div class="upgrades-panel" data-tutorial-id="upgrades-panel" [class.minimized]="isMinimized()">
       <div class="panel-header">
         <h2 class="section-title" *ngIf="!isMinimized()">
           {{ translationService.t('upgrades.title') }}
@@ -128,7 +128,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                 <app-button
                   [label]="translationService.t('buttons.mejorar')"
                   variant="primary"
-                  size="sm"
+                  size="md"
                   [disabled]="
                     !scrapManualUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)
                   "
@@ -204,7 +204,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                 *ngIf="!scrapAutoUpgrade().isMaxLevel"
                 [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
-                size="sm"
+                size="md"
                 [disabled]="
                   !scrapAutoUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_002)
                 "
@@ -275,7 +275,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                 *ngIf="!upgrade.isMaxLevel"
                 [label]="translationService.t('buttons.mejorar')"
                 variant="primary"
-                size="sm"
+                size="md"
                 [disabled]="!upgrade.canAfford || isUpgradeInProgress(upgrade.upgradeId)"
                 (clicked)="purchaseStorageUpgrade(upgrade.upgradeId)"
               />
@@ -292,6 +292,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                 <div
                   *ngFor="let machineUpgrade of allMachineUpgrades()"
                   class="machine-upgrade-card"
+                  [attr.data-tutorial-id]="tutorialMachineUpgradeId(machineUpgrade.machineId)"
                   [class.locked]="machineUpgrade.isLocked"
                   [class.highlighted]="machineUpgrade.machineId === selectedMachine()?.id"
                 >
@@ -386,14 +387,19 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
                       [label]="formatTime(getRemainingTime(machineUpgrade.upgradeId))"
                     />
 
-                    <app-button
+                    <div
                       *ngIf="!machineUpgrade.isMaxLevel"
-                      [label]="translationService.t('buttons.mejorar')"
-                      variant="primary"
-                      size="sm"
-                      [disabled]="!machineUpgrade.canAfford || machineUpgrade.isInProgress"
-                      (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
-                    />
+                      class="tutorial-button-anchor"
+                      [attr.data-tutorial-id]="tutorialMachineUpgradeButtonId(machineUpgrade.machineId)"
+                    >
+                      <app-button
+                        [label]="translationService.t('buttons.mejorar')"
+                        variant="primary"
+                        size="md"
+                        [disabled]="!machineUpgrade.canAfford || machineUpgrade.isInProgress"
+                        (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
+                      />
+                    </div>
 
                     <p *ngIf="machineUpgrade.isMaxLevel" class="max-level">
                       {{ translationService.t('upgrades.max_level') }}
@@ -691,6 +697,11 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
+      }
+
+      .tutorial-button-anchor {
+        display: inline-flex;
+        align-self: flex-start;
       }
 
       .upgrade-stat {
@@ -1398,5 +1409,13 @@ export class UpgradesPanelComponent {
     // Seleccionar la máquina temporalmente para usar la lógica existente
     this.machineSelectionService.selectMachine(machineId);
     this.purchaseMachineUpgrade();
+  }
+
+  tutorialMachineUpgradeId(machineId: string): string | null {
+    return machineId === MachineType.CRUSHER ? 'machine-upgrade-crusher' : null;
+  }
+
+  tutorialMachineUpgradeButtonId(machineId: string): string | null {
+    return machineId === MachineType.CRUSHER ? 'machine-upgrade-button-crusher' : null;
   }
 }

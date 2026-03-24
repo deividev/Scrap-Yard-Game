@@ -3,6 +3,7 @@ import { Machine, MachineType } from '../models/machine.model';
 import { INITIAL_MACHINES } from '../config/machines.config';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,7 @@ import { ResourceType } from '../models/resource.model';
 export class MachinesService {
   private machines = signal<Machine[]>(this.initializeMachines());
   private resourcesService = inject(ResourcesService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
   private saveService?: any;
 
   private initializeMachines(): Machine[] {
@@ -45,9 +47,16 @@ export class MachinesService {
   }
 
   setActive(machineId: string, active: boolean): void {
+    const machine = this.getMachine(machineId);
+
     this.machines.update((machines) =>
       machines.map((m) => (m.id === machineId && m.level > 0 ? { ...m, isActive: active } : m)),
     );
+
+    if (machine?.id === MachineType.CRUSHER && active) {
+      this.firstRunTutorialService.recordEvent('crusher-activated');
+    }
+
     this.saveService?.markDirty();
   }
 

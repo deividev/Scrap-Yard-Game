@@ -84,6 +84,56 @@
     "next_unlock": "Next unlock: {machine} ({requirements})",
     "all_unlocked": "🎉 All machines unlocked!"
   },
+  "tutorial": {
+    "step_counter": "Step {current} of {total}",
+    "waiting_for_action": "Perform the highlighted action and the tutorial will advance automatically.",
+    "actions": {
+      "start": "Start the yard",
+      "continue": "Understood",
+      "next_step": "Next step",
+      "finish": "Back to work",
+      "close": "Close tutorial",
+      "skip": "Skip tutorial"
+    },
+    "steps": {
+      "welcome": {
+        "title": "Start-up sequence",
+        "body": "Welcome to the yard. This tutorial walks you through the first real loop: generate scrap, run the crusher, sell metal, and buy your first upgrade."
+      },
+      "generate_scrap": {
+        "title": "Generate scrap",
+        "body": "Begin by unloading scrap manually. The highlighted button spends money and fills the crusher's input stock."
+      },
+      "activate_crusher": {
+        "title": "Activate the crusher",
+        "body": "Now switch the crusher on. If it has scrap available, it will start cycling and turn raw material into metal."
+      },
+      "watch_crusher_progress": {
+        "title": "Watch the cycle",
+        "body": "Keep an eye on the progress bar. Once the cycle completes, the line will have produced its first unit of metal."
+      },
+      "collect_metal": {
+        "title": "Metal online",
+        "body": "Your metal stock now shows in the top header. That row tells you what is coming in and what is ready to sell or process further."
+      },
+      "sell_metal": {
+        "title": "Make some cash",
+        "body": "Sell one unit of metal to recover money. Early on, this manual sale keeps your loop alive while you unlock more lines."
+      },
+      "buy_first_upgrade": {
+        "title": "Buy an upgrade",
+        "body": "Push progression forward by buying the crusher's first upgrade. The right panel is your main investment and scaling hub."
+      },
+      "check_next_goal": {
+        "title": "Read the next goal",
+        "body": "Look at the progression hint on top. It summarizes the requirements for the next unlock and shows your current bottleneck."
+      },
+      "complete": {
+        "title": "Shift complete",
+        "body": "You have finished the yard's core loop. From here the goal is to scale production, open new machines, and keep throughput stable."
+      }
+    }
+  },
   "upgrades": {
     "title": "Upgrades",
     "tabs": {

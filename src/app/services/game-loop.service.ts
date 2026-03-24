@@ -7,9 +7,11 @@ import { UpgradesService } from './upgrades.service';
 import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
 import { UpgradeId } from '../models/upgrade.model';
+import { MachineType } from '../models/machine.model';
 import { ResourceType } from '../models/resource.model';
 import { AudioService } from './audio.service';
 import { StatisticsService } from './statistics.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +25,7 @@ export class GameLoopService {
   private machineUnlockService = inject(MachineUnlockService);
   private audioService = inject(AudioService);
   private statisticsService = inject(StatisticsService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   constructor(
@@ -170,6 +173,11 @@ export class GameLoopService {
       // At cycle END: Produce outputs immediately, but reset progress with delay for visual feedback
       this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
       producedInThisTick = true;
+
+      if (updatedMachine.id === MachineType.CRUSHER) {
+        this.firstRunTutorialService.recordEvent('crusher-cycle-completed');
+      }
+
       if (updatedMachine.baseProduction.resourceId === ResourceType.MONEY) {
         this.audioService.playResourceSold();
       } else {

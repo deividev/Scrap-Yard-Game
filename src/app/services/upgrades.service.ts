@@ -12,6 +12,7 @@ import { UpgradeProgressService } from './upgrade-progress.service';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 /**
  * G) Upgrades Service - Placeholder
@@ -37,6 +38,7 @@ export class UpgradesService {
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
   private audioService = inject(AudioService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
 
   private initializeUpgrades(): UpgradeState[] {
     return UPGRADE_DEFINITIONS.map((def) => ({
@@ -149,6 +151,7 @@ export class UpgradesService {
     // Iniciar el progreso del upgrade
     this.upgradeProgressService.startUpgrade(upgradeId, targetLevel, category);
     this.audioService.playUpgradeStarted();
+    this.firstRunTutorialService.recordEvent('first-upgrade-purchased');
     this.saveService?.markDirty();
   }
 

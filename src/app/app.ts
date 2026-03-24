@@ -8,6 +8,7 @@ import { OptionsMenuComponent } from './components/options-menu/options-menu.com
 import { StatisticsPanelComponent } from './components/statistics-panel/statistics-panel.component';
 import { CommonModule } from '@angular/common';
 import { BackgroundGridComponent } from './components/ui/background-grid/background-grid.component';
+import { FirstRunTutorialOverlayComponent } from './components/first-run-tutorial-overlay/first-run-tutorial-overlay.component';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
 import { MachinesService } from './services/machines.service';
@@ -16,6 +17,7 @@ import { ScrapGenerationService } from './services/scrap-generation.service';
 import { GameStateService } from './services/game-state.service';
 import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
+import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 
 @Component({
   selector: 'app-root',
@@ -29,6 +31,7 @@ import { GameLoopService } from './services/game-loop.service';
     OptionsMenuComponent,
     StatisticsPanelComponent,
     BackgroundGridComponent,
+    FirstRunTutorialOverlayComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -43,6 +46,7 @@ export class App implements OnInit, OnDestroy {
   private scrapGenerationService = inject(ScrapGenerationService);
   private audioService = inject(AudioService);
   private gameLoopService = inject(GameLoopService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
   gameStateService = inject(GameStateService);
 
   private autoSaveInterval?: number;
@@ -50,6 +54,7 @@ export class App implements OnInit, OnDestroy {
   private viewAudioEffect = effect(() => {
     const currentView = this.gameStateService.view();
     if (currentView === 'game') {
+      this.firstRunTutorialService.startIfNeeded();
       this.audioService.playGameMusicLoop();
       this.gameLoopService.start();
       return;
@@ -68,6 +73,7 @@ export class App implements OnInit, OnDestroy {
     this.machinesService.setSaveService(this.saveService);
     this.upgradesService.setSaveService(this.saveService);
     this.scrapGenerationService.setSaveService(this.saveService);
+    this.firstRunTutorialService.setSaveService(this.saveService);
 
     // Cargar el juego en segundo plano
     // Si no hay save, se usarán los valores por defecto

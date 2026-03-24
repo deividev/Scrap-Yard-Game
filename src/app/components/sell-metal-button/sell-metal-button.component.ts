@@ -11,6 +11,9 @@ import { AudioService } from '../../services/audio.service';
   selector: 'app-sell-metal-button',
   imports: [AppButtonComponent, TooltipComponent],
   standalone: true,
+  host: {
+    'data-tutorial-id': 'sell-metal-button',
+  },
   template: `
     <app-tooltip [text]="translationService.t('tooltips.sell_metal')" [position]="'bottom'">
       <app-button variant="primary" size="sm" [disabled]="!canSell()" (clicked)="sellMetal()">
