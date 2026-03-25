@@ -2,12 +2,9 @@ import { Component, OnDestroy, computed, effect, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
-import { MachinesService } from '../../services/machines.service';
-import { MachineType } from '../../models/machine.model';
 import { DebugControlsComponent } from '../debug-controls/debug-controls.component';
 import { ScrapButtonComponent } from '../scrap-button/scrap-button.component';
-import { SellComponentsButtonComponent } from '../sell-components-button/sell-components-button.component';
-import { SellMetalButtonComponent } from '../sell-metal-button/sell-metal-button.component';
+import { SellResourceButtonComponent } from '../sell-resource-button/sell-resource-button.component';
 import { ProgressionHintComponent } from '../progression-hint/progression-hint.component';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
@@ -24,8 +21,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
     CommonModule,
     DebugControlsComponent,
     ScrapButtonComponent,
-    SellComponentsButtonComponent,
-    SellMetalButtonComponent,
+    SellResourceButtonComponent,
     ProgressionHintComponent,
     FormatNumberPipe,
     TooltipComponent,
@@ -122,7 +118,10 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               >
               <span class="resource-capacity">/ {{ metalResource().capacity | formatNumber }}</span>
             </div>
-            <app-sell-metal-button></app-sell-metal-button>
+            <app-sell-resource-button
+              [resourceId]="ResourceType.METAL"
+              [tutorialId]="'sell-metal-button'"
+            ></app-sell-resource-button>
           </div>
 
           <!-- Componentes -->
@@ -149,9 +148,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ componentsResource().capacity | formatNumber }}</span
               >
             </div>
-            @if (isSmelterUnlocked()) {
-              <app-sell-components-button></app-sell-components-button>
-            }
+            <app-sell-resource-button
+              [resourceId]="ResourceType.COMPONENTS"
+            ></app-sell-resource-button>
           </div>
 
           <!-- Plástico -->
@@ -178,6 +177,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ plasticResource().capacity | formatNumber }}</span
               >
             </div>
+            <app-sell-resource-button
+              [resourceId]="ResourceType.PLASTIC"
+            ></app-sell-resource-button>
           </div>
 
           <!-- Plástico Reciclado -->
@@ -314,6 +316,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         gap: var(--space-2);
         align-items: flex-start;
         min-width: fit-content;
+      }
+
+      .resource-column app-scrap-button,
+      .resource-column app-sell-resource-button {
+        display: block;
+        width: 146px;
       }
 
       .header-actions {
@@ -508,19 +516,17 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 export class ResourcesHeaderComponent implements OnDestroy {
   readonly ResourceType = ResourceType;
 
+  private resourcesService = inject(ResourcesService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
+  public translationService = inject(TranslationService);
   private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
   private capacityPopState = signal<Record<string, boolean>>({});
   private previousAmounts = new Map<string, number>();
   private feedbackTimers = new Map<string, number>();
   private capacityTimers = new Map<string, number>();
 
-  constructor(
-    private resourcesService: ResourcesService,
-    private machinesService: MachinesService,
-    public translationService: TranslationService,
-  ) {
+  constructor() {
     effect(() => {
       const resources = this.resourcesService.getAll();
 
@@ -697,11 +703,6 @@ export class ResourcesHeaderComponent implements OnDestroy {
         icon: this.getResourceIcon(ResourceType.ELECTRIC_COMPONENTS),
       }
     );
-  });
-
-  isSmelterUnlocked = computed(() => {
-    const smelter = this.machinesService.getMachine(MachineType.SMELTER);
-    return smelter ? smelter.level > 0 : false;
   });
 
   currentLang = computed(() => this.translationService.getLanguage().toUpperCase());

@@ -73,6 +73,7 @@
     "generate_scrap": "Generate {amount} scrap for {cost} money",
     "sell_metal": "Sell 1 metal for 2 money",
     "sell_components": "Sell 1 component for 3 money",
+    "sell_resource": "Sell {amount} {resource} for {money} money",
     "machine_speed": "This machine completes a cycle every {time} seconds",
     "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle"
   },

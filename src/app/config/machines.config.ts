@@ -101,7 +101,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 22,
+      amount: 10,
     },
     isActive: false,
     progress: 0,
@@ -120,7 +120,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 65,
+      amount: 60,
     },
     isActive: false,
     progress: 0,

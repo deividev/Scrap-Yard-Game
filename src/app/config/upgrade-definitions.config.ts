@@ -154,7 +154,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     id: UpgradeId.UPG_SCRAP_002,
     category: UpgradeCategory.SCRAP,
     name: 'Llegada Automática de Chatarra',
-    baseCostMoney: 60,
+    baseCostMoney: 75,
     description: 'Genera Chatarra automáticamente por segundo',
     effectType: 'scrap_auto',
   },

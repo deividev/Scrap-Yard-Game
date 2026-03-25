@@ -73,6 +73,7 @@
     "generate_scrap": "Generar {amount} chatarra por {cost} dinero",
     "sell_metal": "Vender 1 metal por 2 dinero",
     "sell_components": "Vender 1 componente por 3 dinero",
+    "sell_resource": "Vender {amount} de {resource} por {money} dinero",
     "machine_speed": "Esta máquina completa un ciclo cada {time} segundos",
     "machine_multiplier": "Produce ×{production} pero consume ×{consumption} materiales por ciclo"
   },

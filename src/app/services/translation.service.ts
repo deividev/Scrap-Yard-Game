@@ -47,6 +47,7 @@ export interface Translations {
     generate_scrap: string;
     sell_metal: string;
     sell_components: string;
+    sell_resource: string;
     machine_speed: string;
     machine_multiplier: string;
   };

@@ -18,13 +18,16 @@ import { AudioService } from '../../services/audio.service';
     <app-tooltip [text]="translationService.t('tooltips.sell_metal')" [position]="'bottom'">
       <app-button variant="primary" size="sm" [disabled]="!canSell()" (clicked)="sellMetal()">
         <span style="display: inline-flex; align-items: center; gap: 4px;">
-          <span>-{{ sellAmount }}</span>
+          <span>-{{ sellAmount() }}</span>
           <img
             src="assets/icons/metal_resource.png"
             style="width: 28px; height: 28px; vertical-align: middle;"
             alt="Metal"
           />
           <span>+{{ moneyGain() }}</span>
+          @if (bonusPercent() > 0) {
+            <span style="color: #ffb74d; font-weight: 700;">({{ bonusPercent() }}%)</span>
+          }
           <img
             src="assets/icons/gold_resource.png"
             style="width: 28px; height: 28px; vertical-align: middle;"
@@ -37,12 +40,16 @@ import { AudioService } from '../../services/audio.service';
   styles: [],
 })
 export class SellMetalButtonComponent {
-  sellAmount = 1;
+  sellAmount = computed(() => this.marketService.getManualSaleAmount(ResourceType.METAL));
 
-  moneyGain = computed(() => this.marketService.getPrice(ResourceType.METAL) * this.sellAmount);
+  moneyGain = computed(() =>
+    this.marketService.getManualSaleValue(ResourceType.METAL, this.sellAmount()),
+  );
+
+  bonusPercent = computed(() => this.marketService.getBatchBonusPercent(this.sellAmount()));
 
   canSell = computed(() => {
-    return this.resourcesService.hasEnough(ResourceType.METAL, this.sellAmount);
+    return this.sellAmount() > 0 && this.resourcesService.hasEnough(ResourceType.METAL, 1);
   });
 
   constructor(
@@ -57,7 +64,7 @@ export class SellMetalButtonComponent {
       return;
     }
 
-    this.marketService.sellMetal(this.sellAmount);
+    this.marketService.sellMetal(this.sellAmount());
     this.audioService.playResourceSold();
   }
 }

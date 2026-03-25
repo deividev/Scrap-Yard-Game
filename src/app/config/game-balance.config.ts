@@ -43,13 +43,35 @@ export const STORAGE_UPGRADE_CONFIG = {
 // ============================================
 
 export const SCRAP_GENERATION_CONFIG = {
-  MANUAL_GENERATION: 5,
+  MANUAL_GENERATION: 6,
   MANUAL_COST: 1, // Coste en dinero por cada click manual de chatarra
   MAX_LEVEL: 10,
   BASE_COST_MONEY: 200,
-  COST_MULTIPLIER: 1.4,
+  COST_MULTIPLIER: 1.45,
   COMPONENTS_START_LEVEL: 6,
-  AUTO_GENERATION_RATES: [0.0, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0],
+  AUTO_GENERATION_RATES: [0.0, 0.12, 0.2, 0.32, 0.48, 0.7, 1.0, 1.45, 2.1, 3.0, 4.2],
+};
+
+// ============================================
+// MARKET - MANUAL SELLING
+// ============================================
+
+export const MARKET_CONFIG = {
+  BASE_PRICES: {
+    METAL: 1,
+    PLASTIC: 1.2,
+    COMPONENTS: 3,
+  },
+  BATCH_BONUSES: {
+    MEDIUM: {
+      threshold: 15,
+      multiplier: 1.05,
+    },
+    LARGE: {
+      threshold: 30,
+      multiplier: 1.1,
+    },
+  },
 };
 
 // ============================================
