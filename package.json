@@ -1,6 +1,7 @@
 {
   "name": "scrap-yard",
-  "version": "0.9.0",
+  "version": "0.3.1",
+  "releaseLabel": "Demo",
   "main": "electron/main.js",
   "description": "Scrap Yard Idle — Industrial idle game. Turn scrap into profit, machine by machine.",
   "author": "David",
@@ -51,6 +52,8 @@
     "electron-builder": "^24.0.0",
     "jsdom": "^27.1.0",
     "rimraf": "^5.0.10",
+    "sharp": "^0.34.5",
+    "to-ico": "^1.1.5",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   },
@@ -61,12 +64,23 @@
       "output": "dist_electron",
       "buildResources": "build"
     },
+    "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      },
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
     "files": [
       "dist/scrap-yard/**",
       "electron/**",
       "package.json"
     ],
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",

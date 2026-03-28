@@ -22,6 +22,9 @@ function cleanDistElectron() {
 }
 
 try {
+  console.log('Generating icons...');
+  execSync('node scripts/generate-ico.js', { stdio: 'inherit' });
+
   console.log('Cleaning previous builds...');
   cleanDistElectron();
 
@@ -46,22 +49,10 @@ try {
   const pkg = require(path.join(process.cwd(), 'package.json'));
   const baseBuild = pkg.build || {};
 
-  // Read game version label from app-meta.config.ts (source of truth for menu display version)
-  let fileVersion = pkg.version;
-  try {
-    const appMetaPath = path.join(process.cwd(), 'src/app/config/app-meta.config.ts');
-    const appMetaContent = fs.readFileSync(appMetaPath, 'utf8');
-    const match = appMetaContent.match(/APP_VERSION_LABEL\s*=\s*['"]([^'"]+)['"]/);
-    if (match) {
-      fileVersion = match[1].replace(/\s+/g, '-'); // e.g. 'demo v0.2.0' → 'demo-v0.2.0'
-      console.log(`Using game version label for artifact names: ${fileVersion}`);
-    }
-  } catch (e) {
-    console.warn(
-      'Could not read APP_VERSION_LABEL, falling back to package.json version:',
-      e && e.message ? e.message : e,
-    );
-  }
+  // Version is the single source of truth from package.json
+  const label = pkg.releaseLabel ? `${pkg.releaseLabel}-` : '';
+  const fileVersion = `${label}v${pkg.version}`;
+  console.log(`Using version from package.json for artifact names: ${fileVersion}`);
 
   const outDir = path.join(process.cwd(), 'dist_electron');
   console.log('Using electron-builder output dir:', outDir);

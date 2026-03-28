@@ -64,15 +64,12 @@ import { SCRAP_GENERATION_CONFIG } from '../../config/game-balance.config';
   ],
 })
 export class DebugControlsComponent {
-  readonly isDev = false;
+  readonly isDev = isDevMode();
   private resourcesService = inject(ResourcesService);
-
-  constructor(
-    private scrapGenerationService: ScrapGenerationService,
-    private gameLoopService: GameLoopService,
-    public translationService: TranslationService,
-    private machinesService: MachinesService,
-  ) {}
+  private scrapGenerationService = inject(ScrapGenerationService);
+  private gameLoopService = inject(GameLoopService);
+  translationService = inject(TranslationService);
+  private machinesService = inject(MachinesService);
 
   tickCount = computed(() => this.gameLoopService.getTickCount());
   currentLang = computed(() => this.translationService.getLanguage().toUpperCase());

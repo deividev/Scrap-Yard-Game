@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, isDevMode } from '@angular/core';
 import {
   UpgradeProgress,
   calculateUpgradeTime,
@@ -89,7 +89,7 @@ export class UpgradeProgressService {
         });
 
       // Log de debug si hay upgrades activos
-      if (updated.length > 0) {
+      if (updated.length > 0 && isDevMode()) {
         console.log(
           '[UpgradeProgress] Progreso actualizado:',
           updated.map((u) => ({
@@ -142,20 +142,16 @@ export class UpgradeProgressService {
     const completedUpgrades: UpgradeId[] = [];
 
     this.activeUpgrades.update((upgrades) => {
-      return upgrades.filter((upgrade) => {
-        // Calcular tiempo real transcurrido desde el inicio
+      const surviving: UpgradeProgress[] = [];
+      for (const upgrade of upgrades) {
         const actualElapsed = (Date.now() - upgrade.startTimestamp) / 1000;
-
-        // Verificar si se completó durante el tiempo offline
         if (actualElapsed >= upgrade.totalTime) {
           completedUpgrades.push(upgrade.upgradeId);
-          return false; // Remover de la lista
+        } else {
+          surviving.push({ ...upgrade, elapsedTime: actualElapsed });
         }
-
-        // Actualizar el tiempo transcurrido
-        upgrade.elapsedTime = actualElapsed;
-        return true; // Mantener en la lista
-      });
+      }
+      return surviving;
     });
 
     return completedUpgrades;

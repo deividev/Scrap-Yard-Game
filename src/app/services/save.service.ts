@@ -31,6 +31,7 @@ export class SaveService {
   private firstRunTutorialService = inject(FirstRunTutorialService);
 
   private isDirty = signal(false);
+  private isSaving = false;
   private gameStarted = signal(false);
   private isElectron = typeof window !== 'undefined' && !!window.electronApi;
   private readonly isDev = isDevMode();
@@ -91,10 +92,11 @@ export class SaveService {
   async save(): Promise<void> {
     this.debugLog('[SaveService] save() called. isDirty:', this.isDirty());
 
-    if (!this.isDirty()) {
+    if (!this.isDirty() || this.isSaving) {
       return;
     }
 
+    this.isSaving = true;
     this.debugLog('[SaveService] Preparing to save...');
 
     const saveState: SaveState = {
@@ -139,6 +141,8 @@ export class SaveService {
       this.isDirty.set(false);
     } catch (error) {
       console.error('Failed to save game state:', error);
+    } finally {
+      this.isSaving = false;
     }
   }
 

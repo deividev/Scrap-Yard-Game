@@ -4,6 +4,7 @@ import { INITIAL_MACHINES } from '../config/machines.config';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { SaveMarker } from '../models/save-marker.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,7 @@ export class MachinesService {
   private machines = signal<Machine[]>(this.initializeMachines());
   private resourcesService = inject(ResourcesService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
-  private saveService?: any;
+  private saveService?: SaveMarker;
 
   private initializeMachines(): Machine[] {
     return INITIAL_MACHINES.map((m) => ({ ...m }));
@@ -71,7 +72,9 @@ export class MachinesService {
 
   consumeProgress(machineId: string, amount: number): void {
     this.machines.update((machines) =>
-      machines.map((m) => (m.id === machineId ? { ...m, progress: m.progress - amount } : m)),
+      machines.map((m) =>
+        m.id === machineId ? { ...m, progress: Math.max(0, m.progress - amount) } : m,
+      ),
     );
     this.saveService?.markDirty();
   }
@@ -105,7 +108,7 @@ export class MachinesService {
     this.machines.set(mergedMachines);
   }
 
-  setSaveService(saveService: any): void {
+  setSaveService(saveService: SaveMarker): void {
     this.saveService = saveService;
   }
 }

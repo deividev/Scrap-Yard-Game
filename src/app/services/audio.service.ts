@@ -87,6 +87,15 @@ export class AudioService {
     this.playTone(784, 0.28, 0.07, 'triangle', 'sfx', 0.14);
   }
 
+  // Triumphant max-level fanfare — extended C-E-G-C-E (5 notes, wider range)
+  playMaxLevelReached(): void {
+    this.playTone(523, 0.3, 0.07, 'triangle', 'sfx');
+    this.playTone(659, 0.28, 0.07, 'triangle', 'sfx', 0.09);
+    this.playTone(784, 0.3, 0.08, 'triangle', 'sfx', 0.18);
+    this.playTone(1047, 0.38, 0.09, 'triangle', 'sfx', 0.28);
+    this.playTone(1319, 0.42, 0.1, 'triangle', 'sfx', 0.4);
+  }
+
   // Celebration fanfare when a new machine is unlocked (C-E-G-C)
   playMachineUnlocked(): void {
     this.playTone(523, 0.32, 0.07, 'triangle', 'sfx');
@@ -137,6 +146,16 @@ export class AudioService {
     this.playSweep(320, 60, 0.28, 0.09, 'sawtooth', 'sfx');
   }
 
+  // Storage full warning — industrial lowpass thud + descending 2-note sawtooth "dunk-wunk"
+  playStorageFull(): void {
+    if (!this.canPlayWithCooldown('storage-full', 3000)) {
+      return;
+    }
+    this.playNoiseBurst(0.09, 0.055, 280, 'lowpass', 'sfx');
+    this.playTone(390, 0.16, 0.055, 'sawtooth', 'sfx', 0.04);
+    this.playTone(270, 0.22, 0.048, 'sawtooth', 'sfx', 0.15);
+  }
+
   private isBrowser(): boolean {
     return typeof window !== 'undefined';
   }
@@ -154,7 +173,12 @@ export class AudioService {
       return;
     }
 
-    this.audioContext = new ContextClass();
+    try {
+      this.audioContext = new ContextClass();
+    } catch (err) {
+      console.warn('[AudioService] AudioContext creation failed:', err);
+      return;
+    }
     this.masterGain = this.audioContext.createGain();
     this.musicGain = this.audioContext.createGain();
     this.sfxGain = this.audioContext.createGain();

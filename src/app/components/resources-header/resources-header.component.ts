@@ -12,6 +12,7 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 import { TranslationService } from '../../services/translation.service';
 import { GameStateService } from '../../services/game-state.service';
 import { SaveService } from '../../services/save.service';
+import { AudioService } from '../../services/audio.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
 @Component({
@@ -77,6 +78,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
               [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(scrapResource().id)"
+              [class.storage-full]="isStorageFull(scrapResource().id)"
+              [class.near-capacity]="isNearCapacity(scrapResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.scrap')"
@@ -103,6 +106,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(metalResource().id, 'up')"
               [class.feedback-down]="isFeedback(metalResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(metalResource().id)"
+              [class.storage-full]="isStorageFull(metalResource().id)"
+              [class.near-capacity]="isNearCapacity(metalResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.metal')"
@@ -131,6 +136,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
               [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(plasticResource().id)"
+              [class.storage-full]="isStorageFull(plasticResource().id)"
+              [class.near-capacity]="isNearCapacity(plasticResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.plastic')"
@@ -160,6 +167,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
               [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(componentsResource().id)"
+              [class.storage-full]="isStorageFull(componentsResource().id)"
+              [class.near-capacity]="isNearCapacity(componentsResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.components')"
@@ -189,6 +198,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(copperResource().id, 'up')"
               [class.feedback-down]="isFeedback(copperResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(copperResource().id)"
+              [class.storage-full]="isStorageFull(copperResource().id)"
+              [class.near-capacity]="isNearCapacity(copperResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.copper')"
@@ -216,6 +227,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(recycledPlasticResource().id, 'up')"
               [class.feedback-down]="isFeedback(recycledPlasticResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(recycledPlasticResource().id)"
+              [class.storage-full]="isStorageFull(recycledPlasticResource().id)"
+              [class.near-capacity]="isNearCapacity(recycledPlasticResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.recycled_plastic')"
@@ -248,6 +261,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(electricComponentsResource().id, 'up')"
               [class.feedback-down]="isFeedback(electricComponentsResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(electricComponentsResource().id)"
+              [class.storage-full]="isStorageFull(electricComponentsResource().id)"
+              [class.near-capacity]="isNearCapacity(electricComponentsResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.electric_components')"
@@ -279,6 +294,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   styles: [
     `
       .resources-header {
+        position: relative;
+        z-index: 50;
         background: var(--color-bg-panel);
         border-bottom: 2px solid rgba(255, 152, 0, 0.35);
         border-top: 2px solid var(--color-accent-main);
@@ -445,7 +462,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-amount.full {
-        color: #f59e0b;
+        color: #ef4444;
         animation: pulse-warning 1.5s ease-in-out infinite;
       }
 
@@ -532,6 +549,39 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
       }
 
+      .resource-item.near-capacity {
+        border-color: rgba(249, 115, 22, 0.38);
+        background: rgba(249, 115, 22, 0.035);
+      }
+
+      .resource-item.near-capacity .resource-amount {
+        color: #f97316;
+      }
+
+      .resource-item.storage-full {
+        border-color: rgba(239, 68, 68, 0.5);
+        background: rgba(239, 68, 68, 0.05);
+        animation: storage-full-pulse 2s ease-in-out infinite;
+      }
+
+      .resource-item.storage-full .resource-icon {
+        animation: storage-full-icon 2s ease-in-out infinite;
+      }
+
+      @keyframes storage-full-pulse {
+        0%, 100% {
+          box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), inset 0 0 6px rgba(239, 68, 68, 0.06);
+        }
+        50% {
+          box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.12), 0 0 14px rgba(239, 68, 68, 0.2);
+        }
+      }
+
+      @keyframes storage-full-icon {
+        0%, 100% { filter: none; }
+        50%       { filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6)); }
+      }
+
       .resource-capacity {
         color: var(--color-text-secondary);
         font-size: clamp(10px, 0.9vw, 13px);
@@ -546,6 +596,7 @@ export class ResourcesHeaderComponent implements OnDestroy {
   private resourcesService = inject(ResourcesService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
+  private audioService = inject(AudioService);
   public translationService = inject(TranslationService);
   private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
   private capacityPopState = signal<Record<string, boolean>>({});
@@ -574,6 +625,7 @@ export class ResourcesHeaderComponent implements OnDestroy {
             resource.amount >= resource.capacity
           ) {
             this.triggerCapacityPop(resource.id);
+            this.audioService.playStorageFull();
           }
         }
 
@@ -595,6 +647,36 @@ export class ResourcesHeaderComponent implements OnDestroy {
 
   isCapacityPop(resourceId: string): boolean {
     return this.capacityPopState()[resourceId] === true;
+  }
+
+  private fullResourceIds = computed(() => {
+    const result = new Set<string>();
+    for (const r of this.resourcesService.getAll()) {
+      if (Number.isFinite(r.capacity) && r.capacity > 0 && r.amount >= r.capacity) {
+        result.add(r.id);
+      }
+    }
+    return result;
+  });
+
+  isStorageFull(resourceId: string): boolean {
+    return this.fullResourceIds().has(resourceId);
+  }
+
+  private nearCapacityIds = computed(() => {
+    const result = new Set<string>();
+    for (const r of this.resourcesService.getAll()) {
+      const hasFinite = Number.isFinite(r.capacity) && r.capacity > 0;
+      if (hasFinite) {
+        const ratio = r.amount / r.capacity;
+        if (ratio >= 0.8 && ratio < 1) result.add(r.id);
+      }
+    }
+    return result;
+  });
+
+  isNearCapacity(resourceId: string): boolean {
+    return this.nearCapacityIds().has(resourceId);
   }
 
   private triggerFeedback(resourceId: string, state: 'up' | 'down'): void {

@@ -27,20 +27,22 @@ import { CommonModule } from '@angular/common';
       >
         <div class="progress-bar-fill" [style.width]="widthStyle()"></div>
         <span class="progress-info">
-          <ng-container *ngIf="!label() || label() === ''">
+          @if (!label() || label() === '') {
             {{ percentText() }}
-          </ng-container>
-          <ng-container *ngIf="label() && label() !== '' && inline()">
+          }
+          @if (label() && label() !== '' && inline()) {
             {{ percentText() }} • {{ label() }}
-          </ng-container>
-          <ng-container *ngIf="label() && label() !== '' && !inline()">
+          }
+          @if (label() && label() !== '' && !inline()) {
             {{ percentText() }}
-          </ng-container>
+          }
         </span>
       </div>
-      <span *ngIf="showLabel() && label() && label() !== '' && !inline()" class="progress-label">
-        {{ label() }}
-      </span>
+      @if (showLabel() && label() && label() !== '' && !inline()) {
+        <span class="progress-label">
+          {{ label() }}
+        </span>
+      }
     </div>
   `,
   styles: [

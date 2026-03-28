@@ -6,18 +6,19 @@ import { UpgradesService } from './upgrades.service';
 import { UpgradeId } from '../models/upgrade.model';
 import { AudioService } from './audio.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { SaveMarker } from '../models/save-marker.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScrapGenerationService {
   private automaticGenerationRate = signal(0);
-  private saveService?: any;
+  private saveService?: SaveMarker;
   private upgradesService = inject(UpgradesService);
   private audioService = inject(AudioService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
 
-  constructor(private resourcesService: ResourcesService) {}
+  private resourcesService = inject(ResourcesService);
 
   /**
    * Manual scrap generation: base +1 scrap per click, plus bonus from UPG_SCRAP_001.
@@ -81,7 +82,7 @@ export class ScrapGenerationService {
     }
   }
 
-  setSaveService(saveService: any): void {
+  setSaveService(saveService: SaveMarker): void {
     this.saveService = saveService;
   }
 }

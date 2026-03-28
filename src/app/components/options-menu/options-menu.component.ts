@@ -24,13 +24,14 @@ import { TranslationService } from '../../services/translation.service';
 
       <!-- Partículas flotantes -->
       <div class="particles">
-        <div
-          class="particle"
-          *ngFor="let p of particles"
-          [style.left.%]="p.left"
-          [style.animation-delay.s]="p.delay"
-          [style.animation-duration.s]="p.duration"
-        ></div>
+        @for (p of particles; track $index) {
+          <div
+            class="particle"
+            [style.left.%]="p.left"
+            [style.animation-delay.s]="p.delay"
+            [style.animation-duration.s]="p.duration"
+          ></div>
+        }
       </div>
 
       <div class="options-content">
@@ -87,46 +88,46 @@ import { TranslationService } from '../../services/translation.service';
           </div>
 
           <!-- Modo de Pantalla (solo Electron) -->
-          <div class="option-item" *ngIf="isElectron">
-            <label class="option-label">
-              {{ translationService.t('options.window_mode') }}
-            </label>
-            <select
-              class="select-input"
-              [value]="settingsService.windowMode()"
-              (change)="onWindowModeChange($event)"
-            >
-              <option value="windowed">
-                {{ translationService.t('options.window_mode_windowed') }}
-              </option>
-              <option value="maximized">
-                {{ translationService.t('options.window_mode_maximized') }}
-              </option>
-              <option value="fullscreen">
-                {{ translationService.t('options.window_mode_fullscreen') }}
-              </option>
-            </select>
-          </div>
-
+          @if (isElectron) {
+            <div class="option-item">
+              <label class="option-label">
+                {{ translationService.t('options.window_mode') }}
+              </label>
+              <select
+                class="select-input"
+                [value]="settingsService.windowMode()"
+                (change)="onWindowModeChange($event)"
+              >
+                <option value="windowed">
+                  {{ translationService.t('options.window_mode_windowed') }}
+                </option>
+                <option value="maximized">
+                  {{ translationService.t('options.window_mode_maximized') }}
+                </option>
+                <option value="fullscreen">
+                  {{ translationService.t('options.window_mode_fullscreen') }}
+                </option>
+              </select>
+            </div>
+          }
           <!-- Resolución (solo Electron, solo en modo ventana) -->
-          <div
-            class="option-item"
-            *ngIf="isElectron && settingsService.windowMode() === 'windowed'"
-          >
-            <label class="option-label">
-              {{ translationService.t('options.resolution') }}
-            </label>
-            <select
-              class="select-input"
-              [value]="settingsService.resolution()"
-              (change)="onResolutionChange($event)"
-            >
-              <option value="1920x1080">1920 x 1080</option>
-              <option value="1600x900">1600 x 900</option>
-              <option value="1366x768">1366 x 768</option>
-              <option value="1280x720">1280 x 720</option>
-            </select>
-          </div>
+          @if (isElectron && settingsService.windowMode() === 'windowed') {
+            <div class="option-item">
+              <label class="option-label">
+                {{ translationService.t('options.resolution') }}
+              </label>
+              <select
+                class="select-input"
+                [value]="settingsService.resolution()"
+                (change)="onResolutionChange($event)"
+              >
+                <option value="1920x1080">1920 x 1080</option>
+                <option value="1600x900">1600 x 900</option>
+                <option value="1366x768">1366 x 768</option>
+                <option value="1280x720">1280 x 720</option>
+              </select>
+            </div>
+          }
         </div>
 
         <div class="options-buttons">
@@ -145,17 +146,18 @@ import { TranslationService } from '../../services/translation.service';
         </div>
       </div>
 
-      <!-- Modal de confirmación -->
-      <app-confirmation-modal
-        *ngIf="showResetModal()"
-        titleKey="options.reset_title"
-        messageKey="options.confirm_reset"
-        confirmLabelKey="options.reset_confirm"
-        cancelLabelKey="options.reset_cancel"
-        confirmVariant="primary"
-        (confirmed)="confirmReset()"
-        (cancelled)="cancelReset()"
-      />
+      @if (showResetModal()) {
+        <!-- Modal de confirmación -->
+        <app-confirmation-modal
+          titleKey="options.reset_title"
+          messageKey="options.confirm_reset"
+          confirmLabelKey="options.reset_confirm"
+          cancelLabelKey="options.reset_cancel"
+          confirmVariant="primary"
+          (confirmed)="confirmReset()"
+          (cancelled)="cancelReset()"
+        />
+      }
     </div>
   `,
   styles: [

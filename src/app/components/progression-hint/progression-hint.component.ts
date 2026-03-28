@@ -13,10 +13,12 @@ import { MachineType } from '../../models/machine.model';
     'data-tutorial-id': 'progression-hint',
   },
   template: `
-    <div class="progression-hint" *ngIf="hintText()">
-      <span class="hint-icon">🎯</span>
-      <span class="hint-text">{{ hintText() }}</span>
-    </div>
+    @if (hintText()) {
+      <div class="progression-hint">
+        <span class="hint-icon">🎯</span>
+        <span class="hint-text">{{ hintText() }}</span>
+      </div>
+    }
   `,
   styles: [
     `

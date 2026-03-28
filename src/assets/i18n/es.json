@@ -206,6 +206,7 @@
   },
   "common": {
     "level_short": "Nv",
-    "cycle_time": "~{{time}}s"
+    "cycle_time": "~{{time}}s",
+    "unlock_requires": "Necesitas:"
   }
 }

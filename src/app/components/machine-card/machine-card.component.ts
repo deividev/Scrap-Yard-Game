@@ -26,7 +26,12 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
   imports: [CommonModule, AppButtonComponent, ProgressBarComponent, TooltipComponent],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <app-tooltip [text]="isLocked() ? unlockRequirementsText() : ''" [position]="'top'">
+    <app-tooltip
+      [text]="unlockRequirementsText()"
+      [disabled]="!isLocked()"
+      [position]="'top'"
+      [wide]="true"
+    >
       <div
         class="machine-card"
         [attr.data-tutorial-id]="machineTutorialId()"
@@ -47,45 +52,56 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
               </div>
             }
             <h3 class="machine-name">{{ translatedMachineName() }}</h3>
-            <span class="machine-level" *ngIf="!isLocked()"
-              >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
-            >
+            @if (!isLocked()) {
+              <span class="machine-level"
+                >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
+              >
+            }
           </div>
           <div class="machine-controls">
-            <app-button
-              *ngIf="!isLocked()"
-              [attr.data-tutorial-id]="machineToggleTutorialId()"
-              [label]="
-                currentIsActive()
-                  ? translationService.t('buttons.activa')
-                  : translationService.t('buttons.parada')
-              "
-              [variant]="currentIsActive() ? 'primary' : 'secondary'"
-              size="sm"
-              (clicked)="toggleMachine()"
-            />
+            @if (!isLocked()) {
+              <app-button
+                [attr.data-tutorial-id]="machineToggleTutorialId()"
+                [label]="
+                  currentIsActive()
+                    ? translationService.t('buttons.activa')
+                    : translationService.t('buttons.parada')
+                "
+                [variant]="currentIsActive() ? 'primary' : 'secondary'"
+                size="sm"
+                (clicked)="toggleMachine()"
+              />
+            }
           </div>
-          <div *ngIf="isLocked()" class="locked-info">
-            <span class="locked-badge">🔒 {{ translationService.t('status.bloqueada') }}</span>
-            <span class="unlock-requirements" *ngIf="unlockRequirementsText()">
-              {{ unlockRequirementsText() }}
-            </span>
-          </div>
+          @if (isLocked()) {
+            <div class="locked-info">
+              <span class="locked-badge">🔒 {{ translationService.t('status.bloqueada') }}</span>
+              @if (unlockRequirementsText()) {
+                <span class="unlock-requirements">
+                  {{ unlockRequirementsText() }}
+                </span>
+              }
+            </div>
+          }
         </div>
 
         <div class="machine-recipe">
           <span class="recipe-inputs">
-            <span *ngFor="let input of effectiveInputs(); let last = last">
-              <app-tooltip [text]="getResourceName(input.resourceId)" [inline]="true">
-                <img
-                  [src]="getResourceIcon(input.resourceId)"
-                  class="resource-icon"
-                  alt="Resource"
-                />
-              </app-tooltip>
-              <span class="resource-amount">{{ input.amount }}</span>
-              <span *ngIf="!last" class="separator">+</span>
-            </span>
+            @for (input of effectiveInputs(); track $index; let last = $last) {
+              <span>
+                <app-tooltip [text]="getResourceName(input.resourceId)" [inline]="true">
+                  <img
+                    [src]="getResourceIcon(input.resourceId)"
+                    class="resource-icon"
+                    alt="Resource"
+                  />
+                </app-tooltip>
+                <span class="resource-amount">{{ input.amount }}</span>
+                @if (!last) {
+                  <span class="separator">+</span>
+                }
+              </span>
+            }
           </span>
           <span class="recipe-arrow">→</span>
           <span class="recipe-output">
@@ -103,22 +119,21 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
           </span>
         </div>
 
-        <div class="machine-stats" *ngIf="!isLocked()">
-          <app-tooltip [text]="speedTooltip()" [inline]="true" [position]="'top-right'">
-            <span class="stat-item">
-              ⚡ {{ effectiveSpeed().toFixed(2) }}
-              {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
-            </span>
-          </app-tooltip>
-          <app-tooltip
-            *ngIf="productionMultiplier() > 1"
-            [text]="multiplierTooltip()"
-            [inline]="true"
-            [position]="'top-right'"
-          >
-            <span class="stat-item"> ×{{ productionMultiplier() }} </span>
-          </app-tooltip>
-        </div>
+        @if (!isLocked()) {
+          <div class="machine-stats">
+            <app-tooltip [text]="speedTooltip()" [inline]="true" [position]="'top-right'">
+              <span class="stat-item">
+                ⚡ {{ effectiveSpeed().toFixed(2) }}
+                {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
+              </span>
+            </app-tooltip>
+            @if (productionMultiplier() > 1) {
+              <app-tooltip [text]="multiplierTooltip()" [inline]="true" [position]="'top-right'">
+                <span class="stat-item"> ×{{ productionMultiplier() }} </span>
+              </app-tooltip>
+            }
+          </div>
+        }
 
         <div [attr.data-tutorial-id]="machineProgressTutorialId()">
           <app-progress-bar
@@ -574,25 +589,23 @@ export class MachineCardComponent {
   justUnlocked = signal(false);
   private wasLocked: boolean | null = null;
 
-  constructor(
-    private resourcesService: ResourcesService,
-    private machinesService: MachinesService,
-    private machineSelectionService: MachineSelectionService,
-    public translationService: TranslationService,
-  ) {
-    effect(() => {
-      const locked = this.isLocked();
-      if (this.wasLocked === null) {
-        this.wasLocked = locked;
-        return;
-      }
-      if (this.wasLocked && !locked) {
-        this.justUnlocked.set(true);
-        setTimeout(() => this.justUnlocked.set(false), 1600);
-      }
+  private resourcesService = inject(ResourcesService);
+  private machinesService = inject(MachinesService);
+  private machineSelectionService = inject(MachineSelectionService);
+  translationService = inject(TranslationService);
+
+  private _unlockEffect = effect(() => {
+    const locked = this.isLocked();
+    if (this.wasLocked === null) {
       this.wasLocked = locked;
-    });
-  }
+      return;
+    }
+    if (this.wasLocked && !locked) {
+      this.justUnlocked.set(true);
+      setTimeout(() => this.justUnlocked.set(false), 1600);
+    }
+    this.wasLocked = locked;
+  });
 
   private currentMachine = computed(
     () => this.machinesService.getMachine(this.machine.id) || this.machine,
@@ -636,7 +649,7 @@ export class MachineCardComponent {
       return `${status} ${machineName} ${levelText} ${req.requiredLevel} (${req.currentLevel}/${req.requiredLevel})`;
     });
 
-    return reqs.join(' • ');
+    return reqs.join('\n');
   });
 
   getResourceIcon(resourceId: string): string {

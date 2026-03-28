@@ -6,7 +6,7 @@ import { ConfirmationModalComponent } from '../ui/confirmation-modal/confirmatio
 import { GameStateService } from '../../services/game-state.service';
 import { SaveService } from '../../services/save.service';
 import { TranslationService } from '../../services/translation.service';
-import { APP_VERSION_LABEL } from '../../config/app-meta.config';
+import { version, releaseLabel } from '../../../../package.json';
 
 @Component({
   selector: 'app-main-menu',
@@ -18,13 +18,14 @@ import { APP_VERSION_LABEL } from '../../config/app-meta.config';
 
       <!-- Partículas flotantes -->
       <div class="particles">
-        <div
-          class="particle"
-          *ngFor="let p of particles"
-          [style.left.%]="p.left"
-          [style.animation-delay.s]="p.delay"
-          [style.animation-duration.s]="p.duration"
-        ></div>
+        @for (p of particles; track $index) {
+          <div
+            class="particle"
+            [style.left.%]="p.left"
+            [style.animation-delay.s]="p.delay"
+            [style.animation-duration.s]="p.duration"
+          ></div>
+        }
       </div>
 
       <div class="menu-content">
@@ -34,13 +35,14 @@ import { APP_VERSION_LABEL } from '../../config/app-meta.config';
         </div>
 
         <div class="menu-buttons">
-          <app-button
-            *ngIf="hasSavedGame()"
-            [label]="translationService.t('main_menu.continue')"
-            variant="primary"
-            size="lg"
-            (clicked)="continueGame()"
-          />
+          @if (hasSavedGame()) {
+            <app-button
+              [label]="translationService.t('main_menu.continue')"
+              variant="primary"
+              size="lg"
+              (clicked)="continueGame()"
+            />
+          }
           <app-button
             [label]="
               hasSavedGame()
@@ -57,13 +59,14 @@ import { APP_VERSION_LABEL } from '../../config/app-meta.config';
             size="lg"
             (clicked)="openOptions()"
           />
-          <app-button
-            *ngIf="isElectron"
-            [label]="translationService.t('main_menu.exit')"
-            variant="ghost"
-            size="lg"
-            (clicked)="exitGame()"
-          />
+          @if (isElectron) {
+            <app-button
+              [label]="translationService.t('main_menu.exit')"
+              variant="ghost"
+              size="lg"
+              (clicked)="exitGame()"
+            />
+          }
         </div>
 
         <div class="version-info">
@@ -71,17 +74,18 @@ import { APP_VERSION_LABEL } from '../../config/app-meta.config';
         </div>
       </div>
 
-      <!-- Modal Nueva Partida -->
-      <app-confirmation-modal
-        *ngIf="showNewGameModal()"
-        titleKey="main_menu.new_game"
-        messageKey="main_menu.confirm_new_game"
-        confirmLabelKey="main_menu.new_game_confirm"
-        cancelLabelKey="options.reset_cancel"
-        confirmVariant="primary"
-        (confirmed)="confirmNewGame()"
-        (cancelled)="showNewGameModal.set(false)"
-      />
+      @if (showNewGameModal()) {
+        <!-- Modal Nueva Partida -->
+        <app-confirmation-modal
+          titleKey="main_menu.new_game"
+          messageKey="main_menu.confirm_new_game"
+          confirmLabelKey="main_menu.new_game_confirm"
+          cancelLabelKey="options.reset_cancel"
+          confirmVariant="primary"
+          (confirmed)="confirmNewGame()"
+          (cancelled)="showNewGameModal.set(false)"
+        />
+      }
     </div>
   `,
   styles: [
@@ -412,7 +416,7 @@ import { APP_VERSION_LABEL } from '../../config/app-meta.config';
   ],
 })
 export class MainMenuComponent implements OnInit {
-  readonly appVersionLabel = APP_VERSION_LABEL;
+  readonly appVersionLabel = (releaseLabel ? releaseLabel + ' ' : '') + 'v' + version;
   translationService = inject(TranslationService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);

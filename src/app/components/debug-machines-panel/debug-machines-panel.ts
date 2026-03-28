@@ -19,36 +19,35 @@ import { MachinesService } from '../../services/machines.service';
       <p>Tick Count: {{ tickCount() }}</p>
 
       <h3>Máquinas</h3>
-      <div
-        *ngFor="let machine of machines(); trackBy: trackByMachineId"
-        style="margin-bottom: 15px; border: 1px solid gray; padding: 10px;"
-      >
-        <h4>
-          {{ machine.name }} <span style="color: #66bb6a;">[Level {{ machine.level }}]</span>
-        </h4>
-        <p>
-          Estado: {{ machine.isActive ? 'ACTIVA' : 'INACTIVA' }}
-          <button (click)="toggleMachine(machine.id)">
-            {{ machine.isActive ? 'Desactivar' : 'Activar' }}
-          </button>
-        </p>
-        <p>
-          Progress: {{ machine.progress.toFixed(2) }} / 1.00 ({{
-            (machine.progress * 100).toFixed(0)
-          }}%)
-        </p>
-        <p>Velocidad: {{ machine.baseSpeed }} ciclos/tick</p>
-        <p>Consumo por ciclo:</p>
-        <ul>
-          <li *ngFor="let consumption of machine.baseConsumption">
-            {{ consumption.resourceId }}: {{ consumption.amount }}
-          </li>
-        </ul>
-        <p>
-          Producción por ciclo: {{ machine.baseProduction.resourceId }}:
-          {{ machine.baseProduction.amount }}
-        </p>
-      </div>
+      @for (machine of machines(); track machine.id) {
+        <div style="margin-bottom: 15px; border: 1px solid gray; padding: 10px;">
+          <h4>
+            {{ machine.name }} <span style="color: #66bb6a;">[Level {{ machine.level }}]</span>
+          </h4>
+          <p>
+            Estado: {{ machine.isActive ? 'ACTIVA' : 'INACTIVA' }}
+            <button (click)="toggleMachine(machine.id)">
+              {{ machine.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </p>
+          <p>
+            Progress: {{ machine.progress.toFixed(2) }} / 1.00 ({{
+              (machine.progress * 100).toFixed(0)
+            }}%)
+          </p>
+          <p>Velocidad: {{ machine.baseSpeed }} ciclos/tick</p>
+          <p>Consumo por ciclo:</p>
+          <ul>
+            @for (consumption of machine.baseConsumption; track $index) {
+              <li>{{ consumption.resourceId }}: {{ consumption.amount }}</li>
+            }
+          </ul>
+          <p>
+            Producción por ciclo: {{ machine.baseProduction.resourceId }}:
+            {{ machine.baseProduction.amount }}
+          </p>
+        </div>
+      }
     </div>
   `,
   styles: [],

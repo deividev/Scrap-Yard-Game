@@ -13,10 +13,9 @@ import { TranslationService } from '../../services/translation.service';
     <div class="machine-list">
       <h2 class="section-title">{{ translationService.t('sections.machines') }}</h2>
       <div class="machines-container">
-        <app-machine-card
-          *ngFor="let machine of orderedMachines(); trackBy: trackByMachineId"
-          [machine]="machine"
-        />
+        @for (machine of orderedMachines(); track machine.id) {
+          <app-machine-card [machine]="machine" />
+        }
       </div>
     </div>
   `,

@@ -51,6 +51,7 @@ export class App implements OnInit, OnDestroy {
 
   private autoSaveInterval?: number;
 
+  // Effect automatically cleaned up by Angular's injection context (component lifetime)
   private viewAudioEffect = effect(() => {
     const currentView = this.gameStateService.view();
     if (currentView === 'game') {
@@ -65,7 +66,7 @@ export class App implements OnInit, OnDestroy {
   });
 
   private beforeUnloadHandler = (event: BeforeUnloadEvent) => {
-    this.saveService.save();
+    this.saveService.save().catch((err) => console.error('[App] beforeUnload save failed:', err));
   };
 
   ngOnInit(): void {
@@ -98,7 +99,7 @@ export class App implements OnInit, OnDestroy {
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
     }
-    this.saveService.save();
+    this.saveService.save().catch((err) => console.error('[App] ngOnDestroy save failed:', err));
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   }
 

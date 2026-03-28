@@ -6,17 +6,29 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="tooltip-wrapper" [class.inline]="inline" [attr.data-tooltip]="text">
+    <div
+      class="tooltip-wrapper"
+      [class.inline]="inline"
+      [attr.data-tooltip]="disabled ? null : text"
+    >
       <ng-content></ng-content>
-      <div
-        class="tooltip-content"
-        [class.tooltip-bottom]="position === 'bottom'"
-        [class.tooltip-top-right]="position === 'top-right'"
-        [class.tooltip-top-left]="position === 'top-left'"
-        *ngIf="text"
-      >
-        {{ text }}
-      </div>
+      @if (!disabled && text) {
+        <div
+          class="tooltip-content"
+          [class.tooltip-bottom]="position === 'bottom'"
+          [class.tooltip-top-right]="position === 'top-right'"
+          [class.tooltip-top-left]="position === 'top-left'"
+          [class.tooltip-wide]="wide"
+        >
+          @if (wide) {
+            @for (line of lines; track $index) {
+              <div class="tooltip-line">{{ line }}</div>
+            }
+          } @else {
+            {{ text }}
+          }
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -30,6 +42,7 @@ import { CommonModule } from '@angular/common';
       .tooltip-wrapper.inline {
         width: auto;
         display: inline-flex;
+        position: relative;
       }
 
       .tooltip-content {
@@ -58,6 +71,16 @@ import { CommonModule } from '@angular/common';
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       }
 
+      .tooltip-content.tooltip-wide {
+        max-width: none;
+        width: max-content;
+        text-align: left;
+      }
+
+      .tooltip-line {
+        white-space: nowrap;
+      }
+
       .tooltip-content::after {
         content: '';
         position: absolute;
@@ -79,7 +102,7 @@ import { CommonModule } from '@angular/common';
         z-index: 1;
       }
 
-      .tooltip-wrapper:hover .tooltip-content {
+      .tooltip-wrapper:hover > .tooltip-content {
         opacity: 1;
         transform: translateX(-50%) translateY(-2px);
       }
@@ -104,7 +127,7 @@ import { CommonModule } from '@angular/common';
         border-bottom-color: #2a2a2a;
       }
 
-      .tooltip-wrapper:hover .tooltip-content.tooltip-bottom {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-bottom {
         transform: translateX(-50%) translateY(2px);
       }
 
@@ -127,7 +150,7 @@ import { CommonModule } from '@angular/common';
         transform: none;
       }
 
-      .tooltip-wrapper:hover .tooltip-content.tooltip-top-right {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-right {
         transform: translateY(-2px);
       }
 
@@ -150,7 +173,7 @@ import { CommonModule } from '@angular/common';
         transform: none;
       }
 
-      .tooltip-wrapper:hover .tooltip-content.tooltip-top-left {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-left {
         transform: translateY(-2px);
       }
     `,
@@ -160,4 +183,10 @@ export class TooltipComponent {
   @Input() text: string = '';
   @Input() inline: boolean = false;
   @Input() position: 'top' | 'bottom' | 'top-right' | 'top-left' = 'top';
+  @Input() wide: boolean = false;
+  @Input() disabled: boolean = false;
+
+  get lines(): string[] {
+    return this.text.split('\n');
+  }
 }

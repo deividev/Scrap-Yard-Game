@@ -155,7 +155,6 @@ export class AppButtonComponent {
   }
 
   handleClick(event: Event): void {
-    event.stopPropagation();
     if (!this.disabled) {
       this.audioService.playUiClick();
       this.clicked.emit();

@@ -7,17 +7,23 @@
   <div class="statistics-grid" [class.grid-hidden]="isCollapsed()">
     <div class="stat-item">
       <span class="stat-label">{{ t.t('statistics.total_scrap') }}</span>
-      <span class="stat-value">{{ statisticsService.totalScrapGenerated() | formatNumber }}</span>
+      <span class="stat-value" [class.flashing]="flashingStats().has('scrap')">{{
+        statisticsService.totalScrapGenerated() | formatNumber
+      }}</span>
     </div>
 
     <div class="stat-item">
       <span class="stat-label">{{ t.t('statistics.play_time') }}</span>
-      <span class="stat-value">{{ statisticsService.playTimeFormatted() }}</span>
+      <span class="stat-value" [class.flashing]="flashingStats().has('time')">{{
+        statisticsService.playTimeFormatted()
+      }}</span>
     </div>
 
     <div class="stat-item">
       <span class="stat-label">{{ t.t('statistics.active_machines') }}</span>
-      <span class="stat-value">{{ statisticsService.activeMachinesCount() }}</span>
+      <span class="stat-value" [class.flashing]="flashingStats().has('machines')">{{
+        statisticsService.activeMachinesCount()
+      }}</span>
     </div>
   </div>
 </div>

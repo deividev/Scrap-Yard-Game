@@ -5,9 +5,15 @@ import { promises as fs } from 'fs';
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
+  const iconFile = process.platform === 'win32' ? 'icon.ico' : 'icon.png';
+  const iconPath = app.isPackaged
+    ? join(process.resourcesPath, iconFile)
+    : join(__dirname, '../build', iconFile);
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: iconPath,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -32,6 +38,9 @@ function createWindow() {
 }
 
 ipcMain.handle('save-game', async (event, data: string) => {
+  if (typeof data !== 'string' || data.length > 10 * 1024 * 1024) {
+    return { success: false, error: 'INVALID_PAYLOAD' };
+  }
   try {
     const userDataPath = app.getPath('userData');
     const savePath = join(userDataPath, 'save.json');
@@ -110,6 +119,8 @@ ipcMain.handle(
     { mode, resolution }: { mode: string; resolution: string },
   ) => {
     if (!mainWindow) return;
+    const validModes = ['fullscreen', 'maximized', 'windowed'];
+    if (!validModes.includes(mode)) return;
     if (mode === 'fullscreen') {
       mainWindow.setFullScreen(true);
     } else if (mode === 'maximized') {
@@ -118,10 +129,12 @@ ipcMain.handle(
     } else {
       mainWindow.setFullScreen(false);
       if (mainWindow.isMaximized()) mainWindow.unmaximize();
-      const [w, h] = resolution.split('x').map(Number);
-      if (w && h) {
-        mainWindow.setSize(w, h);
-        mainWindow.center();
+      if (typeof resolution === 'string' && /^\d+x\d+$/.test(resolution)) {
+        const [w, h] = resolution.split('x').map(Number);
+        if (w && h) {
+          mainWindow.setSize(w, h);
+          mainWindow.center();
+        }
       }
     }
   },
@@ -129,6 +142,7 @@ ipcMain.handle(
 
 ipcMain.handle('set-resolution', (event: Electron.IpcMainInvokeEvent, resolution: string) => {
   if (!mainWindow || mainWindow.isFullScreen() || mainWindow.isMaximized()) return;
+  if (typeof resolution !== 'string' || !/^\d+x\d+$/.test(resolution)) return;
   const [w, h] = resolution.split('x').map(Number);
   if (!w || !h) return;
   mainWindow.setSize(w, h);

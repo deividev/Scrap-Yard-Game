@@ -81,3 +81,23 @@
   font-weight: 600;
   color: var(--color-text-primary);
 }
+
+.stat-value.flashing {
+  animation: stat-pop 0.28s ease-out;
+  color: var(--color-accent-main);
+}
+
+@keyframes stat-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.16);
+  }
+  65% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
