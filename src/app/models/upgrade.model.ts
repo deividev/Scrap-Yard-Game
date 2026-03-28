@@ -18,6 +18,7 @@ export enum UpgradeId {
   UPG_STORE_004 = 'UPG_STORE_004', // Components storage
   UPG_STORE_005 = 'UPG_STORE_005', // Recycled plastic storage
   UPG_STORE_006 = 'UPG_STORE_006', // Electric components storage
+  UPG_STORE_007 = 'UPG_STORE_007', // Copper storage
 
   // Machine speed upgrades
   UPG_MACH_001 = 'UPG_MACH_001', // Trituradora speed
@@ -46,6 +47,7 @@ export interface UpgradeDefinition {
   effectType: 'storage' | 'machine_speed' | 'scrap_manual' | 'scrap_auto';
   targetResourceId?: string; // For storage upgrades
   targetMachineId?: string; // For machine upgrades
+  icon?: string; // Icon path shown in notifications
 }
 
 export interface UpgradeState {

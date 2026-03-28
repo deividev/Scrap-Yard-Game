@@ -19,6 +19,7 @@ export class MarketService {
     if (resourceId === ResourceType.METAL) return MARKET_CONFIG.BASE_PRICES.METAL;
     if (resourceId === ResourceType.PLASTIC) return MARKET_CONFIG.BASE_PRICES.PLASTIC;
     if (resourceId === ResourceType.COMPONENTS) return MARKET_CONFIG.BASE_PRICES.COMPONENTS;
+    if (resourceId === ResourceType.COPPER) return MARKET_CONFIG.BASE_PRICES.COPPER;
     return 0;
   }
 

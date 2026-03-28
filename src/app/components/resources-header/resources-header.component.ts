@@ -124,6 +124,35 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             ></app-sell-resource-button>
           </div>
 
+          <!-- Plástico -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
+              [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(plasticResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.plastic')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="plasticResource().amount >= plasticResource().capacity"
+                >{{ plasticResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ plasticResource().capacity | formatNumber }}</span
+              >
+            </div>
+            <app-sell-resource-button
+              [resourceId]="ResourceType.PLASTIC"
+            ></app-sell-resource-button>
+          </div>
+
           <!-- Componentes -->
           <div class="resource-column">
             <div
@@ -153,33 +182,31 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             ></app-sell-resource-button>
           </div>
 
-          <!-- Plástico -->
+          <!-- Cobre -->
           <div class="resource-column">
             <div
               class="resource-item"
-              [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
-              [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
-              [class.capacity-pop]="isCapacityPop(plasticResource().id)"
+              [class.feedback-up]="isFeedback(copperResource().id, 'up')"
+              [class.feedback-down]="isFeedback(copperResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(copperResource().id)"
             >
               <app-tooltip
-                [text]="translationService.t('resources.plastic')"
+                [text]="translationService.t('resources.copper')"
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
+                <img [src]="copperResource().icon" class="resource-icon" alt="Cobre" />
               </app-tooltip>
               <span
                 class="resource-amount"
-                [class.full]="plasticResource().amount >= plasticResource().capacity"
-                >{{ plasticResource().amount | formatNumber }}</span
+                [class.full]="copperResource().amount >= copperResource().capacity"
+                >{{ copperResource().amount | formatNumber }}</span
               >
               <span class="resource-capacity"
-                >/ {{ plasticResource().capacity | formatNumber }}</span
+                >/ {{ copperResource().capacity | formatNumber }}</span
               >
             </div>
-            <app-sell-resource-button
-              [resourceId]="ResourceType.PLASTIC"
-            ></app-sell-resource-button>
+            <app-sell-resource-button [resourceId]="ResourceType.COPPER"></app-sell-resource-button>
           </div>
 
           <!-- Plástico Reciclado -->
@@ -255,10 +282,10 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         background: var(--color-bg-panel);
         border-bottom: 2px solid rgba(255, 152, 0, 0.35);
         border-top: 2px solid var(--color-accent-main);
-        padding: var(--space-1) var(--space-4) var(--space-2);
+        padding: var(--space-2) var(--space-4) var(--space-3);
         display: flex;
         flex-direction: column;
-        gap: var(--space-1);
+        gap: var(--space-3);
       }
 
       .header-topbar {
@@ -276,8 +303,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resources-row {
         display: flex;
-        gap: var(--space-3);
-        align-items: flex-start;
+        gap: var(--space-4);
+        align-items: center;
       }
 
       .resource-item {
@@ -306,22 +333,16 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resources-container {
         display: flex;
-        gap: var(--space-3);
+        gap: var(--space-4);
         flex: 1;
       }
 
       .resource-column {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
         gap: var(--space-2);
-        align-items: flex-start;
         min-width: fit-content;
-      }
-
-      .resource-column app-scrap-button,
-      .resource-column app-sell-resource-button {
-        display: block;
-        width: 146px;
       }
 
       .header-actions {
@@ -333,16 +354,16 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-icon {
-        width: 56px;
-        height: 56px;
+        width: 44px;
+        height: 44px;
         object-fit: contain;
         transition: transform 0.2s ease;
       }
 
       @media (max-width: 1400px) {
         .resource-icon {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
         }
         .resource-item.money {
           font-size: 16px;
@@ -352,6 +373,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
         .resources-container {
           gap: var(--space-2);
+        }
+        .resource-column {
+          gap: var(--space-1);
         }
       }
 
@@ -368,6 +392,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
         .resources-container {
           gap: var(--space-1);
+        }
+        .resource-column {
+          gap: 6px;
         }
       }
 
@@ -673,6 +700,20 @@ export class ResourcesHeaderComponent implements OnDestroy {
         amount: 0,
         capacity: 0,
         icon: this.getResourceIcon(ResourceType.PLASTIC),
+      }
+    );
+  });
+
+  copperResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.COPPER);
+    return (
+      resource || {
+        id: ResourceType.COPPER,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.COPPER),
       }
     );
   });

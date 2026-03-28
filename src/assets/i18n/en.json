@@ -40,6 +40,7 @@
     "plastic": "Plastic",
     "components": "Components",
     "money": "Money",
+    "copper": "Copper",
     "recycled_plastic": "Recycled Plastic",
     "electric_components": "Electric Components"
   },
@@ -161,6 +162,7 @@
       "metal": "Expand Metal Depot",
       "plastic": "Expand Plastic Warehouse",
       "components": "Expand Components Rack",
+      "copper": "Expand Copper Depot",
       "recycled_plastic": "Expand Recycled Plastic Silo",
       "electric_components": "Expand Electric Parts Rack"
     },

@@ -456,6 +456,18 @@ import { TooltipComponent } from '../ui/tooltip/tooltip.component';
         flex-direction: column;
         height: 100%;
         overflow: hidden;
+        animation: panel-fade-in 0.2s ease-out;
+      }
+
+      @keyframes panel-fade-in {
+        from {
+          opacity: 0;
+          transform: translateX(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
 
       .tabs {
@@ -891,10 +903,10 @@ export class UpgradesPanelComponent {
 
   private readonly machineOrder = [
     MachineType.CRUSHER,
-    MachineType.SMELTER,
-    MachineType.PACKAGER,
     MachineType.SEPARATOR,
     MachineType.ASSEMBLER,
+    MachineType.PACKAGER,
+    MachineType.SMELTER,
     MachineType.RECYCLER,
     MachineType.ELECTRIC_ASSEMBLER,
     MachineType.ELECTRIC_PACKAGER,
@@ -1106,14 +1118,19 @@ export class UpgradesPanelComponent {
         nameKey: 'upgrades.storage.metal',
       },
       {
+        id: UpgradeId.UPG_STORE_003,
+        resourceId: ResourceType.PLASTIC,
+        nameKey: 'upgrades.storage.plastic',
+      },
+      {
         id: UpgradeId.UPG_STORE_004,
         resourceId: ResourceType.COMPONENTS,
         nameKey: 'upgrades.storage.components',
       },
       {
-        id: UpgradeId.UPG_STORE_003,
-        resourceId: ResourceType.PLASTIC,
-        nameKey: 'upgrades.storage.plastic',
+        id: UpgradeId.UPG_STORE_007,
+        resourceId: ResourceType.COPPER,
+        nameKey: 'upgrades.storage.copper',
       },
       {
         id: UpgradeId.UPG_STORE_005,

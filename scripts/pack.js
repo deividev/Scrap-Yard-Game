@@ -46,11 +46,34 @@ try {
   const pkg = require(path.join(process.cwd(), 'package.json'));
   const baseBuild = pkg.build || {};
 
+  // Read game version label from app-meta.config.ts (source of truth for menu display version)
+  let fileVersion = pkg.version;
+  try {
+    const appMetaPath = path.join(process.cwd(), 'src/app/config/app-meta.config.ts');
+    const appMetaContent = fs.readFileSync(appMetaPath, 'utf8');
+    const match = appMetaContent.match(/APP_VERSION_LABEL\s*=\s*['"]([^'"]+)['"]/);
+    if (match) {
+      fileVersion = match[1].replace(/\s+/g, '-'); // e.g. 'demo v0.2.0' → 'demo-v0.2.0'
+      console.log(`Using game version label for artifact names: ${fileVersion}`);
+    }
+  } catch (e) {
+    console.warn(
+      'Could not read APP_VERSION_LABEL, falling back to package.json version:',
+      e && e.message ? e.message : e,
+    );
+  }
+
   const outDir = path.join(process.cwd(), 'dist_electron');
   console.log('Using electron-builder output dir:', outDir);
 
   const tmpConfig = Object.assign({}, baseBuild, {
     directories: Object.assign({}, baseBuild.directories || {}, { output: outDir }),
+    nsis: Object.assign({}, baseBuild.nsis || {}, {
+      artifactName: `\${productName}-${fileVersion}-Setup.\${ext}`,
+    }),
+    portable: Object.assign({}, baseBuild.portable || {}, {
+      artifactName: `\${productName}-${fileVersion}-Portable.\${ext}`,
+    }),
   });
 
   const tmpPath = path.join(process.cwd(), '.electron-builder.tmp.json');

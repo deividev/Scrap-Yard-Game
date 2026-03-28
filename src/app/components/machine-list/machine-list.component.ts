@@ -55,16 +55,16 @@ export class MachineListComponent {
     public translationService: TranslationService,
   ) {}
 
-  // Orden de desbloqueo según árbol de progresión
+  // Orden de desbloqueo según nuevo árbol de progresión
   private machineOrder = [
     MachineType.CRUSHER, // Inicial
-    MachineType.SMELTER, // Requiere Crusher Nv 2
-    MachineType.PACKAGER, // Requiere Smelter Nv 3
-    MachineType.SEPARATOR, // Requiere Packager Nv 2
-    MachineType.ASSEMBLER, // Requiere Separator Nv 2 + Smelter Nv 4
-    MachineType.RECYCLER, // Requiere Separator Nv 3
-    MachineType.ELECTRIC_ASSEMBLER, // Requiere Recycler Nv 2 + Smelter Nv 5 + Assembler
-    MachineType.ELECTRIC_PACKAGER, // Requiere Electric Assembler Nv 2 + Packager Nv 3
+    MachineType.SEPARATOR, // Requiere Crusher Nv 4
+    MachineType.ASSEMBLER, // Requiere Separator Nv 3 + Crusher Nv 6
+    MachineType.PACKAGER, // Requiere Assembler Nv 3 + Crusher Nv 8
+    MachineType.SMELTER, // Requiere Packager Nv 3
+    MachineType.RECYCLER, // Requiere Separator Nv 4
+    MachineType.ELECTRIC_ASSEMBLER, // Requiere Smelter Nv 3 + Recycler Nv 3
+    MachineType.ELECTRIC_PACKAGER, // Requiere Electric Assembler Nv 3 + Packager Nv 5
   ];
 
   orderedMachines = computed(() => {

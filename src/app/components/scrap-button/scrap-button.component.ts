@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ScrapGenerationService } from '../../services/scrap-generation.service';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
@@ -26,25 +26,61 @@ import { AudioService } from '../../services/audio.service';
         (click)="generateScrap()"
       >
         <span class="scrap-summary">
-          <span>-{{ scrapCost }}</span>
-          <img src="assets/icons/gold_resource.png" class="resource-icon" alt="Money" />
-          <span>+{{ scrapAmount() }}</span>
-          <img src="assets/icons/scrap_resource.png" class="resource-icon" alt="Scrap" />
+          <span class="scrap-cost-row">
+            <span class="scrap-amount">-{{ scrapCost }}</span>
+            <img src="assets/icons/gold_resource.png" class="scrap-icon" alt="Money" />
+          </span>
+          <span class="scrap-sep">·</span>
+          <span class="scrap-gain-row">
+            <span class="scrap-amount">+{{ scrapAmount() }}</span>
+            <img src="assets/icons/scrap_resource.png" class="scrap-icon" alt="Scrap" />
+          </span>
         </span>
       </button>
     </app-tooltip>
+    @for (f of floatingTexts(); track f.id) {
+      <span class="scrap-float-text" aria-hidden="true">+{{ scrapAmount() }}</span>
+    }
   `,
   styles: [
     `
       :host {
         display: block;
-        width: 104px;
-        max-width: 104px;
+        width: 110px;
+        max-width: 110px;
+        position: relative;
+        overflow: visible;
+      }
+
+      .scrap-float-text {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px;
+        font-weight: 800;
+        color: #4caf50;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 100;
+        animation: scrap-float-up 0.7s ease-out forwards;
+      }
+
+      @keyframes scrap-float-up {
+        0% {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-50%) translateY(-38px);
+          opacity: 0;
+        }
       }
 
       .scrap-action {
-        width: 104px;
-        min-width: 104px;
+        width: 110px;
+        min-width: 110px;
         min-height: 40px;
         padding: 5px 10px;
         border: 1px solid rgba(255, 152, 0, 0.18);
@@ -77,18 +113,51 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .scrap-summary {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+        line-height: 1;
+      }
+
+      .scrap-sep {
+        font-size: 11px;
+        opacity: 0.35;
+        flex-shrink: 0;
+      }
+
+      .scrap-cost-row,
+      .scrap-gain-row {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        width: 100%;
+        gap: 3px;
       }
 
-      .resource-icon {
-        width: 28px;
-        height: 28px;
+      .scrap-amount {
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .scrap-icon {
+        width: 20px;
+        height: 20px;
         vertical-align: middle;
         object-fit: contain;
+      }
+
+      @media (max-width: 1400px) {
+        :host {
+          width: 134px;
+          max-width: 134px;
+        }
+
+        .scrap-action {
+          width: 134px;
+          min-width: 134px;
+        }
       }
 
       @media (max-width: 1100px) {
@@ -138,8 +207,16 @@ export class ScrapButtonComponent {
     return availableSpace >= this.scrapAmount();
   });
 
+  private floatIdCounter = 0;
+  floatingTexts = signal<{ id: number }[]>([]);
+
   generateScrap(): void {
     this.audioService.playUiClick();
     this.scrapGenerationService.generateManualScrap();
+    const id = this.floatIdCounter++;
+    this.floatingTexts.update((arr) => [...arr, { id }]);
+    setTimeout(() => {
+      this.floatingTexts.update((arr) => arr.filter((f) => f.id !== id));
+    }, 700);
   }
 }

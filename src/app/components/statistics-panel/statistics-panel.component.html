@@ -4,22 +4,20 @@
     <span class="collapse-icon">{{ isCollapsed() ? '▶' : '▼' }}</span>
   </button>
 
-  @if (!isCollapsed()) {
-    <div class="statistics-grid">
-      <div class="stat-item">
-        <span class="stat-label">{{ t.t('statistics.total_scrap') }}</span>
-        <span class="stat-value">{{ statisticsService.totalScrapGenerated() | formatNumber }}</span>
-      </div>
-
-      <div class="stat-item">
-        <span class="stat-label">{{ t.t('statistics.play_time') }}</span>
-        <span class="stat-value">{{ statisticsService.playTimeFormatted() }}</span>
-      </div>
-
-      <div class="stat-item">
-        <span class="stat-label">{{ t.t('statistics.active_machines') }}</span>
-        <span class="stat-value">{{ statisticsService.activeMachinesCount() }}</span>
-      </div>
+  <div class="statistics-grid" [class.grid-hidden]="isCollapsed()">
+    <div class="stat-item">
+      <span class="stat-label">{{ t.t('statistics.total_scrap') }}</span>
+      <span class="stat-value">{{ statisticsService.totalScrapGenerated() | formatNumber }}</span>
     </div>
-  }
+
+    <div class="stat-item">
+      <span class="stat-label">{{ t.t('statistics.play_time') }}</span>
+      <span class="stat-value">{{ statisticsService.playTimeFormatted() }}</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-label">{{ t.t('statistics.active_machines') }}</span>
+      <span class="stat-value">{{ statisticsService.activeMachinesCount() }}</span>
+    </div>
+  </div>
 </div>

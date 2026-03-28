@@ -51,10 +51,10 @@ export class ProgressionHintComponent {
    * Lista ordenada de máquinas según el árbol de progresión
    */
   private progressionOrder: MachineType[] = [
-    MachineType.SMELTER,
-    MachineType.PACKAGER,
     MachineType.SEPARATOR,
     MachineType.ASSEMBLER,
+    MachineType.PACKAGER,
+    MachineType.SMELTER,
     MachineType.RECYCLER,
     MachineType.ELECTRIC_ASSEMBLER,
     MachineType.ELECTRIC_PACKAGER,

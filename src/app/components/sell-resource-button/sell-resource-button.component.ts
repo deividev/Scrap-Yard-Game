@@ -28,18 +28,9 @@ import { AudioService } from '../../services/audio.service';
       <div class="sell-inline">
         <app-tooltip [text]="tooltipText()" [position]="'bottom'">
           <button class="sell-action" type="button" [disabled]="!canSell()" (click)="sell()">
-            <span class="sell-summary">
-              <span class="sell-source">
-                <span class="sell-amount">{{ saleAmount() }}</span>
-                <img [src]="resourceIcon()" class="sell-action-icon" [alt]="resourceName()" />
-              </span>
-              <span class="sell-gain-group">
-                <span class="sell-yield">+{{ moneyGain() }}</span>
-                <img src="assets/icons/gold_resource.png" class="sell-action-icon" alt="Money" />
-                @if (bonusPercent() > 0) {
-                  <span class="bonus-pill">+{{ bonusPercent() }}%</span>
-                }
-              </span>
+            <span class="sell-money">
+              <span class="sell-yield">+{{ moneyGain() }}</span>
+              <img src="assets/icons/gold_resource.png" class="sell-action-icon" alt="Money" />
             </span>
           </button>
         </app-tooltip>
@@ -49,13 +40,19 @@ import { AudioService } from '../../services/audio.service';
           type="button"
           [class.is-open]="isPanelOpen()"
           [attr.aria-expanded]="isPanelOpen()"
+          [disabled]="!hasStock()"
           aria-label="Adjust sell amount"
           (click)="togglePanel()"
         >
-          <span class="sell-toggle-label">{{ saleAmount() }}</span>
+          <span class="sell-toggle-amount">{{ saleAmount() }}</span>
+          <img [src]="resourceIcon()" class="sell-toggle-icon" [alt]="resourceName()" />
           <span class="sell-toggle-caret">▾</span>
         </button>
       </div>
+
+      @for (f of floatingTexts(); track f.id) {
+        <span class="sell-float-text">+{{ f.amount }}</span>
+      }
 
       @if (isPanelOpen()) {
         <div class="sell-panel" [class.is-disabled]="!canSell()">
@@ -145,14 +142,14 @@ import { AudioService } from '../../services/audio.service';
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        width: 146px;
-        max-width: 146px;
+        width: 128px;
+        max-width: 128px;
       }
 
       .sell-inline {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 0;
         width: 100%;
       }
 
@@ -342,67 +339,62 @@ import { AudioService } from '../../services/audio.service';
         gap: 4px;
       }
 
-      .sell-summary {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1px;
-        width: 100%;
-        min-width: 0;
-        line-height: 1;
-      }
-
-      .sell-source,
-      .sell-gain-group {
+      .sell-money {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 3px;
-        min-width: 0;
-      }
-
-      .sell-amount,
-      .sell-yield {
         white-space: nowrap;
-      }
-
-      .sell-amount {
-        font-size: 12px;
+        line-height: 1;
       }
 
       .sell-yield {
-        font-size: 11px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
       }
 
       .sell-toggle {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 3px;
         flex-shrink: 0;
-        width: 38px;
-        min-width: 38px;
+        width: 52px;
+        min-width: 52px;
         align-self: stretch;
         justify-content: center;
-        padding: 0 6px;
+        padding: 0 5px;
         font-size: 12px;
         font-weight: 700;
+        border-radius: 0 4px 4px 0;
+        border-left: none;
+        background: rgba(0, 0, 0, 0.35);
       }
 
       .sell-toggle.is-open {
         color: var(--color-text-primary);
         border-color: var(--color-accent-main);
-        background: rgba(255, 152, 0, 0.14);
-        box-shadow: 0 0 0 2px rgba(220, 174, 92, 0.12);
+        background: rgba(255, 152, 0, 0.18);
+        box-shadow: inset 0 0 0 1px rgba(220, 174, 92, 0.2);
       }
 
-      .sell-toggle-label {
+      .sell-toggle-amount {
+        font-size: 11px;
         font-weight: 700;
+        white-space: nowrap;
+        color: var(--color-text-secondary);
+      }
+
+      .sell-toggle-icon {
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+        flex-shrink: 0;
       }
 
       .sell-toggle-caret {
-        font-size: 11px;
-        opacity: 0.8;
+        font-size: 10px;
+        opacity: 0.65;
       }
 
       .resource-icon {
@@ -413,26 +405,10 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .sell-action-icon {
-        width: 15px;
-        height: 15px;
+        width: 20px;
+        height: 20px;
         vertical-align: middle;
         object-fit: contain;
-      }
-
-      .bonus-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 36px;
-        height: 15px;
-        padding: 0 4px;
-        border-radius: 999px;
-        background: rgba(14, 38, 25, 0.72);
-        color: #8fe6a8;
-        font-weight: 700;
-        font-size: 9px;
-        white-space: nowrap;
-        box-shadow: inset 0 0 0 1px rgba(143, 230, 168, 0.18);
       }
 
       .sell-preset-max {
@@ -440,30 +416,54 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .sell-action {
-        width: 104px;
-        min-width: 104px;
+        flex: 1;
+        min-width: 0;
         min-height: 40px;
         padding: 5px 10px;
         background: linear-gradient(180deg, rgba(255, 152, 0, 0.95), rgba(214, 118, 10, 0.95));
         color: #16120d;
         font-size: 13px;
         font-weight: 700;
+        border-radius: 4px 0 0 4px;
+        border-right: 1px solid rgba(0, 0, 0, 0.3);
       }
 
       .sell-action:hover:not(:disabled) {
         border-color: rgba(255, 193, 7, 0.55);
+        border-right-color: rgba(0, 0, 0, 0.3);
         filter: brightness(1.04);
+      }
+
+      .sell-float-text {
+        position: absolute;
+        bottom: calc(100% + 4px);
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px;
+        font-weight: 700;
+        color: #ffd54f;
+        pointer-events: none;
+        white-space: nowrap;
+        animation: sell-float-up 0.7s ease-out forwards;
+        z-index: 10;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      }
+
+      @keyframes sell-float-up {
+        0% {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(-50%) translateY(-38px);
+        }
       }
 
       @media (max-width: 1100px) {
         .sell-resource {
-          width: 134px;
-          max-width: 134px;
-        }
-
-        .sell-action {
-          width: 96px;
-          min-width: 96px;
+          width: 112px;
+          max-width: 112px;
         }
 
         .sell-panel {
@@ -471,15 +471,14 @@ import { AudioService } from '../../services/audio.service';
         }
 
         .sell-step,
-        .sell-preset,
-        .sell-toggle {
+        .sell-preset {
           min-width: 18px;
           padding: 0 4px;
         }
 
         .sell-toggle {
-          width: 34px;
-          min-width: 34px;
+          width: 44px;
+          min-width: 44px;
         }
       }
     `,
@@ -488,6 +487,9 @@ import { AudioService } from '../../services/audio.service';
 export class SellResourceButtonComponent {
   resourceId = input.required<ResourceType>();
   tutorialId = input<string | null>(null);
+
+  private floatIdCounter = 0;
+  floatingTexts = signal<{ id: number; amount: number }[]>([]);
 
   private hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private selectedAmount = signal(1);
@@ -520,6 +522,10 @@ export class SellResourceButtonComponent {
     );
   });
 
+  resourceCapacity = computed(() => this.resourcesService.getCapacity(this.resourceId()));
+
+  hasStock = computed(() => this.maxSellAmount() > 0);
+
   tooltipText = computed(() =>
     this.translationService.tp('tooltips.sell_resource', {
       amount: this.saleAmount(),
@@ -542,6 +548,11 @@ export class SellResourceButtonComponent {
     effect(() => {
       if (this.selectedAmount() < 1) {
         this.selectedAmount.set(1);
+      }
+    });
+    effect(() => {
+      if (!this.hasStock()) {
+        this.isPanelOpen.set(false);
       }
     });
   }
@@ -605,10 +616,16 @@ export class SellResourceButtonComponent {
       return;
     }
 
+    const gain = this.moneyGain();
     const sold = this.marketService.sell(this.resourceId(), this.saleAmount());
     if (sold) {
       this.audioService.playResourceSold();
       this.closePanel();
+      const id = ++this.floatIdCounter;
+      this.floatingTexts.update((arr) => [...arr, { id, amount: gain }]);
+      setTimeout(() => {
+        this.floatingTexts.update((arr) => arr.filter((f) => f.id !== id));
+      }, 700);
     }
   }
 }

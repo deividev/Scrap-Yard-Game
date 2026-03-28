@@ -25,6 +25,7 @@ export const STORAGE_UPGRADE_CONFIG = {
     METAL: 15,
     PLASTIC: 15,
     COMPONENTS: 5,
+    COPPER: 15,
     RECYCLED_PLASTIC: 10,
     ELECTRIC_COMPONENTS: 5,
   },
@@ -33,6 +34,7 @@ export const STORAGE_UPGRADE_CONFIG = {
     METAL: 35,
     PLASTIC: 35,
     COMPONENTS: 60,
+    COPPER: 40,
     RECYCLED_PLASTIC: 50,
     ELECTRIC_COMPONENTS: 80,
   },
@@ -61,15 +63,16 @@ export const MARKET_CONFIG = {
     METAL: 1,
     PLASTIC: 1.2,
     COMPONENTS: 3,
+    COPPER: 2.8, // Fix: was 1.5 (selling copper was worse than selling metal)
   },
   BATCH_BONUSES: {
     MEDIUM: {
       threshold: 15,
-      multiplier: 1.05,
+      multiplier: 1.0,
     },
     LARGE: {
       threshold: 30,
-      multiplier: 1.1,
+      multiplier: 1.0,
     },
   },
 };
@@ -80,19 +83,27 @@ export const MARKET_CONFIG = {
 
 export const MACHINE_UPGRADE_CONFIG = {
   MAX_LEVEL: 50,
-  COST_MULTIPLIER: 1.26,
+  COST_MULTIPLIER: 1.2,
   COMPONENTS_START_LEVEL: 4,
+  // Per-machine override: Crusher must reach lv13 to unlock Packager,
+  // but Components don't exist until Assembler is unlocked (requires Crusher lv9).
+  // Defer its component cost to lv14 to break the deadlock.
+  COMPONENTS_START_LEVEL_OVERRIDES: {
+    UPG_MACH_001: 14, // Crusher — no components required until after Packager unlock
+  } as Record<string, number>,
   SPEED_BONUS_PER_LEVEL: 0.1,
   PRODUCTION_BONUS_EVERY_N_LEVELS: 10,
+  // Single source of truth for machine upgrade base costs.
+  // upgrade-definitions.config.ts reads from here — do NOT hardcode costs there.
   BASE_COSTS: {
-    CRUSHER: 50,
-    SEPARATOR: 70,
-    SMELTER: 65,
-    ASSEMBLER: 90,
-    PACKAGER: 105,
-    ELECTRIC_PACKAGER: 320,
-    RECYCLER: 130,
-    ELECTRIC_ASSEMBLER: 280,
+    CRUSHER: 65,
+    SMELTER: 85,
+    SEPARATOR: 90,
+    ASSEMBLER: 120,
+    PACKAGER: 135,
+    RECYCLER: 165,
+    ELECTRIC_ASSEMBLER: 365,
+    ELECTRIC_PACKAGER: 405,
   },
 };
 
@@ -103,12 +114,12 @@ export const MACHINE_UPGRADE_CONFIG = {
 export const MACHINE_BASE_SPEEDS = {
   CRUSHER: 0.5,
   SEPARATOR: 0.5,
-  SMELTER: 0.35,
-  ASSEMBLER: 0.17,
+  SMELTER: 0.25, // Fix: was 0.35 (mismatch with machines.config)
+  ASSEMBLER: 0.22, // Fix: was 0.17 (Packager starvation at unlock)
   PACKAGER: 0.1,
   ELECTRIC_PACKAGER: 0.1,
   RECYCLER: 0.5,
-  ELECTRIC_ASSEMBLER: 0.12,
+  ELECTRIC_ASSEMBLER: 0.2, // Fix: was 0.12 (E.Packager 80% deficit)
 };
 
 // ============================================
@@ -130,6 +141,7 @@ export const INITIAL_CAPACITIES = {
   PLASTIC: 15,
   COMPONENTS: 8,
   MONEY: Infinity,
+  COPPER: 20,
   RECYCLED_PLASTIC: 20,
   ELECTRIC_COMPONENTS: 10,
 };

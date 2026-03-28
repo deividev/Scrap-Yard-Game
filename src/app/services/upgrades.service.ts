@@ -116,8 +116,13 @@ export class UpgradesService {
       currentLevel >= SCRAP_GENERATION_CONFIG.COMPONENTS_START_LEVEL
     ) {
       componentsCost = currentLevel - SCRAP_GENERATION_CONFIG.COMPONENTS_START_LEVEL + 1;
-    } else if (isMachineUpgrade && currentLevel >= MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL) {
-      componentsCost = currentLevel - MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL + 1;
+    } else if (isMachineUpgrade) {
+      const componentsStart =
+        MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL_OVERRIDES[upgradeId] ??
+        MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL;
+      if (currentLevel >= componentsStart) {
+        componentsCost = currentLevel - componentsStart + 1;
+      }
     }
 
     return {
@@ -177,7 +182,7 @@ export class UpgradesService {
         name: definition.name,
         level: newLevel.toString(),
       });
-      this.notificationService.show(message, 'success');
+      this.notificationService.show(message, 'success', definition.icon);
     }
 
     this.audioService.playUpgradeCompleted();

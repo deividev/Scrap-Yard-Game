@@ -1,6 +1,7 @@
 import { UpgradeDefinition, UpgradeId, UpgradeCategory } from '../models/upgrade.model';
 import { ResourceType } from '../models/resource.model';
 import { MachineType } from '../models/machine.model';
+import { MACHINE_UPGRADE_CONFIG } from './game-balance.config';
 
 /**
  * G) Upgrade Definitions Config
@@ -18,6 +19,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+25 capacidad máxima de Chatarra por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.SCRAP,
+    icon: 'assets/icons/scrap_resource.png',
   },
   {
     id: UpgradeId.UPG_STORE_002,
@@ -27,6 +29,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+15 capacidad máxima de Metal por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.METAL,
+    icon: 'assets/icons/metal_resource.png',
   },
   {
     id: UpgradeId.UPG_STORE_003,
@@ -36,6 +39,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+15 capacidad máxima de Plástico por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.PLASTIC,
+    icon: 'assets/icons/plastic_resource.png',
   },
   {
     id: UpgradeId.UPG_STORE_004,
@@ -46,6 +50,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+5 capacidad máxima de Componentes por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.COMPONENTS,
+    icon: 'assets/icons/components_resource.png',
   },
   {
     id: UpgradeId.UPG_STORE_005,
@@ -55,6 +60,17 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+10 capacidad máxima de Plástico Reciclado por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.RECYCLED_PLASTIC,
+    icon: 'assets/icons/plastic_recycle_resource.png',
+  },
+  {
+    id: UpgradeId.UPG_STORE_007,
+    category: UpgradeCategory.STORAGE,
+    name: 'Depósito de Cobre',
+    baseCostMoney: 40,
+    description: '+15 capacidad máxima de Cobre por nivel',
+    effectType: 'storage',
+    targetResourceId: ResourceType.COPPER,
+    icon: 'assets/icons/copper_resource.png',
   },
   {
     id: UpgradeId.UPG_STORE_006,
@@ -65,80 +81,90 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: '+5 capacidad máxima de Componentes Eléctricos por nivel',
     effectType: 'storage',
     targetResourceId: ResourceType.ELECTRIC_COMPONENTS,
+    icon: 'assets/icons/electric_components_resource.png',
   },
 
   // MACHINE SPEED UPGRADES
+  // baseCostMoney comes from MACHINE_UPGRADE_CONFIG.BASE_COSTS in game-balance.config.ts — edit there.
   {
     id: UpgradeId.UPG_MACH_001,
     category: UpgradeCategory.MACHINE,
     name: 'Trituradora: Velocidad',
-    baseCostMoney: 30,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.CRUSHER,
     description: 'Aumenta velocidad de Trituradora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.CRUSHER,
+    icon: 'assets/icons/machines/crusher_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_002,
     category: UpgradeCategory.MACHINE,
     name: 'Fundidora: Velocidad',
-    baseCostMoney: 50,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SMELTER,
     description: 'Aumenta velocidad de Fundidora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.SMELTER,
+    icon: 'assets/icons/machines/smelter_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_003,
     category: UpgradeCategory.MACHINE,
     name: 'Separador: Velocidad',
-    baseCostMoney: 30,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SEPARATOR,
     description: 'Aumenta velocidad de Separador',
     effectType: 'machine_speed',
     targetMachineId: MachineType.SEPARATOR,
+    icon: 'assets/icons/machines/separator_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_004,
     category: UpgradeCategory.MACHINE,
     name: 'Ensambladora: Velocidad',
-    baseCostMoney: 60,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ASSEMBLER,
     description: 'Aumenta velocidad de Ensambladora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ASSEMBLER,
+    icon: 'assets/icons/machines/assembler_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_005,
     category: UpgradeCategory.MACHINE,
     name: 'Empaquetadora: Velocidad',
-    baseCostMoney: 80,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.PACKAGER,
     description: 'Aumenta velocidad de Empaquetadora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.PACKAGER,
+    icon: 'assets/icons/machines/packager_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_006,
     category: UpgradeCategory.MACHINE,
     name: 'Recicladora: Velocidad',
-    baseCostMoney: 70,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.RECYCLER,
     description: 'Aumenta velocidad de Recicladora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.RECYCLER,
+    icon: 'assets/icons/machines/recycler_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_007,
     category: UpgradeCategory.MACHINE,
     name: 'Ensambladora Eléctrica: Velocidad',
-    baseCostMoney: 100,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ELECTRIC_ASSEMBLER,
     description: 'Aumenta velocidad de Ensambladora Eléctrica',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ELECTRIC_ASSEMBLER,
+    icon: 'assets/icons/machines/electric_assembler_machine.png',
   },
   {
     id: UpgradeId.UPG_MACH_008,
     category: UpgradeCategory.MACHINE,
     name: 'Empaquetadora Eléctrica: Velocidad',
-    baseCostMoney: 90,
+    baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ELECTRIC_PACKAGER,
     description: 'Aumenta velocidad de Empaquetadora Eléctrica',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ELECTRIC_PACKAGER,
+    icon: 'assets/icons/machines/electric_packager_machine.png',
   },
 
   // SCRAP GENERATION UPGRADES
@@ -146,16 +172,18 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     id: UpgradeId.UPG_SCRAP_001,
     category: UpgradeCategory.SCRAP,
     name: 'Descarga Manual Mejorada',
-    baseCostMoney: 70,
+    baseCostMoney: 95,
     description: '+1 Chatarra adicional por acción manual por nivel',
     effectType: 'scrap_manual',
+    icon: 'assets/icons/scrap_resource.png',
   },
   {
     id: UpgradeId.UPG_SCRAP_002,
     category: UpgradeCategory.SCRAP,
     name: 'Llegada Automática de Chatarra',
-    baseCostMoney: 75,
+    baseCostMoney: 115,
     description: 'Genera Chatarra automáticamente por segundo',
     effectType: 'scrap_auto',
+    icon: 'assets/icons/scrap_resource.png',
   },
 ];

@@ -10,7 +10,9 @@ import { NotificationService } from '../../../services/notification.service';
       @for (notification of notificationService.notifications$(); track notification.id) {
         <div class="notification" [class]="'notification-' + notification.type">
           <span class="notification-icon">
-            @if (notification.type === 'unlock') {
+            @if (notification.icon) {
+              <img [src]="notification.icon" alt="" class="notification-img-icon" />
+            } @else if (notification.type === 'unlock') {
               🔓
             } @else if (notification.type === 'success') {
               ✅
@@ -62,6 +64,13 @@ import { NotificationService } from '../../../services/notification.service';
       font-size: 18px;
       flex-shrink: 0;
       line-height: 1;
+    }
+
+    .notification-img-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      display: block;
     }
 
     .notification-message {

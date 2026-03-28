@@ -26,113 +26,122 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
   imports: [CommonModule, AppButtonComponent, ProgressBarComponent, TooltipComponent],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div
-      class="machine-card"
-      [attr.data-tutorial-id]="machineTutorialId()"
-      [class.selected]="isSelected()"
-      [class.locked]="isLocked()"
-      [class.producing]="isProducing()"
-      [class.input-blocked]="isInputBlocked()"
-      [class.output-blocked]="isOutputBlocked()"
-      [class.unlock-ready]="isUnlockReady()"
-      [class.just-unlocked]="justUnlocked()"
-      (click)="selectMachine()"
-    >
-      <div class="machine-header">
-        <div class="machine-title-group">
-          @if (machineIcon()) {
-            <div class="machine-icon-badge" [class.locked]="isLocked()">
-              <img [src]="machineIcon()!" class="machine-icon" alt="" />
-            </div>
-          }
-          <h3 class="machine-name">{{ translatedMachineName() }}</h3>
-          <span class="machine-level" *ngIf="!isLocked()"
-            >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
-          >
+    <app-tooltip [text]="isLocked() ? unlockRequirementsText() : ''" [position]="'top'">
+      <div
+        class="machine-card"
+        [attr.data-tutorial-id]="machineTutorialId()"
+        [class.selected]="isSelected()"
+        [class.locked]="isLocked()"
+        [class.producing]="isProducing()"
+        [class.input-blocked]="isInputBlocked()"
+        [class.output-blocked]="isOutputBlocked()"
+        [class.unlock-ready]="isUnlockReady()"
+        [class.just-unlocked]="justUnlocked()"
+        (click)="selectMachine()"
+      >
+        <div class="machine-header">
+          <div class="machine-title-group">
+            @if (machineIcon()) {
+              <div class="machine-icon-badge" [class.locked]="isLocked()">
+                <img [src]="machineIcon()!" class="machine-icon" alt="" />
+              </div>
+            }
+            <h3 class="machine-name">{{ translatedMachineName() }}</h3>
+            <span class="machine-level" *ngIf="!isLocked()"
+              >{{ translationService.t('common.level_short') }} {{ currentLevel() }}</span
+            >
+          </div>
+          <div class="machine-controls">
+            <app-button
+              *ngIf="!isLocked()"
+              [attr.data-tutorial-id]="machineToggleTutorialId()"
+              [label]="
+                currentIsActive()
+                  ? translationService.t('buttons.activa')
+                  : translationService.t('buttons.parada')
+              "
+              [variant]="currentIsActive() ? 'primary' : 'secondary'"
+              size="sm"
+              (clicked)="toggleMachine()"
+            />
+          </div>
+          <div *ngIf="isLocked()" class="locked-info">
+            <span class="locked-badge">🔒 {{ translationService.t('status.bloqueada') }}</span>
+            <span class="unlock-requirements" *ngIf="unlockRequirementsText()">
+              {{ unlockRequirementsText() }}
+            </span>
+          </div>
         </div>
-        <div class="machine-controls">
-          <app-button
-            *ngIf="!isLocked()"
-            [attr.data-tutorial-id]="machineToggleTutorialId()"
-            [label]="
-              currentIsActive()
-                ? translationService.t('buttons.activa')
-                : translationService.t('buttons.parada')
-            "
-            [variant]="currentIsActive() ? 'primary' : 'secondary'"
-            size="sm"
-            (clicked)="toggleMachine()"
+
+        <div class="machine-recipe">
+          <span class="recipe-inputs">
+            <span *ngFor="let input of effectiveInputs(); let last = last">
+              <app-tooltip [text]="getResourceName(input.resourceId)" [inline]="true">
+                <img
+                  [src]="getResourceIcon(input.resourceId)"
+                  class="resource-icon"
+                  alt="Resource"
+                />
+              </app-tooltip>
+              <span class="resource-amount">{{ input.amount }}</span>
+              <span *ngIf="!last" class="separator">+</span>
+            </span>
+          </span>
+          <span class="recipe-arrow">→</span>
+          <span class="recipe-output">
+            <app-tooltip
+              [text]="getResourceName(currentBaseProduction().resourceId)"
+              [inline]="true"
+            >
+              <img
+                [src]="getResourceIcon(currentBaseProduction().resourceId)"
+                class="resource-icon"
+                alt="Resource"
+              />
+            </app-tooltip>
+            <span class="resource-amount">{{ effectiveOutput() }}</span>
+          </span>
+        </div>
+
+        <div class="machine-stats" *ngIf="!isLocked()">
+          <app-tooltip [text]="speedTooltip()" [inline]="true" [position]="'top-right'">
+            <span class="stat-item">
+              ⚡ {{ effectiveSpeed().toFixed(2) }}
+              {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
+            </span>
+          </app-tooltip>
+          <app-tooltip
+            *ngIf="productionMultiplier() > 1"
+            [text]="multiplierTooltip()"
+            [inline]="true"
+            [position]="'top-right'"
+          >
+            <span class="stat-item"> ×{{ productionMultiplier() }} </span>
+          </app-tooltip>
+        </div>
+
+        <div [attr.data-tutorial-id]="machineProgressTutorialId()">
+          <app-progress-bar
+            [progress]="progressPercent() / 100"
+            [label]="progressLabel()"
+            [inline]="true"
           />
         </div>
-        <div *ngIf="isLocked()" class="locked-info">
-          <span class="locked-badge">🔒 {{ translationService.t('status.bloqueada') }}</span>
-          <span class="unlock-requirements" *ngIf="unlockRequirementsText()">
-            {{ unlockRequirementsText() }}
+
+        <div class="machine-status">
+          <span
+            class="status-label"
+            [class.status-produciendo]="isProducing()"
+            [class.status-parada]="isStopped()"
+            [class.status-bloqueada]="isLocked()"
+            [class.status-input]="isInputBlocked()"
+            [class.status-output]="isOutputBlocked()"
+          >
+            {{ statusText() }}
           </span>
         </div>
       </div>
-
-      <div class="machine-recipe">
-        <span class="recipe-inputs">
-          <span *ngFor="let input of effectiveInputs(); let last = last">
-            <app-tooltip [text]="getResourceName(input.resourceId)" [inline]="true">
-              <img [src]="getResourceIcon(input.resourceId)" class="resource-icon" alt="Resource" />
-            </app-tooltip>
-            <span class="resource-amount">{{ input.amount }}</span>
-            <span *ngIf="!last" class="separator">+</span>
-          </span>
-        </span>
-        <span class="recipe-arrow">→</span>
-        <span class="recipe-output">
-          <app-tooltip [text]="getResourceName(currentBaseProduction().resourceId)" [inline]="true">
-            <img
-              [src]="getResourceIcon(currentBaseProduction().resourceId)"
-              class="resource-icon"
-              alt="Resource"
-            />
-          </app-tooltip>
-          <span class="resource-amount">{{ effectiveOutput() }}</span>
-        </span>
-      </div>
-
-      <div class="machine-stats" *ngIf="!isLocked()">
-        <app-tooltip [text]="speedTooltip()" [inline]="true" [position]="'top-right'">
-          <span class="stat-item">
-            ⚡ {{ effectiveSpeed().toFixed(2) }}
-            {{ translationService.t('upgrades.machine_tab.cycles_per_second') }}
-          </span>
-        </app-tooltip>
-        <app-tooltip
-          *ngIf="productionMultiplier() > 1"
-          [text]="multiplierTooltip()"
-          [inline]="true"
-          [position]="'top-right'"
-        >
-          <span class="stat-item"> ×{{ productionMultiplier() }} </span>
-        </app-tooltip>
-      </div>
-
-      <div [attr.data-tutorial-id]="machineProgressTutorialId()">
-        <app-progress-bar
-          [progress]="progressPercent() / 100"
-          [label]="progressLabel()"
-          [inline]="true"
-        />
-      </div>
-
-      <div class="machine-status">
-        <span
-          class="status-label"
-          [class.status-produciendo]="isProducing()"
-          [class.status-parada]="isStopped()"
-          [class.status-bloqueada]="isLocked()"
-          [class.status-input]="isInputBlocked()"
-          [class.status-output]="isOutputBlocked()"
-        >
-          {{ statusText() }}
-        </span>
-      </div>
-    </div>
+    </app-tooltip>
   `,
   styles: [
     `
@@ -194,11 +203,21 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 
       .machine-card.locked {
         opacity: 0.6;
-        cursor: default;
+        cursor: help;
       }
 
       .machine-card.locked:hover {
-        border-color: var(--color-border);
+        border-color: rgba(245, 158, 11, 0.45);
+        box-shadow:
+          0 0 0 1px rgba(245, 158, 11, 0.2),
+          0 2px 8px rgba(245, 158, 11, 0.12);
+        transform: translateY(-1px);
+        opacity: 0.75;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.18s ease,
+          opacity 0.18s ease;
       }
 
       .machine-controls {
@@ -221,11 +240,29 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
         border-color: var(--color-accent-main);
         box-shadow: 0 0 0 3px rgba(220, 174, 92, 0.22);
         background: rgba(220, 174, 92, 0.06);
+        animation: none;
       }
 
       .machine-card.producing {
-        border-color: rgba(34, 197, 94, 0.45);
-        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.55);
+        box-shadow:
+          inset 0 0 0 1px rgba(34, 197, 94, 0.2),
+          0 0 14px rgba(34, 197, 94, 0.12);
+        animation: producing-pulse 2.4s ease-in-out infinite;
+      }
+
+      @keyframes producing-pulse {
+        0%,
+        100% {
+          box-shadow:
+            inset 0 0 0 1px rgba(34, 197, 94, 0.2),
+            0 0 10px rgba(34, 197, 94, 0.1);
+        }
+        50% {
+          box-shadow:
+            inset 0 0 0 1px rgba(34, 197, 94, 0.35),
+            0 0 22px rgba(34, 197, 94, 0.22);
+        }
       }
 
       .machine-card.producing .progress-bar-fill {
@@ -377,6 +414,31 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
           0 2px 8px rgba(0, 0, 0, 0.4),
           inset 0 1px 0 rgba(220, 174, 92, 0.12);
         transition: opacity 0.3s ease;
+      }
+
+      .machine-card.producing .machine-icon-badge {
+        animation: icon-idle-bounce 2.8s ease-in-out infinite;
+        border-color: rgba(34, 197, 94, 0.5);
+        box-shadow:
+          0 2px 10px rgba(0, 0, 0, 0.45),
+          0 0 8px rgba(34, 197, 94, 0.18),
+          inset 0 1px 0 rgba(34, 197, 94, 0.1);
+      }
+
+      @keyframes icon-idle-bounce {
+        0%,
+        100% {
+          transform: translateY(0px) scale(1);
+        }
+        30% {
+          transform: translateY(-3px) scale(1.03);
+        }
+        60% {
+          transform: translateY(1px) scale(0.99);
+        }
+        80% {
+          transform: translateY(-1px) scale(1.01);
+        }
       }
 
       .machine-icon-badge.locked {

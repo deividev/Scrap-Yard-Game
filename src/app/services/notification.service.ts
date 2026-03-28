@@ -5,6 +5,7 @@ export interface Notification {
   message: string;
   type: 'success' | 'info' | 'unlock';
   timestamp: number;
+  icon?: string;
 }
 
 @Injectable({
@@ -22,12 +23,13 @@ export class NotificationService {
 
   notifications$ = this.notifications.asReadonly();
 
-  show(message: string, type: 'success' | 'info' | 'unlock' = 'info'): void {
+  show(message: string, type: 'success' | 'info' | 'unlock' = 'info', icon?: string): void {
     const notification: Notification = {
       id: this.nextId++,
       message,
       type,
       timestamp: Date.now(),
+      icon,
     };
 
     this.notifications.update((current) => {

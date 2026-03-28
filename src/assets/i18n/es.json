@@ -40,6 +40,7 @@
     "plastic": "Plástico",
     "components": "Componentes",
     "money": "Dinero",
+    "copper": "Cobre",
     "recycled_plastic": "Plástico reciclado",
     "electric_components": "Componentes eléctricos"
   },
@@ -161,6 +162,7 @@
       "metal": "Ampliar Depósito de Metal",
       "plastic": "Ampliar Almacén de Plástico",
       "components": "Ampliar Estantería de Componentes",
+      "copper": "Ampliar Depósito de Cobre",
       "recycled_plastic": "Ampliar Silo de Plástico Reciclado",
       "electric_components": "Ampliar Rack Eléctrico"
     },
