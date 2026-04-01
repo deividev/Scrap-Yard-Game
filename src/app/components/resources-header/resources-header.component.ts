@@ -2,7 +2,6 @@ import { Component, OnDestroy, computed, effect, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
-import { DebugControlsComponent } from '../debug-controls/debug-controls.component';
 import { ScrapButtonComponent } from '../scrap-button/scrap-button.component';
 import { SellResourceButtonComponent } from '../sell-resource-button/sell-resource-button.component';
 import { ProgressionHintComponent } from '../progression-hint/progression-hint.component';
@@ -11,6 +10,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 import { TranslationService } from '../../services/translation.service';
 import { GameStateService } from '../../services/game-state.service';
+import { ScrapGenerationService } from '../../services/scrap-generation.service';
 import { SaveService } from '../../services/save.service';
 import { AudioService } from '../../services/audio.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
@@ -20,7 +20,6 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   standalone: true,
   imports: [
     CommonModule,
-    DebugControlsComponent,
     ScrapButtonComponent,
     SellResourceButtonComponent,
     ProgressionHintComponent,
@@ -48,7 +47,6 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             size="sm"
             (clicked)="returnToMenu()"
           />
-          <app-debug-controls></app-debug-controls>
         </div>
       </div>
 
@@ -64,7 +62,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             [inline]="true"
             [position]="'bottom'"
           >
-            <img [src]="moneyResource().icon" class="resource-icon" alt="Money" />
+            <img
+              [src]="moneyResource().icon"
+              class="resource-icon"
+              [attr.alt]="translationService.t('resources.money')"
+            />
           </app-tooltip>
           <span class="resource-amount">{{ moneyResource().amount }}</span>
         </div>
@@ -86,7 +88,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="scrapResource().icon" class="resource-icon" alt="Chatarra" />
+                <img
+                  [src]="scrapResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.scrap')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -94,6 +100,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >{{ scrapResource().amount | formatNumber }}</span
               >
               <span class="resource-capacity">/ {{ scrapResource().capacity | formatNumber }}</span>
+              @for (f of autoFloatingTexts(); track f.id) {
+                <span class="auto-scrap-float" aria-hidden="true"
+                  >+{{ formatAutoAmount(f.amount) }}</span
+                >
+              }
             </div>
             <app-scrap-button></app-scrap-button>
           </div>
@@ -114,7 +125,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="metalResource().icon" class="resource-icon" alt="Metal" />
+                <img
+                  [src]="metalResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.metal')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -144,7 +159,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
+                <img
+                  [src]="plasticResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.plastic')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -175,7 +194,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="componentsResource().icon" class="resource-icon" alt="Componentes" />
+                <img
+                  [src]="componentsResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.components')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -206,7 +229,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="copperResource().icon" class="resource-icon" alt="Cobre" />
+                <img
+                  [src]="copperResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.copper')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -238,7 +265,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 <img
                   [src]="recycledPlasticResource().icon"
                   class="resource-icon"
-                  alt="Plástico reciclado"
+                  [attr.alt]="translationService.t('resources.recycled_plastic')"
                 />
               </app-tooltip>
               <span
@@ -272,7 +299,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 <img
                   [src]="electricComponentsResource().icon"
                   class="resource-icon"
-                  alt="Componentes eléctricos"
+                  [attr.alt]="translationService.t('resources.electric_components')"
                 />
               </app-tooltip>
               <span
@@ -295,7 +322,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
     `
       .resources-header {
         position: relative;
-        z-index: 50;
+        z-index: 100;
         background: var(--color-bg-panel);
         border-bottom: 2px solid rgba(255, 152, 0, 0.35);
         border-top: 2px solid var(--color-accent-main);
@@ -322,9 +349,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         display: flex;
         gap: var(--space-4);
         align-items: center;
+        overflow: visible;
       }
 
       .resource-item {
+        position: relative;
+        overflow: visible;
         display: flex;
         align-items: center;
         gap: var(--space-2);
@@ -352,6 +382,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         display: flex;
         gap: var(--space-4);
         flex: 1;
+        overflow: visible;
       }
 
       .resource-column {
@@ -416,7 +447,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-amount {
+        font-family: var(--font-mono);
         font-weight: 600;
+        letter-spacing: 0.04em;
         color: var(--color-text-primary);
         transition:
           color 0.2s ease,
@@ -431,7 +464,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.feedback-up .resource-amount {
-        color: #22c55e;
+        color: var(--color-state-success);
         animation: amount-pop 0.52s ease-out;
       }
 
@@ -448,7 +481,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.feedback-down .resource-amount {
-        color: #f87171;
+        color: var(--color-state-danger-light);
         animation: amount-drop 0.52s ease-out;
       }
 
@@ -462,7 +495,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-amount.full {
-        color: #ef4444;
+        color: var(--color-state-danger);
         animation: pulse-warning 1.5s ease-in-out infinite;
       }
 
@@ -555,7 +588,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.near-capacity .resource-amount {
-        color: #f97316;
+        color: var(--color-state-warning);
       }
 
       .resource-item.storage-full {
@@ -569,23 +602,59 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       @keyframes storage-full-pulse {
-        0%, 100% {
-          box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), inset 0 0 6px rgba(239, 68, 68, 0.06);
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 1px rgba(239, 68, 68, 0.2),
+            inset 0 0 6px rgba(239, 68, 68, 0.06);
         }
         50% {
-          box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.12), 0 0 14px rgba(239, 68, 68, 0.2);
+          box-shadow:
+            0 0 0 2px rgba(239, 68, 68, 0.45),
+            inset 0 0 10px rgba(239, 68, 68, 0.12),
+            0 0 14px rgba(239, 68, 68, 0.2);
         }
       }
 
       @keyframes storage-full-icon {
-        0%, 100% { filter: none; }
-        50%       { filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6)); }
+        0%,
+        100% {
+          filter: none;
+        }
+        50% {
+          filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+        }
       }
 
       .resource-capacity {
         color: var(--color-text-secondary);
         font-size: clamp(10px, 0.9vw, 13px);
         white-space: nowrap;
+      }
+
+      .auto-scrap-float {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        color: #4caf50;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+        z-index: 100;
+        white-space: nowrap;
+        animation: auto-scrap-float-up 0.7s ease-out forwards;
+      }
+
+      @keyframes auto-scrap-float-up {
+        0% {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-50%) translateY(-38px);
+          opacity: 0;
+        }
       }
     `,
   ],
@@ -598,11 +667,15 @@ export class ResourcesHeaderComponent implements OnDestroy {
   private saveService = inject(SaveService);
   private audioService = inject(AudioService);
   public translationService = inject(TranslationService);
+  private scrapGenerationService = inject(ScrapGenerationService);
   private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
   private capacityPopState = signal<Record<string, boolean>>({});
   private previousAmounts = new Map<string, number>();
   private feedbackTimers = new Map<string, number>();
   private capacityTimers = new Map<string, number>();
+  private autoFloatIdCounter = 0;
+  private autoFloatTimers = new Map<number, number>();
+  autoFloatingTexts = signal<{ id: number; amount: number }[]>([]);
 
   constructor() {
     effect(() => {
@@ -632,13 +705,27 @@ export class ResourcesHeaderComponent implements OnDestroy {
         this.previousAmounts.set(resource.id, resource.amount);
       }
     });
+
+    effect(() => {
+      const event = this.scrapGenerationService.autoGenEvent();
+      if (event.id < 0) return;
+      const id = this.autoFloatIdCounter++;
+      this.autoFloatingTexts.update((arr) => [...arr, { id, amount: event.amount }]);
+      const timerId = window.setTimeout(() => {
+        this.autoFloatingTexts.update((arr) => arr.filter((f) => f.id !== id));
+        this.autoFloatTimers.delete(id);
+      }, 700);
+      this.autoFloatTimers.set(id, timerId);
+    });
   }
 
   ngOnDestroy(): void {
     this.feedbackTimers.forEach((timerId) => clearTimeout(timerId));
     this.capacityTimers.forEach((timerId) => clearTimeout(timerId));
+    this.autoFloatTimers.forEach((timerId) => clearTimeout(timerId));
     this.feedbackTimers.clear();
     this.capacityTimers.clear();
+    this.autoFloatTimers.clear();
   }
 
   isFeedback(resourceId: string, state: 'up' | 'down'): boolean {
@@ -714,6 +801,11 @@ export class ResourcesHeaderComponent implements OnDestroy {
   getResourceIcon(resourceId: string): string {
     const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);
     return resource?.icon || '?';
+  }
+
+  formatAutoAmount(amount: number): string {
+    if (amount === Math.floor(amount)) return String(amount);
+    return amount.toFixed(2).replace(/\.?0+$/, '');
   }
 
   moneyResource = computed(() => {

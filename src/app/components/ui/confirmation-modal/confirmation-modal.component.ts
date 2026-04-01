@@ -75,12 +75,12 @@ import { TranslationService } from '../../../services/translation.service';
 
       .modal-content {
         position: relative;
-        background: #1a1a1a;
-        border: 2px solid rgba(255, 193, 7, 0.6);
+        background: var(--color-bg-panel);
+        border: 2px solid rgba(255, 152, 0, 0.6);
         border-radius: 12px;
         max-width: 500px;
         width: 100%;
-        box-shadow: 
+        box-shadow:
           0 8px 32px rgba(0, 0, 0, 0.8),
           0 0 60px rgba(255, 193, 7, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -99,10 +99,10 @@ import { TranslationService } from '../../../services/translation.service';
       .modal-title {
         font-size: 24px;
         font-weight: 700;
-        color: #ffc107;
+        color: var(--color-accent-main);
         margin: 0;
         letter-spacing: 1px;
-        text-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+        text-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
       }
 
       .modal-body {
@@ -114,7 +114,7 @@ import { TranslationService } from '../../../services/translation.service';
       .modal-message {
         font-size: 16px;
         line-height: 1.6;
-        color: #e0e0e0;
+        color: var(--color-text-primary);
         margin: 0;
       }
 

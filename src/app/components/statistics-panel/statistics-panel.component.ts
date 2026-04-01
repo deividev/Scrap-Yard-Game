@@ -1,5 +1,6 @@
-import { Component, OnDestroy, inject, signal, effect } from '@angular/core';
+import { Component, OnDestroy, inject, signal, effect, computed } from '@angular/core';
 import { StatisticsService } from '../../services/statistics.service';
+import { ScrapGenerationService } from '../../services/scrap-generation.service';
 import { TranslationService } from '../../services/translation.service';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 
@@ -12,29 +13,37 @@ import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 })
 export class StatisticsPanelComponent implements OnDestroy {
   protected statisticsService = inject(StatisticsService);
+  protected scrapGenerationService = inject(ScrapGenerationService);
   protected t = inject(TranslationService);
   protected isCollapsed = signal(false);
   protected flashingStats = signal<Set<string>>(new Set());
+  protected scrapAutoRate = computed(() =>
+    this.scrapGenerationService.getAutomaticGenerationRate(),
+  );
 
   private flashTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private prevScrap: number | undefined = undefined;
   private prevTime: string | undefined = undefined;
   private prevMachines: number | undefined = undefined;
+  private prevMoney: number | undefined = undefined;
 
   constructor() {
     effect(() => {
       const scrap = this.statisticsService.totalScrapGenerated();
       const time = this.statisticsService.playTimeFormatted();
       const machines = this.statisticsService.activeMachinesCount();
+      const money = this.statisticsService.totalMoneyEarned();
 
       if (this.prevScrap !== undefined && scrap !== this.prevScrap) this.triggerFlash('scrap');
       if (this.prevTime !== undefined && time !== this.prevTime) this.triggerFlash('time');
       if (this.prevMachines !== undefined && machines !== this.prevMachines)
         this.triggerFlash('machines');
+      if (this.prevMoney !== undefined && money !== this.prevMoney) this.triggerFlash('money');
 
       this.prevScrap = scrap;
       this.prevTime = time;
       this.prevMachines = machines;
+      this.prevMoney = money;
     });
   }
 

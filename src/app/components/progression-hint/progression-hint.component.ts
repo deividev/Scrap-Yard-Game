@@ -23,8 +23,8 @@ import { MachineType } from '../../models/machine.model';
   styles: [
     `
       .progression-hint {
-        background: rgba(139, 92, 246, 0.1);
-        border: 1px solid rgba(139, 92, 246, 0.3);
+        background: rgba(255, 152, 0, 0.08);
+        border: 1px solid rgba(255, 152, 0, 0.3);
         border-radius: var(--border-radius-small);
         padding: var(--space-2) var(--space-3);
         display: flex;
@@ -80,8 +80,8 @@ export class ProgressionHintComponent {
       }
     }
 
-    // Si todas las máquinas están desbloqueadas, mostrar mensaje de felicitación
-    return this.translationService.t('progression.all_unlocked');
+    // Si todas las máquinas están desbloqueadas, ocultar el banner
+    return null;
   });
 
   private formatRequirements(requirements: UnlockRequirement[]): string {

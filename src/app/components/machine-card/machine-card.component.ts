@@ -355,6 +355,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       }
 
       .machine-level {
+        font-family: var(--font-mono);
         font-size: 11px;
         font-weight: 500;
         color: var(--color-text-secondary);
@@ -384,7 +385,7 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
       .unlock-requirements {
         font-size: 10px;
         color: var(--color-text-secondary);
-        background: var(--color-bg-elevated);
+        background: var(--color-bg-main);
         padding: 4px 8px;
         border-radius: var(--border-radius-small);
         border: 1px solid var(--color-border);

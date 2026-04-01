@@ -98,6 +98,7 @@ export class MachinesService {
         return {
           ...loadedMachine,
           name: configMachine.name,
+          icon: configMachine.icon,
           baseSpeed: configMachine.baseSpeed,
           baseConsumption: configMachine.baseConsumption,
           baseProduction: configMachine.baseProduction,

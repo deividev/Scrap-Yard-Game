@@ -177,6 +177,7 @@
       "production_label": "Producción",
       "production_multiplier_label": "Multiplicador de producción:",
       "next_bonus_label": "Próximo multiplicador:",
+      "in": "en",
       "in_levels": "en {{count}} niveles",
       "cycles_per_second": "ciclos/s",
       "speed_upgrades_coming": "Mejoras de velocidad próximamente",
@@ -198,11 +199,16 @@
   "debug": {
     "tick": "Tick"
   },
+  "sell": {
+    "bonus_active": "Bonus activo +{percent}%"
+  },
   "statistics": {
     "title": "Estadísticas",
     "total_scrap": "Chatarra procesada",
     "play_time": "Tiempo operativo",
-    "active_machines": "Líneas activas"
+    "active_machines": "Líneas activas",
+    "total_money": "Dinero generado",
+    "scrap_rate": "Chatarra auto/seg"
   },
   "common": {
     "level_short": "Nv",

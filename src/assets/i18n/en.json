@@ -177,6 +177,7 @@
       "production_label": "Production",
       "production_multiplier_label": "Production multiplier:",
       "next_bonus_label": "Next bonus:",
+      "in": "in",
       "in_levels": "in {{count}} levels",
       "cycles_per_second": "cycles/s",
       "speed_upgrades_coming": "Speed upgrades coming soon",
@@ -198,11 +199,16 @@
   "debug": {
     "tick": "Tick"
   },
+  "sell": {
+    "bonus_active": "Active bonus +{percent}%"
+  },
   "statistics": {
     "title": "Statistics",
     "total_scrap": "Scrap processed",
     "play_time": "Time on shift",
-    "active_machines": "Active lines"
+    "active_machines": "Active lines",
+    "total_money": "Total earnings",
+    "scrap_rate": "Auto scrap/sec"
   },
   "common": {
     "level_short": "Lv",

@@ -99,7 +99,7 @@ export class MachineUnlockService {
   getUnlockInfo(machineType: MachineType): MachineUnlockInfo {
     const machine = this.machinesService.getMachine(machineType);
 
-    if (!machine || machine.level > 0) {
+    if (!machine || (machine?.level as any) > 0) {
       return { isUnlocked: true, requirements: [] };
     }
 

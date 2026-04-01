@@ -10,7 +10,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.CRUSHER,
     name: 'Trituradora',
-    icon: 'assets/icons/machines/crusher_machine.png',
+    icon: 'assets/cards/crusher_card_new_slot.png',
     level: 1,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -29,7 +29,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SEPARATOR,
     name: 'Separador',
-    icon: 'assets/icons/machines/separator_machine.png',
+    icon: 'assets/cards/separator_card_new_slot.png',
     level: 0,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -48,7 +48,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.SMELTER,
     name: 'Fundidora',
-    icon: 'assets/icons/machines/smelter_machine.png',
+    icon: 'assets/cards/smelter_card_new_slot.png',
     level: 0,
     baseSpeed: 0.25,
     baseConsumption: [
@@ -67,7 +67,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ASSEMBLER,
     name: 'Ensambladora',
-    icon: 'assets/icons/machines/assembler_machine.png',
+    icon: 'assets/cards/assembler_card_new_slot.png',
     level: 0,
     baseSpeed: 0.22, // Fix: was 0.17 (Packager starvation at unlock)
     baseConsumption: [
@@ -90,7 +90,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.PACKAGER,
     name: 'Empaquetadora',
-    icon: 'assets/icons/machines/packager_machine.png',
+    icon: 'assets/cards/packager_card_new_slot.png',
     level: 0,
     baseSpeed: 0.1,
     baseConsumption: [
@@ -109,7 +109,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ELECTRIC_PACKAGER,
     name: 'Empaquetadora eléctrica',
-    icon: 'assets/icons/machines/electric_packager_machine.png',
+    icon: 'assets/cards/electric_packager_card_new_slot.png',
     level: 0,
     baseSpeed: 0.1,
     baseConsumption: [
@@ -128,7 +128,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.RECYCLER,
     name: 'Recicladora',
-    icon: 'assets/icons/machines/recycler_machine.png',
+    icon: 'assets/cards/recycler_card_new_slot.png',
     level: 0,
     baseSpeed: 0.5,
     baseConsumption: [
@@ -147,7 +147,7 @@ export const INITIAL_MACHINES: Machine[] = [
   {
     id: MachineType.ELECTRIC_ASSEMBLER,
     name: 'Ensambladora eléctrica',
-    icon: 'assets/icons/machines/electric_assembler_machine.png',
+    icon: 'assets/cards/electric_assembler_card_new_slot.png',
     level: 0,
     baseSpeed: 0.2, // Fix: was 0.12 (E.Packager 80% deficit at unlock)
     baseConsumption: [

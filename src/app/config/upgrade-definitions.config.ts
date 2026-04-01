@@ -94,7 +94,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Trituradora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.CRUSHER,
-    icon: 'assets/icons/machines/crusher_machine.png',
+    icon: 'assets/cards/crusher_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_002,
@@ -104,7 +104,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Fundidora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.SMELTER,
-    icon: 'assets/icons/machines/smelter_machine.png',
+    icon: 'assets/cards/smelter_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_003,
@@ -114,7 +114,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Separador',
     effectType: 'machine_speed',
     targetMachineId: MachineType.SEPARATOR,
-    icon: 'assets/icons/machines/separator_machine.png',
+    icon: 'assets/cards/separator_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_004,
@@ -124,7 +124,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Ensambladora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ASSEMBLER,
-    icon: 'assets/icons/machines/assembler_machine.png',
+    icon: 'assets/cards/assembler_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_005,
@@ -134,7 +134,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Empaquetadora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.PACKAGER,
-    icon: 'assets/icons/machines/packager_machine.png',
+    icon: 'assets/cards/packager_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_006,
@@ -144,7 +144,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Recicladora',
     effectType: 'machine_speed',
     targetMachineId: MachineType.RECYCLER,
-    icon: 'assets/icons/machines/recycler_machine.png',
+    icon: 'assets/cards/recycler_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_007,
@@ -154,7 +154,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Ensambladora Eléctrica',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ELECTRIC_ASSEMBLER,
-    icon: 'assets/icons/machines/electric_assembler_machine.png',
+    icon: 'assets/cards/electric_assembler_card_new_slot.png',
   },
   {
     id: UpgradeId.UPG_MACH_008,
@@ -164,7 +164,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
     description: 'Aumenta velocidad de Empaquetadora Eléctrica',
     effectType: 'machine_speed',
     targetMachineId: MachineType.ELECTRIC_PACKAGER,
-    icon: 'assets/icons/machines/electric_packager_machine.png',
+    icon: 'assets/cards/electric_packager_card_new_slot.png',
   },
 
   // SCRAP GENERATION UPGRADES

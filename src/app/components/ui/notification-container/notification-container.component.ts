@@ -11,7 +11,9 @@ import { NotificationService } from '../../../services/notification.service';
         <div class="notification" [class]="'notification-' + notification.type">
           <span class="notification-icon">
             @if (notification.icon) {
-              <img [src]="notification.icon" alt="" class="notification-img-icon" />
+              <span class="notification-machine-badge">
+                <img [src]="notification.icon" alt="" class="notification-img-icon" />
+              </span>
             } @else if (notification.type === 'unlock') {
               🔓
             } @else if (notification.type === 'success') {
@@ -66,10 +68,27 @@ import { NotificationService } from '../../../services/notification.service';
       line-height: 1;
     }
 
+    .notification-machine-badge {
+      width: 56px;
+      height: 72px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, rgba(220, 174, 92, 0.1) 0%, rgba(20, 20, 20, 0.75) 100%);
+      border: 1.5px solid rgba(220, 174, 92, 0.4);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(220, 174, 92, 0.15);
+    }
+
     .notification-img-icon {
-      width: 22px;
-      height: 22px;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      object-position: center center;
       display: block;
     }
 

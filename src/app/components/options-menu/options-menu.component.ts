@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
+import { AppSelectComponent, SelectOption } from '../ui/app-select/app-select.component';
 import { BackgroundGridComponent } from '../ui/background-grid/background-grid.component';
 import { ConfirmationModalComponent } from '../ui/confirmation-modal/confirmation-modal.component';
 import { GameStateService } from '../../services/game-state.service';
@@ -13,8 +13,8 @@ import { TranslationService } from '../../services/translation.service';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     AppButtonComponent,
+    AppSelectComponent,
     BackgroundGridComponent,
     ConfirmationModalComponent,
   ],
@@ -77,14 +77,11 @@ import { TranslationService } from '../../services/translation.service';
             <label class="option-label">
               {{ translationService.t('options.language') }}
             </label>
-            <select
-              class="select-input"
+            <app-select
+              [options]="languageOptions"
               [value]="settingsService.language()"
-              (change)="onLanguageChange($event)"
-            >
-              <option value="es">Español</option>
-              <option value="en">English</option>
-            </select>
+              (changed)="setLanguage($event)"
+            />
           </div>
 
           <!-- Modo de Pantalla (solo Electron) -->
@@ -93,21 +90,11 @@ import { TranslationService } from '../../services/translation.service';
               <label class="option-label">
                 {{ translationService.t('options.window_mode') }}
               </label>
-              <select
-                class="select-input"
+              <app-select
+                [options]="windowModeOptions"
                 [value]="settingsService.windowMode()"
-                (change)="onWindowModeChange($event)"
-              >
-                <option value="windowed">
-                  {{ translationService.t('options.window_mode_windowed') }}
-                </option>
-                <option value="maximized">
-                  {{ translationService.t('options.window_mode_maximized') }}
-                </option>
-                <option value="fullscreen">
-                  {{ translationService.t('options.window_mode_fullscreen') }}
-                </option>
-              </select>
+                (changed)="setWindowMode($event)"
+              />
             </div>
           }
           <!-- Resolución (solo Electron, solo en modo ventana) -->
@@ -116,16 +103,11 @@ import { TranslationService } from '../../services/translation.service';
               <label class="option-label">
                 {{ translationService.t('options.resolution') }}
               </label>
-              <select
-                class="select-input"
+              <app-select
+                [options]="resolutionOptions"
                 [value]="settingsService.resolution()"
-                (change)="onResolutionChange($event)"
-              >
-                <option value="1920x1080">1920 x 1080</option>
-                <option value="1600x900">1600 x 900</option>
-                <option value="1366x768">1366 x 768</option>
-                <option value="1280x720">1280 x 720</option>
-              </select>
+                (changed)="setResolution($event)"
+              />
             </div>
           }
         </div>
@@ -178,7 +160,6 @@ import { TranslationService } from '../../services/translation.service';
         justify-content: flex-start;
         z-index: 10000;
         padding-top: var(--space-6);
-        position: relative;
         overflow-y: auto;
         overflow-x: hidden;
       }
@@ -361,30 +342,7 @@ import { TranslationService } from '../../services/translation.service';
         transform: scale(1.1);
       }
 
-      /* Select personalizado */
-      .select-input {
-        width: 100%;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.4);
-        border: 2px solid rgba(255, 193, 7, 0.2);
-        border-radius: 8px;
-        color: var(--color-text-primary);
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        outline: none;
-        transition: all 0.2s ease;
-      }
-
-      .select-input:hover {
-        border-color: rgba(255, 193, 7, 0.4);
-        background: rgba(0, 0, 0, 0.5);
-      }
-
-      .select-input:focus {
-        border-color: var(--color-accent-main);
-        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
-      }
+      /* Select: ver AppSelectComponent */
 
       /* Toggle switch */
       .toggle-container {
@@ -554,21 +512,38 @@ export class OptionsMenuComponent {
     this.settingsService.setSfxVolume(Number(target.value));
   }
 
-  onLanguageChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    const lang = target.value as 'es' | 'en';
+  readonly languageOptions: SelectOption[] = [
+    { value: 'es', label: 'Español' },
+    { value: 'en', label: 'English' },
+  ];
+
+  get windowModeOptions(): SelectOption[] {
+    return [
+      { value: 'windowed', label: this.translationService.t('options.window_mode_windowed') },
+      { value: 'maximized', label: this.translationService.t('options.window_mode_maximized') },
+      { value: 'fullscreen', label: this.translationService.t('options.window_mode_fullscreen') },
+    ];
+  }
+
+  readonly resolutionOptions: SelectOption[] = [
+    { value: '1920x1080', label: '1920 x 1080' },
+    { value: '1600x900', label: '1600 x 900' },
+    { value: '1366x768', label: '1366 x 768' },
+    { value: '1280x720', label: '1280 x 720' },
+  ];
+
+  setLanguage(val: string): void {
+    const lang = val as 'es' | 'en';
     this.settingsService.setLanguage(lang);
     this.translationService.setLanguage(lang);
   }
 
-  onWindowModeChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.settingsService.setWindowMode(target.value as 'windowed' | 'maximized' | 'fullscreen');
+  setWindowMode(val: string): void {
+    this.settingsService.setWindowMode(val as 'windowed' | 'maximized' | 'fullscreen');
   }
 
-  onResolutionChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.settingsService.setResolution(target.value);
+  setResolution(val: string): void {
+    this.settingsService.setResolution(val);
   }
 
   resetToDefaults(): void {

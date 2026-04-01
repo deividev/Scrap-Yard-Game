@@ -3,6 +3,7 @@ import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
 import { MARKET_CONFIG } from '../config/game-balance.config';
+import { StatisticsService } from './statistics.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,7 @@ import { MARKET_CONFIG } from '../config/game-balance.config';
 export class MarketService {
   private resourcesService = inject(ResourcesService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private statisticsService = inject(StatisticsService);
 
   isManuallySellable(resourceId: string): boolean {
     return this.getPrice(resourceId) > 0;
@@ -67,7 +69,9 @@ export class MarketService {
       return false;
     }
 
-    this.resourcesService.add(ResourceType.MONEY, this.getManualSaleValue(resourceId, amount));
+    const moneyEarned = this.getManualSaleValue(resourceId, amount);
+    this.resourcesService.add(ResourceType.MONEY, moneyEarned);
+    this.statisticsService.recordMoneyEarned(moneyEarned);
     return true;
   }
 

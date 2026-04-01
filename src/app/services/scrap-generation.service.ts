@@ -7,16 +7,21 @@ import { UpgradeId } from '../models/upgrade.model';
 import { AudioService } from './audio.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
 import { SaveMarker } from '../models/save-marker.model';
+import { StatisticsService } from './statistics.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScrapGenerationService {
   private automaticGenerationRate = signal(0);
+  private _autoEventId = 0;
+  private _autoGenEvent = signal<{ id: number; amount: number }>({ id: -1, amount: 0 });
+  readonly autoGenEvent = this._autoGenEvent.asReadonly();
   private saveService?: SaveMarker;
   private upgradesService = inject(UpgradesService);
   private audioService = inject(AudioService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private statisticsService = inject(StatisticsService);
 
   private resourcesService = inject(ResourcesService);
 
@@ -51,6 +56,7 @@ export class ScrapGenerationService {
 
     // Generar chatarra
     this.resourcesService.add(ResourceType.SCRAP, totalGeneration);
+    this.statisticsService.recordScrapGenerated(totalGeneration);
     this.audioService.playScrapGenerated();
     this.firstRunTutorialService.recordEvent('manual-scrap-generated');
 
@@ -79,6 +85,7 @@ export class ScrapGenerationService {
     const rate = this.automaticGenerationRate();
     if (rate > 0) {
       this.resourcesService.add(ResourceType.SCRAP, rate);
+      this._autoGenEvent.set({ id: ++this._autoEventId, amount: rate });
     }
   }
 

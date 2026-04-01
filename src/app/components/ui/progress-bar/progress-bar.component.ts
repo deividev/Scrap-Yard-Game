@@ -55,8 +55,8 @@ import { CommonModule } from '@angular/common';
       .progress-bar-wrapper {
         width: 100%;
         height: 24px;
-        background-color: #1e1e1e;
-        border: 1px solid #444444;
+        background-color: var(--color-bg-main);
+        border: 1px solid var(--color-border);
         border-radius: 4px;
         overflow: hidden;
         position: relative;
@@ -67,7 +67,11 @@ import { CommonModule } from '@angular/common';
         top: 0;
         left: 0;
         bottom: 0;
-        background: linear-gradient(90deg, #4caf50, #66bb6a);
+        background: linear-gradient(
+          90deg,
+          var(--color-accent-positive),
+          var(--color-accent-positive)
+        );
         transition: width 0.3s ease-out;
         width: 0%;
       }
@@ -113,7 +117,7 @@ import { CommonModule } from '@angular/common';
         transform: translateY(-50%);
         font-size: 11px;
         font-weight: 600;
-        color: #e0e0e0;
+        color: var(--color-text-primary);
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         z-index: 1;
         white-space: nowrap;
@@ -123,7 +127,7 @@ import { CommonModule } from '@angular/common';
         display: block;
         text-align: center;
         font-size: 12px;
-        color: #b0b0b0;
+        color: var(--color-text-secondary);
         margin-top: 4px;
       }
 

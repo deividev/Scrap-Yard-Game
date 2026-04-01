@@ -12,6 +12,7 @@ import { AudioService } from '../../../services/audio.service';
       @if (label) {
         {{ label }}
       }
+      <ng-content select="[btn-cost]"></ng-content>
     </button>
   `,
   styles: [
@@ -27,6 +28,15 @@ import { AudioService } from '../../../services/audio.service';
           opacity 0.15s ease,
           transform 0.1s ease;
         outline: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      button:focus-visible:not(:disabled) {
+        outline: 2px solid rgba(255, 152, 0, 0.6);
+        outline-offset: 2px;
       }
 
       button:hover:not(:disabled) {

@@ -55,7 +55,12 @@ import { AudioService } from '../../services/audio.service';
       }
 
       @if (isPanelOpen()) {
-        <div class="sell-panel" [class.is-disabled]="!canSell()">
+        <div
+          class="sell-panel"
+          [class.is-disabled]="!canSell()"
+          [style.top.px]="panelTop()"
+          [style.left.px]="panelLeft()"
+        >
           <div class="sell-panel-header">
             <span class="sell-panel-title">{{ resourceName() }}</span>
             <span class="sell-panel-meta">Stock {{ maxSellAmount() }}</span>
@@ -63,7 +68,7 @@ import { AudioService } from '../../services/audio.service';
 
           <div class="sell-panel-body">
             @if (bonusPercent() > 0) {
-              <div class="sell-panel-bonus-strip">Bonus activo +{{ bonusPercent() }}%</div>
+              <div class="sell-panel-bonus-strip">{{ bonusActiveLabel() }}</div>
             }
 
             <div class="sell-controls">
@@ -154,10 +159,10 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .sell-panel {
-        position: absolute;
-        top: calc(100% + 6px);
+        position: fixed;
+        top: 0;
         left: 0;
-        z-index: 30;
+        z-index: 9999;
         width: 172px;
         border: 1px solid rgba(255, 152, 0, 0.18);
         border-top: 2px solid var(--color-accent-main);
@@ -494,6 +499,8 @@ export class SellResourceButtonComponent {
   private hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private selectedAmount = signal(1);
   isPanelOpen = signal(false);
+  panelTop = signal(0);
+  panelLeft = signal(0);
   private marketService = inject(MarketService);
   private resourcesService = inject(ResourcesService);
   private translationService = inject(TranslationService);
@@ -512,6 +519,10 @@ export class SellResourceButtonComponent {
   );
 
   bonusPercent = computed(() => this.marketService.getBatchBonusPercent(this.saleAmount()));
+
+  bonusActiveLabel = computed(() =>
+    this.translationService.tp('sell.bonus_active', { percent: this.bonusPercent() }),
+  );
 
   resourceName = computed(() => this.translationService.t(`resources.${this.resourceId()}`));
 
@@ -589,6 +600,11 @@ export class SellResourceButtonComponent {
   }
 
   togglePanel(): void {
+    if (!this.isPanelOpen()) {
+      const rect = this.hostElement.nativeElement.getBoundingClientRect();
+      this.panelTop.set(rect.bottom + 6);
+      this.panelLeft.set(rect.left);
+    }
     this.isPanelOpen.update((isOpen) => !isOpen);
   }
 

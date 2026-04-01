@@ -106,7 +106,6 @@ import { version, releaseLabel } from '../../../../package.json';
         justify-content: center;
         z-index: 10000;
         padding: clamp(8px, 2vh, 32px) 16px;
-        position: relative;
         overflow: hidden;
       }
 
@@ -336,10 +335,12 @@ import { version, releaseLabel } from '../../../../package.json';
 
       .game-subtitle {
         margin: 0;
-        font-size: clamp(12px, 1.5vh, 16px);
+        font-family: var(--font-display);
+        font-size: clamp(11px, 1.4vh, 15px);
         color: var(--color-text-secondary);
-        font-weight: 500;
-        letter-spacing: 1px;
+        font-weight: 400;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
       }
 
       .menu-buttons {

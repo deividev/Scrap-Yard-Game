@@ -112,6 +112,9 @@ export interface Translations {
   debug: {
     tick: string;
   };
+  sell: {
+    bonus_active: string;
+  };
   statistics: {
     title: string;
     total_scrap: string;
