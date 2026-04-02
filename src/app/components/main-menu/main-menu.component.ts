@@ -14,6 +14,10 @@ import { version, releaseLabel } from '../../../../package.json';
   imports: [CommonModule, AppButtonComponent, BackgroundGridComponent, ConfirmationModalComponent],
   template: `
     <div class="main-menu">
+      <!-- Fondo atmosférico -->
+      <img src="assets/image/menu_bg.png" class="menu-bg" aria-hidden="true" />
+      <div class="menu-bg-overlay"></div>
+
       <app-background-grid [opacity]="0.35"></app-background-grid>
 
       <!-- Partículas flotantes -->
@@ -28,9 +32,17 @@ import { version, releaseLabel } from '../../../../package.json';
         }
       </div>
 
+      <!-- Engranajes decorativos -->
+      <img src="assets/image/engram_menu.png" class="gear gear--left" aria-hidden="true" />
+      <img src="assets/image/engram_menu.png" class="gear gear--right" aria-hidden="true" />
+
       <div class="menu-content">
         <div class="game-logo">
-          <img src="assets/image/logo_Scrap_Yardl.png" alt="Scrap Yard Idle" class="logo-image" />
+          <img
+            src="assets/image/logo_scrap_yard.png"
+            [attr.alt]="translationService.t('main_menu.title')"
+            class="logo-image"
+          />
           <p class="game-subtitle">{{ translationService.t('main_menu.subtitle') }}</p>
         </div>
 
@@ -96,10 +108,7 @@ import { version, releaseLabel } from '../../../../package.json';
         left: 0;
         width: 100vw;
         height: 100vh;
-        background:
-          linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, transparent 20%),
-          linear-gradient(-135deg, rgba(255, 193, 7, 0.03) 0%, transparent 20%),
-          radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 50%, #0f0f0f 100%);
+        background: #0f0f0f;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -107,6 +116,35 @@ import { version, releaseLabel } from '../../../../package.json';
         z-index: 10000;
         padding: clamp(8px, 2vh, 32px) 16px;
         overflow: hidden;
+      }
+
+      /* Fondo imagen */
+      .menu-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Overlay central para legibilidad */
+      .menu-bg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          /* oscurecer lado derecho donde está la máquina brillante */
+          linear-gradient(to left, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 65%),
+          /* oscurecer zona central donde van logo y botones */
+          radial-gradient(ellipse 55% 70% at 42% 52%, rgba(0, 0, 0, 0.55) 0%, transparent 100%);
+        z-index: 0;
+        pointer-events: none;
       }
 
       /* Halos de luz en esquinas */
@@ -118,11 +156,11 @@ import { version, releaseLabel } from '../../../../package.json';
         width: 100%;
         height: 100%;
         background:
-          radial-gradient(circle at 15% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 15% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(ellipse at center top, rgba(255, 193, 7, 0.08) 0%, transparent 40%),
+          radial-gradient(circle at 15% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 15% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(ellipse at center top, rgba(255, 152, 0, 0.08) 0%, transparent 40%),
           linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
         pointer-events: none;
         z-index: 1;
@@ -144,11 +182,11 @@ import { version, releaseLabel } from '../../../../package.json';
         bottom: -10px;
         width: 3px;
         height: 3px;
-        background: rgba(255, 193, 7, 0.6);
+        background: rgba(255, 152, 0, 0.6);
         border-radius: 50%;
         box-shadow:
-          0 0 4px rgba(255, 193, 7, 0.8),
-          0 0 8px rgba(255, 193, 7, 0.4);
+          0 0 4px rgba(255, 152, 0, 0.8),
+          0 0 8px rgba(255, 152, 0, 0.4);
         animation: float-up linear infinite;
         opacity: 0;
       }
@@ -179,109 +217,28 @@ import { version, releaseLabel } from '../../../../package.json';
         z-index: 3;
       }
 
-      /* Engranaje superior izquierdo */
-      .menu-content::before {
-        content: '';
-        position: absolute;
-        top: 10%;
-        left: 8%;
-        width: 100px;
-        height: 100px;
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(255, 193, 7, 0.25) 0%,
-            rgba(255, 193, 7, 0.15) 30%,
-            transparent 30%,
-            transparent 35%,
-            rgba(255, 193, 7, 0.08) 35%,
-            rgba(255, 193, 7, 0.08) 100%
-          ),
-          conic-gradient(
-            from 0deg,
-            rgba(255, 193, 7, 0.3) 0deg 15deg,
-            transparent 15deg 30deg,
-            rgba(255, 193, 7, 0.3) 30deg 45deg,
-            transparent 45deg 60deg,
-            rgba(255, 193, 7, 0.3) 60deg 75deg,
-            transparent 75deg 90deg,
-            rgba(255, 193, 7, 0.3) 90deg 105deg,
-            transparent 105deg 120deg,
-            rgba(255, 193, 7, 0.3) 120deg 135deg,
-            transparent 135deg 150deg,
-            rgba(255, 193, 7, 0.3) 150deg 165deg,
-            transparent 165deg 180deg,
-            rgba(255, 193, 7, 0.3) 180deg 195deg,
-            transparent 195deg 210deg,
-            rgba(255, 193, 7, 0.3) 210deg 225deg,
-            transparent 225deg 240deg,
-            rgba(255, 193, 7, 0.3) 240deg 255deg,
-            transparent 255deg 270deg,
-            rgba(255, 193, 7, 0.3) 270deg 285deg,
-            transparent 285deg 300deg,
-            rgba(255, 193, 7, 0.3) 300deg 315deg,
-            transparent 315deg 330deg,
-            rgba(255, 193, 7, 0.3) 330deg 345deg,
-            transparent 345deg 360deg
-          );
-        border-radius: 50%;
-        border: 3px solid rgba(255, 193, 7, 0.4);
-        box-shadow:
-          inset 0 0 25px rgba(255, 193, 7, 0.2),
-          inset 0 0 10px rgba(0, 0, 0, 0.5),
-          0 0 40px rgba(255, 193, 7, 0.3),
-          0 0 20px rgba(255, 193, 7, 0.2);
+      /* Engranajes decorativos reales */
+      .gear {
+        position: fixed;
         pointer-events: none;
-        opacity: 0.8;
+        z-index: 2;
+        opacity: 0.75;
+        filter: drop-shadow(0 0 12px rgba(255, 152, 0, 0.35));
+      }
+
+      .gear--left {
+        width: 160px;
+        height: 160px;
+        top: 8%;
+        left: 6%;
         animation: rotate-gear-slow 30s linear infinite;
       }
 
-      /* Engranaje inferior derecho */
-      .menu-content::after {
-        content: '';
-        position: absolute;
-        bottom: 15%;
-        right: 10%;
-        width: 75px;
-        height: 75px;
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(255, 193, 7, 0.25) 0%,
-            rgba(255, 193, 7, 0.15) 25%,
-            transparent 25%,
-            transparent 30%,
-            rgba(255, 193, 7, 0.08) 30%,
-            rgba(255, 193, 7, 0.08) 100%
-          ),
-          conic-gradient(
-            from 22.5deg,
-            rgba(255, 193, 7, 0.3) 0deg 18deg,
-            transparent 18deg 45deg,
-            rgba(255, 193, 7, 0.3) 45deg 63deg,
-            transparent 63deg 90deg,
-            rgba(255, 193, 7, 0.3) 90deg 108deg,
-            transparent 108deg 135deg,
-            rgba(255, 193, 7, 0.3) 135deg 153deg,
-            transparent 153deg 180deg,
-            rgba(255, 193, 7, 0.3) 180deg 198deg,
-            transparent 198deg 225deg,
-            rgba(255, 193, 7, 0.3) 225deg 243deg,
-            transparent 243deg 270deg,
-            rgba(255, 193, 7, 0.3) 270deg 288deg,
-            transparent 288deg 315deg,
-            rgba(255, 193, 7, 0.3) 315deg 333deg,
-            transparent 333deg 360deg
-          );
-        border-radius: 50%;
-        border: 3px solid rgba(255, 193, 7, 0.4);
-        box-shadow:
-          inset 0 0 20px rgba(255, 193, 7, 0.2),
-          inset 0 0 8px rgba(0, 0, 0, 0.5),
-          0 0 35px rgba(255, 193, 7, 0.3),
-          0 0 15px rgba(255, 193, 7, 0.2);
-        pointer-events: none;
-        opacity: 0.8;
+      .gear--right {
+        width: 110px;
+        height: 110px;
+        bottom: 12%;
+        right: 8%;
         animation: rotate-gear-slow-reverse 25s linear infinite;
       }
 
@@ -319,17 +276,17 @@ import { version, releaseLabel } from '../../../../package.json';
         max-height: 30vh;
         height: auto;
         object-fit: contain;
-        filter: drop-shadow(0 6px 16px rgba(255, 193, 7, 0.4));
+        filter: drop-shadow(0 6px 16px rgba(255, 152, 0, 0.4));
         animation: logo-glow 3s ease-in-out infinite;
       }
 
       @keyframes logo-glow {
         0%,
         100% {
-          filter: drop-shadow(0 6px 16px rgba(255, 193, 7, 0.4));
+          filter: drop-shadow(0 6px 16px rgba(255, 152, 0, 0.4));
         }
         50% {
-          filter: drop-shadow(0 8px 24px rgba(255, 193, 7, 0.6));
+          filter: drop-shadow(0 8px 24px rgba(255, 152, 0, 0.6));
         }
       }
 
@@ -349,6 +306,11 @@ import { version, releaseLabel } from '../../../../package.json';
         align-items: center;
         justify-content: center;
         gap: clamp(8px, 1.5vh, 16px);
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        padding: clamp(12px, 2vh, 24px) clamp(20px, 4vw, 48px);
+        border-radius: var(--border-radius-medium);
       }
 
       .version-info {
@@ -382,18 +344,18 @@ import { version, releaseLabel } from '../../../../package.json';
           font-size: 11px;
         }
 
-        .menu-content::before {
-          width: 60px;
-          height: 60px;
+        .gear--left {
+          width: 100px;
+          height: 100px;
           top: 5%;
-          left: 5%;
+          left: 3%;
         }
 
-        .menu-content::after {
-          width: 45px;
-          height: 45px;
-          bottom: 10%;
-          right: 5%;
+        .gear--right {
+          width: 70px;
+          height: 70px;
+          bottom: 8%;
+          right: 3%;
         }
       }
 
@@ -408,8 +370,7 @@ import { version, releaseLabel } from '../../../../package.json';
           font-size: 10px;
         }
 
-        .menu-content::before,
-        .menu-content::after {
+        .gear {
           opacity: 0.4;
         }
       }

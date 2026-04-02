@@ -102,7 +102,8 @@ import { CommonModule } from '@angular/common';
         z-index: 1;
       }
 
-      .tooltip-wrapper:hover > .tooltip-content {
+      .tooltip-wrapper:hover > .tooltip-content,
+      .tooltip-wrapper:focus-within > .tooltip-content {
         opacity: 1;
         transform: translateX(-50%) translateY(-2px);
       }
@@ -127,7 +128,8 @@ import { CommonModule } from '@angular/common';
         border-bottom-color: #2a2a2a;
       }
 
-      .tooltip-wrapper:hover > .tooltip-content.tooltip-bottom {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-bottom,
+      .tooltip-wrapper:focus-within > .tooltip-content.tooltip-bottom {
         transform: translateX(-50%) translateY(2px);
       }
 
@@ -150,7 +152,8 @@ import { CommonModule } from '@angular/common';
         transform: none;
       }
 
-      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-right {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-right,
+      .tooltip-wrapper:focus-within > .tooltip-content.tooltip-top-right {
         transform: translateY(-2px);
       }
 
@@ -173,7 +176,8 @@ import { CommonModule } from '@angular/common';
         transform: none;
       }
 
-      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-left {
+      .tooltip-wrapper:hover > .tooltip-content.tooltip-top-left,
+      .tooltip-wrapper:focus-within > .tooltip-content.tooltip-top-left {
         transform: translateY(-2px);
       }
     `,

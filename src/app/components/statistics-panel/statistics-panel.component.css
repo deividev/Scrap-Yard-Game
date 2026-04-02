@@ -83,7 +83,7 @@
 .stat-value {
   font-size: 15px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-text-primary);
   letter-spacing: 0.02em;
   line-height: 1.2;
 }
@@ -91,6 +91,12 @@
 .stat-value.flashing {
   animation: stat-pop 0.28s ease-out;
   color: var(--color-accent-main);
+}
+
+@media (max-width: 900px) {
+  .statistics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @keyframes stat-pop {

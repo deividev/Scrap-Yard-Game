@@ -28,12 +28,20 @@ import { AudioService } from '../../services/audio.service';
         <span class="scrap-summary">
           <span class="scrap-cost-row">
             <span class="scrap-amount">-{{ scrapCost }}</span>
-            <img src="assets/icons/gold_resource.png" class="scrap-icon" alt="Money" />
+            <img
+              src="assets/icons/gold_resource_1.png"
+              class="scrap-icon"
+              [attr.alt]="translationService.t('resources.money')"
+            />
           </span>
           <span class="scrap-sep">·</span>
           <span class="scrap-gain-row">
             <span class="scrap-amount">+{{ scrapAmount() }}</span>
-            <img src="assets/icons/scrap_resource.png" class="scrap-icon" alt="Scrap" />
+            <img
+              src="assets/icons/scrap_resource.png"
+              class="scrap-icon"
+              [attr.alt]="translationService.t('resources.scrap')"
+            />
           </span>
         </span>
       </button>
@@ -59,7 +67,7 @@ import { AudioService } from '../../services/audio.service';
         transform: translateX(-50%);
         font-size: 13px;
         font-weight: 800;
-        color: #4caf50;
+        color: var(--color-accent-positive);
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         pointer-events: none;
         white-space: nowrap;
@@ -99,7 +107,7 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .scrap-action:hover:not(:disabled) {
-        border-color: rgba(255, 193, 7, 0.55);
+        border-color: rgba(255, 152, 0, 0.55);
         filter: brightness(1.04);
       }
 
@@ -178,7 +186,7 @@ export class ScrapButtonComponent {
   private scrapGenerationService = inject(ScrapGenerationService);
   private resourcesService = inject(ResourcesService);
   private upgradesService = inject(UpgradesService);
-  private translationService = inject(TranslationService);
+  readonly translationService = inject(TranslationService);
   private audioService = inject(AudioService);
 
   scrapCost = SCRAP_GENERATION_CONFIG.MANUAL_COST;

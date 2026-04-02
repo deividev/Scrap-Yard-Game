@@ -76,14 +76,16 @@
     "sell_components": "Vender 1 componente por 3 dinero",
     "sell_resource": "Vender {amount} de {resource} por {money} dinero",
     "machine_speed": "Esta máquina completa un ciclo cada {time} segundos",
-    "machine_multiplier": "Produce ×{production} pero consume ×{consumption} materiales por ciclo"
+    "machine_multiplier": "Produce ×{production} pero consume ×{consumption} materiales por ciclo",
+    "adjust_sell_amount": "Ajustar cantidad a vender"
   },
   "notifications": {
     "upgrade_completed": "⬆ {name} — Nv {level}",
-    "machine_unlocked": "¡{name} en línea!"
+    "machine_unlocked": "¡{name} en línea!",
+    "upgrade_unlocked": "¡{name} disponible!"
   },
   "progression": {
-    "next_unlock": "Próximo desbloqueo: {machine} ({requirements})",
+    "next_unlock": "Próximo desbloqueo: {machine} · {requirements}",
     "all_unlocked": "🎉 ¡Todas las máquinas desbloqueadas!"
   },
   "tutorial": {
@@ -104,15 +106,15 @@
       },
       "generate_scrap": {
         "title": "Genera chatarra",
-        "body": "Empieza descargando chatarra manualmente. El botón resaltado consume dinero y llena el silo de entrada para la trituradora."
+        "body": "Empieza descargando chatarra manualmente. El botón resaltado consume dinero y añade chatarra a tu stock."
       },
       "activate_crusher": {
         "title": "Activa la trituradora",
-        "body": "Ahora enciende la trituradora. Si tiene chatarra disponible, arrancará su ciclo y transformará material bruto en metal."
+        "body": "Pulsa el botón LED de la tarjeta de la Trituradora para encenderla. En cuanto tenga chatarra en stock, iniciará su ciclo de procesado automáticamente."
       },
       "watch_crusher_progress": {
         "title": "Sigue el ciclo",
-        "body": "Observa la barra de progreso. Cuando complete un ciclo, la línea habrá producido su primera unidad de metal."
+        "body": "Observa cómo la barra de progreso en la parte inferior de la tarjeta se llena de izquierda a derecha — eso es un ciclo completo de procesado. Cuando la barra se complete, tu primera unidad de metal aparecerá en el stock."
       },
       "collect_metal": {
         "title": "Metal listo",
@@ -120,7 +122,7 @@
       },
       "sell_metal": {
         "title": "Haz caja",
-        "body": "Vende una unidad de metal para recuperar dinero. En la fase inicial esta venta manual sostiene el flujo mientras desbloqueas más líneas."
+        "body": "Vende metal para recuperar dinero. En la fase inicial esta venta manual sostiene el flujo mientras desbloqueas más líneas."
       },
       "buy_first_upgrade": {
         "title": "Compra una mejora",
@@ -138,6 +140,8 @@
   },
   "upgrades": {
     "title": "Mejoras",
+    "expand": "Expandir panel de mejoras",
+    "collapse": "Contraer panel de mejoras",
     "tabs": {
       "scrap": "Chatarra",
       "storage": "Almacenamiento",

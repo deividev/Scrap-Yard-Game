@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MachinesService } from '../../services/machines.service';
 import { MachineCardV2Component } from '../machine-card-v2/machine-card-v2.component';
@@ -34,6 +34,7 @@ import { TranslationService } from '../../services/translation.service';
         margin: 0 0 var(--space-4) 0;
         font-size: 12px;
         font-weight: 700;
+        font-family: var(--font-ui);
         color: var(--color-text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -90,10 +91,8 @@ import { TranslationService } from '../../services/translation.service';
   ],
 })
 export class MachineListComponent {
-  constructor(
-    private machinesService: MachinesService,
-    public translationService: TranslationService,
-  ) {}
+  private machinesService = inject(MachinesService);
+  readonly translationService = inject(TranslationService);
 
   // Orden de desbloqueo según nuevo árbol de progresión
   private machineOrder = [

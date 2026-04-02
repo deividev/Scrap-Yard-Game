@@ -26,10 +26,12 @@ import { AudioService } from '../../services/audio.service';
           />
           <span>+{{ moneyGain() }}</span>
           @if (bonusPercent() > 0) {
-            <span style="color: #ffb74d; font-weight: 700;">({{ bonusPercent() }}%)</span>
+            <span style="color: var(--color-accent-light); font-weight: 700;"
+              >({{ bonusPercent() }}%)</span
+            >
           }
           <img
-            src="assets/icons/gold_resource.png"
+            src="assets/icons/gold_resource_1.png"
             style="width: 28px; height: 28px; vertical-align: middle;"
             alt="Money"
           />

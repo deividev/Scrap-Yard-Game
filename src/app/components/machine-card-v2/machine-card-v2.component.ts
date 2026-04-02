@@ -30,6 +30,13 @@ import { MachineCardCalibratorComponent } from '../machine-card-calibrator/machi
 
 type CardState = 'producing' | 'stopped' | 'input' | 'output' | 'locked';
 
+// Colors resolved at runtime from CSS custom properties so we stay in sync with the token system
+function getCssToken(token: string): string {
+  return typeof getComputedStyle !== 'undefined'
+    ? getComputedStyle(document.documentElement).getPropertyValue(token).trim()
+    : '';
+}
+
 const STATE_COLORS: Record<
   CardState,
   { led: string | null; bar: string[] | null; pulse: boolean }
@@ -69,7 +76,11 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
       [class.mc-v2--selected]="isSelected()"
       [style.--shake-i]="shakeIntensityVar()"
       [style.--shake-speed]="shakeSpeedVar()"
+      role="button"
+      tabindex="0"
       (click)="selectMachine()"
+      (keydown.enter)="selectMachine()"
+      (keydown.space)="selectMachine()"
     >
       <img
         #imgEl
@@ -81,6 +92,16 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         alt=""
       />
       <canvas #canvasEl class="mc-v2__canvas"></canvas>
+
+      <!-- Tutorial anchor for step 4: zero-visual-impact div positioned exactly over the canvas bar slot -->
+      <div
+        class="mc-v2__progress-anchor"
+        [attr.data-tutorial-id]="machineProgressTutorialId"
+        [style.top.%]="cardSlots().canvas.bar.y * 100"
+        [style.left.%]="cardSlots().canvas.bar.x * 100"
+        [style.width.%]="cardSlots().canvas.bar.w * 100"
+        [style.height.%]="cardSlots().canvas.bar.h * 100"
+      ></div>
 
       <!-- SLOT 5: nombre máquina -->
       <div
@@ -97,6 +118,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         <!-- SLOT 2: LED toggle button -->
         <button
           class="mc-v2__led-btn"
+          [attr.data-tutorial-id]="machineToggleTutorialId"
           [style.top]="cardSlots().overlay.led.top"
           [style.left]="cardSlots().overlay.led.left"
           [style.width]="cardSlots().overlay.led.width"
@@ -179,7 +201,9 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
 
       @if (isLocked()) {
         <div class="mc-v2__locked">
-          <div class="mc-v2__lock-icon">🔒</div>
+          <div class="mc-v2__lock-icon">
+            <img src="assets/icons/lock_icon.png" alt="" aria-hidden="true" />
+          </div>
           <div class="mc-v2__lock-text">
             @for (line of unlockRequirementLines(); track $index) {
               <div class="mc-v2__req">
@@ -256,6 +280,11 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
       }
 
       /* ── Canvas overlay ──────────────────────────── */
+      .mc-v2__progress-anchor {
+        position: absolute;
+        pointer-events: none;
+      }
+
       .mc-v2__canvas {
         position: absolute;
         inset: 0;
@@ -398,7 +427,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         font-size: 2cqw;
         font-weight: bold;
         color: rgba(220, 240, 255, 0.95);
-        // line-height: 1;
+        /* line-height: 1; */
         background: rgba(0, 0, 0, 0.7);
         padding: 0 0.4cqw;
         border-radius: 0.5cqw;
@@ -458,6 +487,10 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
       .mc-v2__led-btn:not(:disabled):active {
         box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45);
       }
+      .mc-v2__led-btn:focus-visible {
+        outline: 2px solid var(--color-accent-main);
+        outline-offset: 3px;
+      }
       .mc-v2__led-btn:disabled {
         cursor: default;
         pointer-events: none;
@@ -490,7 +523,14 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         font-family: var(--font-mono);
       }
       .mc-v2__lock-icon {
-        font-size: 7.6cqw;
+        width: 24cqw;
+        height: 24cqw;
+      }
+      .mc-v2__lock-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
       }
       .mc-v2__lock-text {
         font-size: 2.4cqw;
@@ -507,11 +547,11 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         align-items: baseline;
       }
       .mc-v2__req-icon--met {
-        color: #66bb6a;
+        color: var(--color-accent-positive);
         font-weight: 700;
       }
       .mc-v2__req-icon--unmet {
-        color: #ef5350;
+        color: var(--color-state-danger);
         font-weight: 700;
       }
       .mc-v2__req-label {
@@ -636,6 +676,13 @@ export class MachineCardV2Component implements AfterViewInit, OnDestroy {
 
   currentIsActive = computed(() => this.currentMachine().isActive);
   currentBaseProduction = computed(() => this.currentMachine().baseProduction);
+
+  get machineToggleTutorialId(): string {
+    return `machine-toggle-${this.machine.id}`;
+  }
+  get machineProgressTutorialId(): string {
+    return `machine-progress-${this.machine.id}`;
+  }
 
   progressPercent = computed(() =>
     this.forceProgress >= 0 ? this.forceProgress : Math.round(this.currentMachine().progress * 100),

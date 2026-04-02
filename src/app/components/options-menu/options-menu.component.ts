@@ -151,8 +151,8 @@ import { TranslationService } from '../../services/translation.service';
         width: 100vw;
         height: 100vh;
         background:
-          linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, transparent 20%),
-          linear-gradient(-135deg, rgba(255, 193, 7, 0.03) 0%, transparent 20%),
+          linear-gradient(135deg, rgba(255, 152, 0, 0.05) 0%, transparent 20%),
+          linear-gradient(-135deg, rgba(255, 152, 0, 0.03) 0%, transparent 20%),
           radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 50%, #0f0f0f 100%);
         display: flex;
         flex-direction: column;
@@ -173,11 +173,11 @@ import { TranslationService } from '../../services/translation.service';
         width: 100%;
         height: 100%;
         background:
-          radial-gradient(circle at 15% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 15% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(ellipse at center top, rgba(255, 193, 7, 0.08) 0%, transparent 40%),
+          radial-gradient(circle at 15% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 15% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(ellipse at center top, rgba(255, 152, 0, 0.08) 0%, transparent 40%),
           linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
         pointer-events: none;
         z-index: 1;
@@ -199,11 +199,11 @@ import { TranslationService } from '../../services/translation.service';
         bottom: -10px;
         width: 3px;
         height: 3px;
-        background: rgba(255, 193, 7, 0.6);
+        background: rgba(255, 152, 0, 0.6);
         border-radius: 50%;
         box-shadow:
-          0 0 4px rgba(255, 193, 7, 0.8),
-          0 0 8px rgba(255, 193, 7, 0.4);
+          0 0 4px rgba(255, 152, 0, 0.8),
+          0 0 8px rgba(255, 152, 0, 0.4);
         animation: float-up linear infinite;
         opacity: 0;
       }
@@ -243,15 +243,15 @@ import { TranslationService } from '../../services/translation.service';
         text-align: center;
         margin: 0 0 32px 0;
         text-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.4),
-          0 4px 16px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.4),
+          0 4px 16px rgba(255, 152, 0, 0.2);
         letter-spacing: 2px;
       }
 
       .options-panel {
         width: 100%;
         background: rgba(26, 26, 26, 0.9);
-        border: 2px solid rgba(255, 193, 7, 0.3);
+        border: 2px solid rgba(255, 152, 0, 0.3);
         border-radius: 12px;
         padding: 40px;
         margin-bottom: 40px;
@@ -308,16 +308,16 @@ import { TranslationService } from '../../services/translation.service';
         background: var(--color-accent-main);
         cursor: pointer;
         box-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.5),
-          0 0 0 2px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.5),
+          0 0 0 2px rgba(255, 152, 0, 0.2);
         transition: all 0.2s ease;
       }
 
       .slider::-webkit-slider-thumb:hover {
         background: var(--color-accent-light);
         box-shadow:
-          0 3px 12px rgba(255, 193, 7, 0.7),
-          0 0 0 3px rgba(255, 193, 7, 0.3);
+          0 3px 12px rgba(255, 152, 0, 0.7),
+          0 0 0 3px rgba(255, 152, 0, 0.3);
         transform: scale(1.1);
       }
 
@@ -329,16 +329,16 @@ import { TranslationService } from '../../services/translation.service';
         cursor: pointer;
         border: none;
         box-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.5),
-          0 0 0 2px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.5),
+          0 0 0 2px rgba(255, 152, 0, 0.2);
         transition: all 0.2s ease;
       }
 
       .slider::-moz-range-thumb:hover {
         background: var(--color-accent-light);
         box-shadow:
-          0 3px 12px rgba(255, 193, 7, 0.7),
-          0 0 0 3px rgba(255, 193, 7, 0.3);
+          0 3px 12px rgba(255, 152, 0, 0.7),
+          0 0 0 3px rgba(255, 152, 0, 0.3);
         transform: scale(1.1);
       }
 
@@ -356,7 +356,7 @@ import { TranslationService } from '../../services/translation.service';
         width: 60px;
         height: 30px;
         background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 193, 7, 0.2);
+        border: 2px solid rgba(255, 152, 0, 0.2);
         border-radius: 15px;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -365,11 +365,11 @@ import { TranslationService } from '../../services/translation.service';
       }
 
       .toggle-button:hover {
-        border-color: rgba(255, 193, 7, 0.4);
+        border-color: rgba(255, 152, 0, 0.4);
       }
 
       .toggle-button.active {
-        background: rgba(255, 193, 7, 0.3);
+        background: rgba(255, 152, 0, 0.3);
         border-color: var(--color-accent-main);
       }
 
@@ -388,7 +388,7 @@ import { TranslationService } from '../../services/translation.service';
       .toggle-button.active .toggle-slider {
         left: 32px;
         background: var(--color-accent-main);
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.5);
       }
 
       .toggle-text {

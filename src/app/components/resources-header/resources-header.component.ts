@@ -638,7 +638,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         left: 50%;
         font-size: 12px;
         font-weight: 700;
-        color: #4caf50;
+        color: var(--color-accent-positive);
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         pointer-events: none;
         z-index: 100;

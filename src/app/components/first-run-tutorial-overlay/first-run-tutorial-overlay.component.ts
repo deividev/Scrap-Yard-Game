@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  HostListener,
   computed,
   effect,
   inject,
@@ -100,7 +102,7 @@ type SpotlightRect = {
         position: absolute;
         inset: 0;
         background:
-          radial-gradient(circle at top, rgba(255, 193, 7, 0.08), transparent 38%),
+          radial-gradient(circle at top, rgba(255, 152, 0, 0.08), transparent 38%),
           linear-gradient(180deg, rgba(3, 6, 8, 0.4), rgba(3, 6, 8, 0.5));
       }
 
@@ -111,11 +113,11 @@ type SpotlightRect = {
       .tutorial-spotlight {
         position: absolute;
         border-radius: 16px;
-        border: 2px solid rgba(255, 193, 7, 0.92);
+        border: 2px solid rgba(255, 152, 0, 0.92);
         box-shadow:
-          0 0 0 9999px rgba(0, 0, 0, 0.28),
-          0 0 0 8px rgba(255, 193, 7, 0.12),
-          0 0 30px rgba(255, 193, 7, 0.38);
+          0 0 0 9999px rgba(0, 0, 0, 0.2),
+          0 0 0 8px rgba(255, 152, 0, 0.12),
+          0 0 30px rgba(255, 152, 0, 0.38);
         pointer-events: none;
         animation: tutorialPulse 1.8s ease-in-out infinite;
       }
@@ -124,11 +126,11 @@ type SpotlightRect = {
         position: fixed;
         width: min(360px, calc(100vw - 32px));
         background: linear-gradient(180deg, rgba(30, 33, 36, 0.98), rgba(16, 18, 20, 0.98));
-        border: 1px solid rgba(255, 193, 7, 0.5);
+        border: 1px solid rgba(255, 152, 0, 0.5);
         border-radius: 16px;
         box-shadow:
           0 18px 60px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(255, 193, 7, 0.16),
+          0 0 0 1px rgba(255, 152, 0, 0.16),
           inset 0 1px 0 rgba(255, 255, 255, 0.05);
         color: var(--color-text-primary);
         padding: 18px 18px 16px;
@@ -154,7 +156,7 @@ type SpotlightRect = {
         font-weight: 700;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(255, 193, 7, 0.92);
+        color: rgba(255, 152, 0, 0.92);
       }
 
       .tutorial-panel__title {
@@ -174,7 +176,7 @@ type SpotlightRect = {
       .tutorial-panel__hint {
         margin: 14px 0 0;
         padding-top: 12px;
-        border-top: 1px solid rgba(255, 193, 7, 0.14);
+        border-top: 1px solid rgba(255, 152, 0, 0.14);
         font-size: 12px;
         color: var(--color-text-secondary);
       }
@@ -218,12 +220,14 @@ type SpotlightRect = {
 export class FirstRunTutorialOverlayComponent {
   protected readonly tutorialService = inject(FirstRunTutorialService);
   protected readonly translationService = inject(TranslationService);
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   private readonly viewportSize = signal({
     width: typeof window !== 'undefined' ? window.innerWidth : 1280,
     height: typeof window !== 'undefined' ? window.innerHeight : 720,
   });
   private readonly spotlightRectSignal = signal<SpotlightRect | null>(null);
+  private lastScrolledTargetId: string | null = null;
 
   protected readonly currentStep = this.tutorialService.currentStep;
   protected readonly spotlightRect = this.spotlightRectSignal.asReadonly();
@@ -305,13 +309,27 @@ export class FirstRunTutorialOverlayComponent {
         return;
       }
 
+      // Scroll element into view once per step change so it is always on screen
+      if (targetId !== this.lastScrolledTargetId) {
+        this.lastScrolledTargetId = targetId;
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
       const rect = element.getBoundingClientRect();
       const padding = 8;
+      const minSize = 48;
+      const rawWidth = rect.width + padding * 2;
+      const rawHeight = rect.height + padding * 2;
+      const finalWidth = Math.max(minSize, rawWidth);
+      const finalHeight = Math.max(minSize, rawHeight);
+      // Re-center the spotlight box if we had to expand it
+      const leftAdjust = (finalWidth - rawWidth) / 2;
+      const topAdjust = (finalHeight - rawHeight) / 2;
       this.spotlightRectSignal.set({
-        top: Math.max(8, rect.top - padding),
-        left: Math.max(8, rect.left - padding),
-        width: rect.width + padding * 2,
-        height: rect.height + padding * 2,
+        top: Math.max(8, rect.top - padding - topAdjust),
+        left: Math.max(8, rect.left - padding - leftAdjust),
+        width: finalWidth,
+        height: finalHeight,
       });
     };
 
@@ -339,5 +357,33 @@ export class FirstRunTutorialOverlayComponent {
 
   protected skipTutorial(): void {
     this.tutorialService.skipTutorial();
+  }
+
+  @HostListener('keydown.tab', ['$event'])
+  @HostListener('keydown.shift.tab', ['$event'])
+  protected trapFocus(event: Event): void {
+    const keyEvent = event as KeyboardEvent;
+    if (!this.isModalStep()) return;
+    const dialog = this.elementRef.nativeElement.querySelector<HTMLElement>('[role="dialog"]');
+    if (!dialog) return;
+    const focusable = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (keyEvent.shiftKey) {
+      if (document.activeElement === first) {
+        last.focus();
+        keyEvent.preventDefault();
+      }
+    } else {
+      if (document.activeElement === last) {
+        first.focus();
+        keyEvent.preventDefault();
+      }
+    }
   }
 }

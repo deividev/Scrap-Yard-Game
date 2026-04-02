@@ -102,14 +102,14 @@ import { AudioService } from '../../../services/audio.service';
 
       .btn-lg.btn-primary {
         box-shadow:
-          0 4px 12px rgba(255, 193, 7, 0.35),
+          0 4px 12px rgba(255, 152, 0, 0.35),
           0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       .btn-lg.btn-primary:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow:
-          0 6px 20px rgba(255, 193, 7, 0.45),
+          0 6px 20px rgba(255, 152, 0, 0.45),
           0 3px 6px rgba(0, 0, 0, 0.3);
         filter: brightness(1.1);
       }
@@ -124,7 +124,7 @@ import { AudioService } from '../../../services/audio.service';
         border-color: var(--color-accent-main);
         box-shadow:
           0 5px 16px rgba(0, 0, 0, 0.35),
-          0 0 0 1px rgba(255, 193, 7, 0.3);
+          0 0 0 1px rgba(255, 152, 0, 0.3);
         background: rgba(42, 42, 42, 0.95);
       }
 
@@ -145,7 +145,7 @@ import { AudioService } from '../../../services/audio.service';
       }
 
       .btn-lg:focus:not(:disabled) {
-        outline: 2px solid rgba(255, 193, 7, 0.5);
+        outline: 2px solid rgba(255, 152, 0, 0.5);
         outline-offset: 2px;
       }
     `,

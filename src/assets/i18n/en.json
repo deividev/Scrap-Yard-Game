@@ -76,14 +76,16 @@
     "sell_components": "Sell 1 component for 3 money",
     "sell_resource": "Sell {amount} {resource} for {money} money",
     "machine_speed": "This machine completes a cycle every {time} seconds",
-    "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle"
+    "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle",
+    "adjust_sell_amount": "Adjust sell amount"
   },
   "notifications": {
     "upgrade_completed": "⬆ {name} — Lv {level}",
-    "machine_unlocked": "{name} is online!"
+    "machine_unlocked": "{name} is online!",
+    "upgrade_unlocked": "{name} available!"
   },
   "progression": {
-    "next_unlock": "Next unlock: {machine} ({requirements})",
+    "next_unlock": "Next unlock: {machine} · {requirements}",
     "all_unlocked": "🎉 All machines unlocked!"
   },
   "tutorial": {
@@ -108,11 +110,11 @@
       },
       "activate_crusher": {
         "title": "Activate the crusher",
-        "body": "Now switch the crusher on. If it has scrap available, it will start cycling and turn raw material into metal."
+        "body": "Click the glowing LED button on the Crusher card to power it up. Once it has scrap in stock, it will begin its processing cycle automatically."
       },
       "watch_crusher_progress": {
         "title": "Watch the cycle",
-        "body": "Keep an eye on the progress bar. Once the cycle completes, the line will have produced its first unit of metal."
+        "body": "Watch the progress bar at the bottom of the Crusher card fill from left to right — that is one full processing cycle. When the bar completes, your first unit of metal appears in stock."
       },
       "collect_metal": {
         "title": "Metal online",
@@ -120,7 +122,7 @@
       },
       "sell_metal": {
         "title": "Make some cash",
-        "body": "Sell one unit of metal to recover money. Early on, this manual sale keeps your loop alive while you unlock more lines."
+        "body": "Sell metal to recover money. Early on, this manual sale keeps your loop alive while you unlock more lines."
       },
       "buy_first_upgrade": {
         "title": "Buy an upgrade",
@@ -138,6 +140,8 @@
   },
   "upgrades": {
     "title": "Upgrades",
+    "expand": "Expand upgrades panel",
+    "collapse": "Collapse upgrades panel",
     "tabs": {
       "scrap": "Scrap",
       "storage": "Storage",

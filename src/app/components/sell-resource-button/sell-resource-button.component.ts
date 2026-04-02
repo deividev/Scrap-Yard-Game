@@ -30,7 +30,7 @@ import { AudioService } from '../../services/audio.service';
           <button class="sell-action" type="button" [disabled]="!canSell()" (click)="sell()">
             <span class="sell-money">
               <span class="sell-yield">+{{ moneyGain() }}</span>
-              <img src="assets/icons/gold_resource.png" class="sell-action-icon" alt="Money" />
+              <img src="assets/icons/gold_resource_1.png" class="sell-action-icon" alt="Money" />
             </span>
           </button>
         </app-tooltip>
@@ -41,7 +41,7 @@ import { AudioService } from '../../services/audio.service';
           [class.is-open]="isPanelOpen()"
           [attr.aria-expanded]="isPanelOpen()"
           [disabled]="!hasStock()"
-          aria-label="Adjust sell amount"
+          [attr.aria-label]="translationService.t('tooltips.adjust_sell_amount')"
           (click)="togglePanel()"
         >
           <span class="sell-toggle-amount">{{ saleAmount() }}</span>
@@ -51,7 +51,7 @@ import { AudioService } from '../../services/audio.service';
       </div>
 
       @for (f of floatingTexts(); track f.id) {
-        <span class="sell-float-text">+{{ f.amount }}</span>
+        <span class="sell-float-text" aria-hidden="true">+{{ f.amount }}</span>
       }
 
       @if (isPanelOpen()) {
@@ -226,7 +226,7 @@ import { AudioService } from '../../services/audio.service';
         border: 1px solid rgba(245, 158, 11, 0.28);
         border-radius: 4px;
         background: rgba(245, 158, 11, 0.1);
-        color: #ffb74d;
+        color: var(--color-accent-light);
         font-weight: 700;
         font-size: 10px;
         text-transform: uppercase;
@@ -434,7 +434,7 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .sell-action:hover:not(:disabled) {
-        border-color: rgba(255, 193, 7, 0.55);
+        border-color: rgba(255, 152, 0, 0.55);
         border-right-color: rgba(0, 0, 0, 0.3);
         filter: brightness(1.04);
       }
@@ -446,7 +446,7 @@ import { AudioService } from '../../services/audio.service';
         transform: translateX(-50%);
         font-size: 13px;
         font-weight: 700;
-        color: #ffd54f;
+        color: var(--color-accent-light);
         pointer-events: none;
         white-space: nowrap;
         animation: sell-float-up 0.7s ease-out forwards;
@@ -503,7 +503,7 @@ export class SellResourceButtonComponent {
   panelLeft = signal(0);
   private marketService = inject(MarketService);
   private resourcesService = inject(ResourcesService);
-  private translationService = inject(TranslationService);
+  readonly translationService = inject(TranslationService);
   private audioService = inject(AudioService);
 
   maxSellAmount = computed(() => this.marketService.getManualSaleAmount(this.resourceId()));

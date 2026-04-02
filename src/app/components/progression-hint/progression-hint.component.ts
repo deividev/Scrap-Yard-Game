@@ -15,7 +15,7 @@ import { MachineType } from '../../models/machine.model';
   template: `
     @if (hintText()) {
       <div class="progression-hint">
-        <span class="hint-icon">🎯</span>
+        <img src="assets/icons/goal_icon.png" class="hint-icon" alt="" aria-hidden="true" />
         <span class="hint-text">{{ hintText() }}</span>
       </div>
     }
@@ -35,7 +35,11 @@ import { MachineType } from '../../models/machine.model';
       }
 
       .hint-icon {
-        font-size: 16px;
+        width: 54px;
+        height: 54px;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 0 4px rgba(255, 152, 0, 0.6));
       }
 
       .hint-text {

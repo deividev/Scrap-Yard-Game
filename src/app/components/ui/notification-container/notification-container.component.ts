@@ -6,7 +6,7 @@ import { NotificationService } from '../../../services/notification.service';
   selector: 'app-notification-container',
   imports: [CommonModule],
   template: `
-    <div class="notification-container">
+    <div class="notification-container" aria-live="polite" role="status">
       @for (notification of notificationService.notifications$(); track notification.id) {
         <div class="notification" [class]="'notification-' + notification.type">
           <span class="notification-icon">

@@ -30,6 +30,7 @@
 
   --border-radius-small: 4px;
   --border-radius-medium: 6px;
+  --border-radius-large: 12px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -128,4 +129,9 @@ h4 {
   font-family: var(--font-display);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* Section labels in UI components use the UI font, not the display font */
+.section-title {
+  font-family: var(--font-ui);
 }

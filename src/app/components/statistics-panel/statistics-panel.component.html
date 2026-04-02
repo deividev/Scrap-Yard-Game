@@ -1,5 +1,11 @@
 <div class="statistics-panel" [class.collapsed]="isCollapsed()">
-  <button class="statistics-header" (click)="toggleCollapse()" type="button">
+  <button
+    class="statistics-header"
+    (click)="toggleCollapse()"
+    type="button"
+    [attr.aria-expanded]="!isCollapsed()"
+    [attr.aria-label]="t.t('statistics.title')"
+  >
     <span class="statistics-title">{{ t.t('statistics.title') }}</span>
     <span class="collapse-icon">{{ isCollapsed() ? '▶' : '▼' }}</span>
   </button>

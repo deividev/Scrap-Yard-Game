@@ -77,12 +77,12 @@ import { TranslationService } from '../../../services/translation.service';
         position: relative;
         background: var(--color-bg-panel);
         border: 2px solid rgba(255, 152, 0, 0.6);
-        border-radius: 12px;
+        border-radius: var(--border-radius-large);
         max-width: 500px;
         width: 100%;
         box-shadow:
           0 8px 32px rgba(0, 0, 0, 0.8),
-          0 0 60px rgba(255, 193, 7, 0.2),
+          0 0 60px rgba(255, 152, 0, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.1);
         animation: slideIn 0.3s ease-out;
         overflow: visible;
@@ -91,7 +91,7 @@ import { TranslationService } from '../../../services/translation.service';
 
       .modal-header {
         padding: 24px 32px 16px;
-        border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+        border-bottom: 1px solid rgba(255, 152, 0, 0.2);
         position: relative;
         z-index: 20002;
       }
@@ -123,7 +123,7 @@ import { TranslationService } from '../../../services/translation.service';
         display: flex;
         gap: 16px;
         justify-content: flex-end;
-        border-top: 1px solid rgba(255, 193, 7, 0.1);
+        border-top: 1px solid rgba(255, 152, 0, 0.1);
         position: relative;
         z-index: 20002;
       }

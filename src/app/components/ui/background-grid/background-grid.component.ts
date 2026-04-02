@@ -17,28 +17,28 @@ import { Component, Input } from '@angular/core';
             0deg,
             transparent 0px,
             transparent 49px,
-            rgba(255, 193, 7, 0.08) 49px,
-            rgba(255, 193, 7, 0.08) 50px
+            rgba(255, 152, 0, 0.08) 49px,
+            rgba(255, 152, 0, 0.08) 50px
           ),
           repeating-linear-gradient(
             90deg,
             transparent 0px,
             transparent 49px,
-            rgba(255, 193, 7, 0.08) 49px,
-            rgba(255, 193, 7, 0.08) 50px
+            rgba(255, 152, 0, 0.08) 49px,
+            rgba(255, 152, 0, 0.08) 50px
           ),
           linear-gradient(
             45deg,
             transparent 48%,
-            rgba(255, 193, 7, 0.03) 49%,
-            rgba(255, 193, 7, 0.03) 51%,
+            rgba(255, 152, 0, 0.03) 49%,
+            rgba(255, 152, 0, 0.03) 51%,
             transparent 52%
           ),
           linear-gradient(
             -45deg,
             transparent 48%,
-            rgba(255, 193, 7, 0.03) 49%,
-            rgba(255, 193, 7, 0.03) 51%,
+            rgba(255, 152, 0, 0.03) 49%,
+            rgba(255, 152, 0, 0.03) 51%,
             transparent 52%
           );
         background-size:

@@ -7,6 +7,7 @@ import {
   Output,
   EventEmitter,
   ElementRef,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
@@ -24,10 +25,12 @@ import { ResourceType } from '../../models/resource.model';
 import { Machine, MachineType } from '../../models/machine.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
+import { FirstRunTutorialService } from '../../services/first-run-tutorial.service';
 
 @Component({
   selector: 'app-upgrades-panel',
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, AppButtonComponent, ProgressBarComponent, FormatNumberPipe],
   template: `
     <div class="upgrades-panel" data-tutorial-id="upgrades-panel" [class.minimized]="isMinimized()">
@@ -41,6 +44,12 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
           [label]="isMinimized() ? '◀' : '▶'"
           variant="ghost"
           size="sm"
+          [attr.aria-label]="
+            isMinimized()
+              ? translationService.t('upgrades.expand')
+              : translationService.t('upgrades.collapse')
+          "
+          [attr.aria-expanded]="!isMinimized()"
           (clicked)="toggleMinimize()"
         />
       </div>
@@ -67,27 +76,47 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                   class="upgrade-item"
                   [class.upgrade-item--locked]="scrapManualUpgrade().isLocked"
                 >
-                  @if (scrapManualUpgrade().isLocked) {
-                    <div class="upgrade-locked-overlay">
-                      <span class="upgrade-locked-icon">🔒</span>
-                      <span class="upgrade-locked-name">{{ scrapManualUpgrade().name }}</span>
-                      <span class="upgrade-locked-hint">{{
-                        translationService.t('upgrades.scrap_manual.locked_hint')
-                      }}</span>
+                  <div class="machine-card-header">
+                    <div class="machine-card-title-group">
+                      <div
+                        class="machine-icon-badge"
+                        [class.locked]="scrapManualUpgrade().isLocked"
+                      >
+                        <img
+                          src="assets/icons/scrap_manual.png"
+                          class="machine-icon"
+                          alt=""
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <h4 class="machine-card-name">{{ scrapManualUpgrade().name }}</h4>
                     </div>
+                    @if (!scrapManualUpgrade().isLocked) {
+                      <span class="machine-card-level">
+                        {{ translationService.t('upgrades.nivel') }}
+                        {{ scrapManualUpgrade().level }}
+                      </span>
+                    }
+                    @if (scrapManualUpgrade().isLocked) {
+                      <span class="machine-card-locked">
+                        <img
+                          src="assets/icons/lock_icon.png"
+                          class="machine-card-locked-icon"
+                          width="14"
+                          height="14"
+                          alt=""
+                          aria-hidden="true"
+                        />
+                        {{ translationService.t('status.bloqueada') }}
+                      </span>
+                    }
+                  </div>
+                  @if (scrapManualUpgrade().isLocked) {
+                    <p class="upgrade-locked-hint">
+                      {{ translationService.t('upgrades.scrap_manual.locked_hint') }}
+                    </p>
                   }
                   @if (!scrapManualUpgrade().isLocked) {
-                    <div class="upgrade-header">
-                      <span class="upgrade-icon">🔨</span>
-                      <div class="upgrade-info">
-                        <h4 class="upgrade-name">{{ scrapManualUpgrade().name }}</h4>
-                        <p class="upgrade-description">
-                          {{ translationService.t('upgrades.nivel') }}
-                          {{ scrapManualUpgrade().level }}
-                        </p>
-                      </div>
-                    </div>
-
                     <div class="upgrade-details">
                       <p class="detail-line">
                         <strong>{{
@@ -130,7 +159,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                       (clicked)="purchaseScrapManualUpgrade()"
                     >
                       <span btn-cost class="upgrade-btn-cost">
-                        <img src="assets/icons/gold_resource.png" class="btn-cost-icon" alt="" />
+                        <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
                         {{ scrapManualUpgrade().cost.money | formatNumber }}
                         @if (scrapManualUpgrade().cost.components > 0) {
                           <img
@@ -147,16 +176,21 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
 
                 <!-- Automatic Scrap Generation Upgrade -->
                 <div class="upgrade-item">
-                  <div class="upgrade-header">
-                    <img src="assets/icons/scrap_resource.png" class="upgrade-icon" alt="Scrap" />
-                    <div class="upgrade-info">
-                      <h4 class="upgrade-name">{{ scrapAutoUpgrade().name }}</h4>
-                      <p class="upgrade-description">
-                        {{ translationService.t('upgrades.nivel') }}
-                        {{ scrapAutoUpgrade().level }} /
-                        {{ SCRAP_GENERATION_CONFIG.MAX_LEVEL }}
-                      </p>
+                  <div class="machine-card-header">
+                    <div class="machine-card-title-group">
+                      <div class="machine-icon-badge">
+                        <img
+                          src="assets/icons/scrap_resource.png"
+                          class="machine-icon"
+                          [attr.alt]="translationService.t('resources.scrap')"
+                        />
+                      </div>
+                      <h4 class="machine-card-name">{{ scrapAutoUpgrade().name }}</h4>
                     </div>
+                    <span class="machine-card-level">
+                      {{ translationService.t('upgrades.nivel') }} {{ scrapAutoUpgrade().level }} /
+                      {{ SCRAP_GENERATION_CONFIG.MAX_LEVEL }}
+                    </span>
                   </div>
 
                   <div class="upgrade-details">
@@ -202,7 +236,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                       (clicked)="purchaseScrapUpgrade()"
                     >
                       <span btn-cost class="upgrade-btn-cost">
-                        <img src="assets/icons/gold_resource.png" class="btn-cost-icon" alt="" />
+                        <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
                         {{ scrapAutoUpgrade().cost.money | formatNumber }}
                         @if (scrapAutoUpgrade().cost.components > 0) {
                           <img
@@ -229,14 +263,16 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
               <div class="storage-upgrades">
                 @for (upgrade of storageUpgrades(); track upgrade.upgradeId) {
                   <div class="upgrade-item">
-                    <div class="upgrade-header">
-                      <img [src]="upgrade.icon" class="upgrade-icon" [alt]="upgrade.name" />
-                      <div class="upgrade-info">
-                        <h4 class="upgrade-name">{{ upgrade.name }}</h4>
-                        <p class="upgrade-description">
-                          {{ translationService.t('upgrades.nivel') }} {{ upgrade.level }}
-                        </p>
+                    <div class="machine-card-header">
+                      <div class="machine-card-title-group">
+                        <div class="machine-icon-badge">
+                          <img [src]="upgrade.icon" class="machine-icon" [alt]="upgrade.name" />
+                        </div>
+                        <h4 class="machine-card-name">{{ upgrade.name }}</h4>
                       </div>
+                      <span class="machine-card-level">
+                        {{ translationService.t('upgrades.nivel') }} {{ upgrade.level }}
+                      </span>
                     </div>
 
                     <div class="upgrade-capacity">
@@ -271,7 +307,11 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                         (clicked)="purchaseStorageUpgrade(upgrade.upgradeId)"
                       >
                         <span btn-cost class="upgrade-btn-cost">
-                          <img src="assets/icons/gold_resource.png" class="btn-cost-icon" alt="" />
+                          <img
+                            src="assets/icons/gold_resource_1.png"
+                            class="btn-cost-icon"
+                            alt=""
+                          />
                           {{ upgrade.cost.money | formatNumber }}
                           @if (upgrade.cost.components > 0) {
                             <img
@@ -326,7 +366,15 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                         }
                         @if (machineUpgrade.isLocked) {
                           <span class="machine-card-locked">
-                            🔒 {{ translationService.t('status.bloqueada') }}
+                            <img
+                              src="assets/icons/lock_icon.png"
+                              class="machine-card-locked-icon"
+                              width="14"
+                              height="14"
+                              alt=""
+                              aria-hidden="true"
+                            />
+                            {{ translationService.t('status.bloqueada') }}
                           </span>
                         }
                       </div>
@@ -407,7 +455,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
                                 @if (machineUpgrade.cost) {
                                   <span btn-cost class="upgrade-btn-cost">
                                     <img
-                                      src="assets/icons/gold_resource.png"
+                                      src="assets/icons/gold_resource_1.png"
                                       class="btn-cost-icon"
                                       alt=""
                                     />
@@ -474,6 +522,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
         margin: 0;
         font-size: 12px;
         font-weight: 700;
+        font-family: var(--font-ui);
         color: var(--color-accent-main);
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -509,14 +558,14 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
         position: relative;
       }
 
-      .tabs ::ng-deep button {
+      .tabs button {
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 11px;
         font-weight: 600;
       }
 
-      .tabs app-button.active ::ng-deep button {
+      .tabs app-button.active button {
         color: var(--color-accent-main);
         font-weight: 700;
       }
@@ -739,8 +788,18 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
       }
 
       .machine-card-locked {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
         font-size: 11px;
         color: var(--color-text-secondary);
+      }
+      .machine-card-locked-icon {
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
       }
 
       .machine-card-body {
@@ -776,7 +835,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
         font-size: 13px;
       }
 
-      .btn-can-afford ::ng-deep button {
+      .btn-can-afford button {
         background: var(--color-accent-main);
         box-shadow:
           0 0 8px rgba(220, 174, 92, 0.5),
@@ -796,7 +855,7 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
       .upgrade-item--locked {
         opacity: 0.6;
         border-style: dashed;
-        border-color: rgba(255, 193, 7, 0.3);
+        border-color: rgba(255, 152, 0, 0.3);
       }
 
       .upgrade-locked-overlay {
@@ -809,7 +868,22 @@ import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/ga
       }
 
       .upgrade-locked-icon {
-        font-size: 24px;
+        width: 32px;
+        height: 32px;
+      }
+      .upgrade-locked-icon img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+      }
+
+      .upgrade-locked-preview {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+        opacity: 0.45;
+        filter: grayscale(0.4) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
       }
 
       .upgrade-locked-name {
@@ -961,6 +1035,23 @@ export class UpgradesPanelComponent {
   private scrapGenerationService = inject(ScrapGenerationService);
   translationService = inject(TranslationService);
   private readonly _elRef = inject(ElementRef<HTMLElement>);
+  private tutorialService = inject(FirstRunTutorialService);
+
+  private _tutorialBuyUpgradeEffect = effect(() => {
+    if (this.tutorialService.currentStepId() === 'buy-first-upgrade') {
+      this.isMinimized.set(false);
+      this.activeTab.set('machine');
+      this.minimizedChange.emit(false);
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          const btn = this._elRef.nativeElement.querySelector(
+            '[data-tutorial-id="machine-upgrade-button-crusher"]',
+          ) as HTMLElement | null;
+          btn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }, 100);
+    }
+  });
 
   private _selectionEffect = effect(() => {
     const selectedId = this.machineSelectionService.getSelectedMachineId();

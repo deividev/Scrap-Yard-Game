@@ -89,6 +89,16 @@ export class MachineUnlockService {
         machine.icon,
       );
       this.audioService.playMachineUnlocked();
+
+      // When the Packager unlocks, the manual scrap upgrade also becomes available
+      if (machineType === MachineType.PACKAGER) {
+        const upgradeName = this.translationService.t('upgrades.scrap_manual.name');
+        this.notificationService.show(
+          this.translationService.tp('notifications.upgrade_unlocked', { name: upgradeName }),
+          'unlock',
+          'assets/icons/scrap_manual.png',
+        );
+      }
     }
   }
 
@@ -198,13 +208,20 @@ export class MachineUnlockService {
   }
 
   private getRecyclerRequirements(): UnlockRequirement[] {
-    const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
+    const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
+    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
     return [
       {
-        machineType: MachineType.SEPARATOR,
-        requiredLevel: 4,
-        currentLevel: separatorLevel,
-        isMet: separatorLevel >= 4,
+        machineType: MachineType.PACKAGER,
+        requiredLevel: 5,
+        currentLevel: packagerLevel,
+        isMet: packagerLevel >= 5,
+      },
+      {
+        machineType: MachineType.SMELTER,
+        requiredLevel: 3,
+        currentLevel: smelterLevel,
+        isMet: smelterLevel >= 3,
       },
     ];
   }
