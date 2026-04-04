@@ -36,11 +36,29 @@
       "**/build": true,
       "**/public": true
     },
-    "typescript.tsserver.maxTsServerMemory": 2048,
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
     "typescript.disableAutomaticTypeAcquisition": true,
     "github.copilot.enable": {
       "*": true,
-      "plaintext": false
-    }
+      "plaintext": false,
+      "markdown": false
+    },
+    "git.autorefresh": false,
+    "git.autoRepositoryDetection": false,
+    "extensions.autoUpdate": false,
+    "editor.formatOnSave": false,
+    "editor.quickSuggestions": {
+      "other": "on",
+      "comments": "off",
+      "strings": "off"
+    },
+    "editor.semanticHighlighting.enabled": false,
+    "editor.occurrencesHighlight": "off",
+    "typescript.inlayHints.parameterNames.enabled": "none",
+    "typescript.inlayHints.variableTypes.enabled": false,
+    "typescript.inlayHints.returnTypes.enabled": false,
+    "ms-vscode.powershell.enableProfileLoading": false,
+    "prettier-eslint.prettierLast": true
   }
 }

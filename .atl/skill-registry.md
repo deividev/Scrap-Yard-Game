@@ -8,7 +8,7 @@
 
 ## Project Context
 
-**Stack:** Angular 19 standalone + Electron (desktop), TypeScript strict mode, signals, no NgModules.
+**Stack:** Angular 21 standalone + Electron 26 (desktop), TypeScript 5.9 strict mode, signals, no NgModules.
 **Game type:** Idle/incremental. Player generates scrap → processes via machines → sells for money → buys upgrades.
 **Version source of truth:** `package.json` fields `"version"` + `"releaseLabel"`.
 **i18n:** `TranslationService.t('key')` — all user-facing strings translated; JSON files in `src/assets/i18n/`.
@@ -17,7 +17,7 @@
 
 ## Compact Rules
 
-### [angular] Angular 19 conventions
+### [angular] Angular 21 conventions
 
 - **Always `inject()`** — never constructor injection for services.
 - **Signals for all reactive state** — `signal()`, `computed()`, `effect()`. No BehaviorSubject, no RxJS for local state.
@@ -135,8 +135,13 @@ src/app/
     audio.service.ts              # AudioContext graph, try/catch init
     market.service.ts             # Buy/sell prices
     machine-unlock.service.ts     # Unlock conditions per machine
+    machine-selection.service.ts  # Active/selected machine state
     notification.service.ts       # Toast notifications
     translation.service.ts        # t('key') i18n lookup
+    settings.service.ts           # User settings (volume, window mode, etc.)
+    statistics.service.ts         # Game statistics tracking
+    demo-end.service.ts           # Demo end detection and overlay trigger
+    first-run-tutorial.service.ts # First-run tutorial steps and state
   components/
     main-menu/                    # Main menu view, version display
     options-menu/                 # Options/settings, window mode, reset
