@@ -494,9 +494,13 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
   styles: [
     `
       .upgrades-panel {
-        background: transparent;
+        background: var(--color-bg-section);
         border-left: 2px solid var(--color-border);
         border-top: 2px solid var(--color-accent-main);
+        box-shadow:
+          inset 1px 0 0 rgba(255, 200, 80, 0.06),
+          inset 0 1px 0 rgba(255, 200, 80, 0.1),
+          -4px 0 24px rgba(0, 0, 0, 0.4);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -508,7 +512,7 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: var(--color-bg-panel);
+        background: var(--color-bg-section);
         border-bottom: 1px solid var(--color-border);
       }
 

@@ -140,7 +140,12 @@ import { version, releaseLabel } from '../../../../package.json';
         height: 100%;
         background:
           /* oscurecer lado derecho donde está la máquina brillante */
-          linear-gradient(to left, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 65%),
+          linear-gradient(
+            to left,
+            rgba(0, 0, 0, 0.72) 0%,
+            rgba(0, 0, 0, 0.35) 45%,
+            transparent 65%
+          ),
           /* oscurecer zona central donde van logo y botones */
           radial-gradient(ellipse 55% 70% at 42% 52%, rgba(0, 0, 0, 0.55) 0%, transparent 100%);
         z-index: 0;

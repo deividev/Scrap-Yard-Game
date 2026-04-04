@@ -323,9 +323,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       .resources-header {
         position: relative;
         z-index: 100;
-        background: var(--color-bg-panel);
-        border-bottom: 2px solid rgba(255, 152, 0, 0.35);
+        background: var(--color-bg-section);
         border-top: 2px solid var(--color-accent-main);
+        border-bottom: 1px solid var(--color-border);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.04),
+          0 4px 24px rgba(0, 0, 0, 0.55);
         padding: var(--space-2) var(--space-4) var(--space-3);
         display: flex;
         flex-direction: column;

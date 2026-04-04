@@ -145,3 +145,11 @@ export const INITIAL_CAPACITIES = {
   RECYCLED_PLASTIC: 20,
   ELECTRIC_COMPONENTS: 10,
 };
+
+// ============================================
+// DEMO CONFIG
+// ============================================
+
+export const DEMO_CONFIG = {
+  STEAM_WISHLIST_URL: 'https://store.steampowered.com/app/YOUR_APP_ID',
+};

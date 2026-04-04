@@ -5,6 +5,7 @@ import { MachineType } from '../models/machine.model';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
+import { DemoEndService } from './demo-end.service';
 
 export interface UnlockRequirement {
   machineType: MachineType;
@@ -32,6 +33,7 @@ export class MachineUnlockService {
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
   private audioService = inject(AudioService);
+  private demoEndService = inject(DemoEndService);
   private readonly isDev = isDevMode();
 
   private debugLog(message: string): void {
@@ -98,6 +100,12 @@ export class MachineUnlockService {
           'unlock',
           'assets/icons/scrap_manual.png',
         );
+        // Mostrar el modal de fin de demo 1 minuto después del desbloqueo
+        console.log('[DemoEnd] Packager unlocked — programando modal en 60s');
+        setTimeout(() => {
+          console.log('[DemoEnd] 60s cumplidos — llamando triggerIfNeeded()');
+          this.demoEndService.triggerIfNeeded();
+        }, 60_000);
       }
     }
   }

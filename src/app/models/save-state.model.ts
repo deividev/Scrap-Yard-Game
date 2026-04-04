@@ -5,7 +5,10 @@ import { UpgradeProgress } from './upgrade-progress.model';
 import { FirstRunTutorialState } from './tutorial-step.model';
 import { GameSettings } from '../services/settings.service';
 
+export const SAVE_VERSION = 1;
+
 export interface SaveState {
+  version: number;
   resources: Resource[];
   machines: Machine[];
   upgrades: UpgradeState[];
@@ -16,4 +19,5 @@ export interface SaveState {
   gameStarted?: boolean; // Indica si el usuario ha iniciado el juego (true) o solo ha guardado configuraciones (false/undefined)
   statistics?: { totalScrapGenerated: number; playTimeSeconds: number };
   firstRunTutorial?: FirstRunTutorialState;
+  demoEndSeen?: boolean;
 }

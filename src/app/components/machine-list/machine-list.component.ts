@@ -28,6 +28,7 @@ import { TranslationService } from '../../services/translation.service';
         padding: var(--space-4);
         overflow-y: auto;
         height: 100%;
+        background: rgba(255, 255, 255, 0.02);
       }
 
       .section-title {

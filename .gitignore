@@ -76,6 +76,7 @@ Thumbs.db
 
 # Project docs and prompts (internal design documents)
 /docs
+/docs-old
 /docs/**
 /prompts
 /prompts/**

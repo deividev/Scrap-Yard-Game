@@ -20,6 +20,10 @@ import { TranslationService } from '../../services/translation.service';
   ],
   template: `
     <div class="options-menu">
+      <!-- Fondo atmosférico -->
+      <img src="assets/image/menu_bg.png" class="menu-bg" aria-hidden="true" />
+      <div class="menu-bg-overlay"></div>
+
       <app-background-grid [opacity]="0.35"></app-background-grid>
 
       <!-- Partículas flotantes -->
@@ -150,18 +154,38 @@ import { TranslationService } from '../../services/translation.service';
         left: 0;
         width: 100vw;
         height: 100vh;
-        background:
-          linear-gradient(135deg, rgba(255, 152, 0, 0.05) 0%, transparent 20%),
-          linear-gradient(-135deg, rgba(255, 152, 0, 0.03) 0%, transparent 20%),
-          radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 50%, #0f0f0f 100%);
+        background: #0f0f0f;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         z-index: 10000;
-        padding-top: var(--space-6);
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow: hidden;
+      }
+
+      /* Fondo imagen */
+      .menu-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Overlay oscuro uniforme */
+      .menu-bg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.62);
+        z-index: 0;
+        pointer-events: none;
       }
 
       /* Halos de luz en esquinas */
@@ -233,7 +257,10 @@ import { TranslationService } from '../../services/translation.service';
         max-width: 700px;
         position: relative;
         z-index: 3;
-        padding: 0 var(--space-4) var(--space-6);
+        padding: var(--space-6) var(--space-4);
+        max-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .options-title {
@@ -250,14 +277,15 @@ import { TranslationService } from '../../services/translation.service';
 
       .options-panel {
         width: 100%;
-        background: rgba(26, 26, 26, 0.9);
-        border: 2px solid rgba(255, 152, 0, 0.3);
+        background: var(--color-bg-section);
+        border: 1px solid var(--color-border);
+        border-top: 2px solid rgba(255, 152, 0, 0.5);
         border-radius: 12px;
         padding: 40px;
         margin-bottom: 40px;
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.6),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          0 8px 40px rgba(0, 0, 0, 0.7),
+          inset 0 1px 0 rgba(255, 200, 80, 0.1);
       }
 
       .option-item {
