@@ -111,6 +111,8 @@ La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son 
 - [x] **DevTools bloqueados en producción** — F12/Ctrl+Shift+I deshabilitados cuando `app.isPackaged` en `electron/main.js`
 - [x] **End-game demo — modal de fin de demo** — Implementado. Dispara en el primer ciclo completado de la Empaquetadora (no timeout). Modal con diseño industrial via `ModalShellComponent` (shell genérico reutilizable), botón de Steam Wishlist y "Seguir jugando". Flag `demoEndSeen` persistido en `SaveState`. Body text via i18n. Componente: `demo-end-overlay`.
 - [x] **ModalShellComponent** — Componente genérico de modal (`src/app/components/ui/modal-shell/`). Backdrop + panel dark + animación slide-in + top/bottom bars opcionales. `ConfirmationModal` y `DemoEndOverlay` refactorizados para usarlo.
+- [x] **i18n audit completo** — Todos los textos visibles al usuario pasan por `translationService.t()`. Claves añadidas: `demo_end.*`, `common.{max,stock_label,cycles_per_second}`, `alerts.save_corrupted`. Cero strings hardcodeados en componentes de producción.
+- [x] **Sonido de fanfare en modal demo-end** — `playMaxLevelReached()` (5 notas Do-Mi-Sol-Do-Mi) se dispara al aparecer la modal. Implementado en `game-loop.service.ts` junto al trigger del modal.
 - [x] i18n / Traducción
 - [x] Settings (idioma, audio)
 - [x] Menú principal y opciones
