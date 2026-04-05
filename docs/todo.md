@@ -74,6 +74,25 @@ La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son 
 
 - [ ] **Estado visual "demo-locked" en MachineCard** — Las máquinas del cap deben mostrar un estado visual diferente al "bloqueada por requisitos". El jugador tiene que entender que no es cuestión de subir más niveles sino de que es contenido del juego completo.
 
+- [ ] **Icono de la app reemplazado** — El icono actual (`build/icon.png`) es un logo genérico de reciclaje que no representa el estilo del juego. Debe reemplazarse antes del lanzamiento.
+  - Imagen objetivo: prensa industrial steampunk aplastando cubos de chatarra, iluminación naranja-ámbar, fondo oscuro, silueta clara a 16×16
+  - Prompt base ya generado (ver abajo en esta tarea)
+  - Recomendación: pedir variante más centrada (prensa + brillo ocupando 70% del encuadre, recortando elementos laterales) para mejor legibilidad en taskbar y miniatura de Steam
+  - Al tener el PNG final (1024×1024): reemplazar `build/icon.png` y `public/favicon.png`, luego ejecutar `node scripts/generate-ico.js` para regenerar `build/icon.ico`
+  - **Prompt de generación:**
+    ```
+    Game app icon for "Scrap Yard Idle", a steampunk industrial idle game.
+    Central element: a front-facing industrial scrap press/crusher machine,
+    compact and iconic — thick iron frame with rivets and bolts, a glowing
+    orange furnace light source in the center, compressed metal scrap cubes
+    being crushed. Machine feels heavy, powerful, worn.
+    Color palette: background near black (#111111), machine body dark bronze
+    and oxidized iron (#3d2b1f, #5c4033), accent glow orange-amber (#f97316).
+    Style: bold icon silhouette, slightly isometric, painterly texture,
+    heavily detailed but strong readable silhouette at small sizes.
+    NOT flat, NOT cartoon. Square 1024x1024, dark solid background, no text.
+    ```
+
 - [ ] **Build de producción verificado** — Confirmar que `electron-builder` genera el `.exe` sin errores y con todos los assets empaquetados correctamente.
 
 ### 🟡 Importante
