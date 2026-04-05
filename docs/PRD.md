@@ -69,20 +69,50 @@ Aplican a todas las fases:
 ## 4. Ciclo de desarrollo por fases
 
 ```
-F0 Rebalanceo  →  F2 Tiers (base de datos)  →  F2 Tiers (gameplay)
-                                                      ↓
-                                              F1 Contratos
-                                                      ↓
-                                              F3 Eventos de mercado
-                                                      ↓
-                                              F4 Narrativa
-                                                      ↓
-                                              QA balance sesión larga
-                                                      ↓
-                                              Build final
+F0 Rebalanceo Fundidora
+        ↓
+F2a T4-T7 Base de datos (enums, configs, modelos — sin UI nueva)
+        ↓
+F2b T4-T7 Gameplay completo (upgrades, sell buttons, unlock, QA balance)
+        ↓
+F1 Sistema de Contratos
+        ↓
+F3 Eventos de Mercado
+        ↓
+F4 Narrativa / Flavor Text
+        ↓
+QA balance sesión larga
+        ↓
+Build final
 ```
 
+**Orden justificado:**
+- F0 primero porque corrige el diseño base antes de construir encima. Todo lo que viene después asume el nuevo comportamiento de la Fundidora.
+- F2 completo (a+b) antes de F1 porque los contratos son más valiosos con recursos T4-T7 disponibles. Además, el refactor de `MarketService` (obligatorio en F2a) es prerequisito para el sistema de multiplicadores de F3.
+- F1 antes de F3 porque los eventos de mercado interactúan con el sistema de contratos (multiplicador de precio afecta rewards URGENT). Mejor tener contratos funcionando y probados primero.
+- F4 al final porque solo añade notificaciones sobre milestones — cero riesgo de romper mecánicas anteriores.
+
 Cada fase se revisa y valida contra sus criterios de aceptación antes de empezar la siguiente.
+
+### Filosofía de implementación incremental
+
+> **Una fase a la vez. Probada y validada antes de continuar.**
+
+Este proyecto sigue un modelo de desarrollo estrictamente secuencial e incremental:
+
+1. **Implementar una fase completa** — todos sus requisitos funcionales, i18n, config y save integration.
+2. **Probar en sesión real** — jugar desde cero hasta cubrir todos los criterios de aceptación de esa fase.
+3. **Validar sin regresiones** — confirmar que las fases anteriores siguen funcionando correctamente.
+4. **Solo entonces empezar la siguiente fase.**
+
+**No se avanza hasta que la fase actual pasa todos sus criterios.** Una fase con una feature "al 80%" no cuenta como terminada. El objetivo no es velocidad de implementación — es solidez acumulativa.
+
+#### Reglas concretas para cada sesión de trabajo
+
+- Si una tarea falla en QA, se arregla en esa misma fase antes de tocar la siguiente.
+- Los cambios de balance se hacen en config, no en código. Si un número de la Apéndice A demuestra ser incorrecto en QA, se corrige en el PRD y en el config file de esa fase antes de continuar.
+- Ninguna feature parcial entra en `full-game-dev`. Si una implementación no está terminada, va en una rama de feature y solo se mergea cuando pasa QA.
+- Los saves de prueba de una fase deben cargar correctamente en la siguiente (compatibilidad hacia adelante verificada antes de cada merge).
 
 ---
 
@@ -262,7 +292,7 @@ T7: Server Rack            ← Data Center Assembly [Desktop PC x2 + Circuit Boa
 6. Los upgrades de velocidad existen para todas las máquinas nuevas.
 7. Los upgrades de almacenamiento existen para los recursos intermedios (CB, HDD, Screen, GPU).
 8. El save versioning se incrementa a v2 con migración progresiva (spec en F0 — los campos F2 nuevos se inicializan a defaults en la misma rama de migración).
-9. `MarketService.getPrice()` incluye los 9 nuevos `ResourceType` — actualmente es una cadena `if` que retorna 0 para recursos desconocidos, haciendo `isManuallySellable() = false`. Si no se extiende, **todos los productos T4-T7 son insellables**, la economía T4-T7 está rota desde el día 1. Refactorizar a mapa de config o extender el `if`-chain antes de implementar F2.
+9. `MarketService.getPrice()` se refactoriza a mapa de config (`BASE_PRICES: Record<ResourceType, number>`) cubriendo **todos** los recursos (existentes y nuevos). Actualmente es una cadena `if` hardcodeada que retorna 0 para recursos desconocidos, haciendo `isManuallySellable() = false` para cualquier recurso nuevo — con lo que **todos los productos T4-T7 serían insellables** sin este cambio. La refactorización cubre todos los recursos a la vez (no solo los nuevos) porque: (a) evita mantener dos patrones en paralelo, y (b) es prerequisito necesario para que el sistema de multiplicadores de F3 funcione de forma uniforme sobre todos los recursos.
 10. Los enums `ResourceType`, `MachineType` y `UpgradeId` se extienden con todos los valores nuevos antes de cualquier código de config. Los IDs a añadir: `UPG_MACH_009`–`UPG_MACH_017` y `UPG_STORE_008`–`UPG_STORE_016`.
 11. Todos los assets (iconos y cards) existen al menos como placeholders del tamaño correcto.
 12. Todos los textos en i18n (es y en).
@@ -338,7 +368,7 @@ Solo puede estar activo un evento a la vez. Entre eventos hay un intervalo míni
 
 1. Un evento de mercado es un estado global temporal con un timer.
 2. Solo puede haber un evento activo simultáneamente.
-3. El evento afecta los precios de venta en tiempo real (los botones de venta muestran el precio modificado). **Arquitectura:** `MarketService` expone un signal `activeEventMultiplier = signal<number>(1.0)`. El precio efectivo es `BASE_PRICE * activeEventMultiplier()`. No mutar el objeto `BASE_PRICES` — es una constante estática. Fórmula final con batch bonus: `BASE_PRICE × eventMultiplier × batchBonus` (multiplicativo).
+3. El evento afecta los precios de venta en tiempo real (los botones de venta muestran el precio modificado). **Arquitectura:** `MarketService` expone un signal `activeEventMultipliers = signal<Partial<Record<ResourceType, number>>>({})`. El precio efectivo de un recurso es `BASE_PRICES[resourceId] * (activeEventMultipliers()[resourceId] ?? 1.0)`. Esto permite que cada evento afecte exactamente los recursos que le corresponden (Boom PCs → solo Laptop/Desktop/Smartphone; Market Crash → todos; etc.) sin que se filtren unos con otros. No mutar `BASE_PRICES` — es una constante estática. Fórmula final con batch bonus: `BASE_PRICE × eventMultiplier × batchBonus` (multiplicativo). Al terminar un evento, se resetea `activeEventMultipliers` a `{}`.
 4. El banner de evento es visible mientras el evento está activo y desaparece al terminar.
 5. El banner muestra: tipo de evento, recursos afectados, multiplicador, tiempo restante.
 6. Al inicio y al fin del evento se muestra una notificación.
