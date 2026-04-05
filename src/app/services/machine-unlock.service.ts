@@ -6,6 +6,7 @@ import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
 import { DemoEndService } from './demo-end.service';
+import { IS_DEMO, DEMO_MACHINE_CAP } from '../config/dev-flags.config';
 
 export interface UnlockRequirement {
   machineType: MachineType;
@@ -17,6 +18,7 @@ export interface UnlockRequirement {
 export interface MachineUnlockInfo {
   isUnlocked: boolean;
   requirements: UnlockRequirement[];
+  isDemoLocked?: boolean;
 }
 
 /**
@@ -72,7 +74,9 @@ export class MachineUnlockService {
       MachineType.ELECTRIC_ASSEMBLER,
       MachineType.ELECTRIC_PACKAGER,
     ];
-    unlockable.forEach((machineType) => this.checkUnlock(machineType));
+    unlockable
+      .filter((machineType) => !(IS_DEMO && DEMO_MACHINE_CAP.includes(machineType)))
+      .forEach((machineType) => this.checkUnlock(machineType));
   }
 
   private checkUnlock(machineType: MachineType): void {
@@ -115,6 +119,10 @@ export class MachineUnlockService {
    * Returns requirements and whether each one is met.
    */
   getUnlockInfo(machineType: MachineType): MachineUnlockInfo {
+    if (IS_DEMO && DEMO_MACHINE_CAP.includes(machineType)) {
+      return { isUnlocked: false, requirements: [], isDemoLocked: true };
+    }
+
     const machine = this.machinesService.getMachine(machineType);
 
     if (!machine || (machine?.level as any) > 0) {
