@@ -20,23 +20,29 @@ import { CommonModule } from '@angular/common';
   encapsulation: ViewEncapsulation.None,
   template: `
     <div class="progress-container">
-      <div class="progress-bar-wrapper" [class.completing]="isCompleting()">
+      <div
+        class="progress-bar-wrapper"
+        [class.completing]="isCompleting()"
+        [class.active]="isActive()"
+      >
         <div class="progress-bar-fill" [style.width]="widthStyle()"></div>
         <span class="progress-info">
-          <ng-container *ngIf="!label() || label() === ''">
+          @if (!label() || label() === '') {
             {{ percentText() }}
-          </ng-container>
-          <ng-container *ngIf="label() && label() !== '' && inline()">
+          }
+          @if (label() && label() !== '' && inline()) {
             {{ percentText() }} • {{ label() }}
-          </ng-container>
-          <ng-container *ngIf="label() && label() !== '' && !inline()">
+          }
+          @if (label() && label() !== '' && !inline()) {
             {{ percentText() }}
-          </ng-container>
+          }
         </span>
       </div>
-      <span *ngIf="showLabel() && label() && label() !== '' && !inline()" class="progress-label">
-        {{ label() }}
-      </span>
+      @if (showLabel() && label() && label() !== '' && !inline()) {
+        <span class="progress-label">
+          {{ label() }}
+        </span>
+      }
     </div>
   `,
   styles: [
@@ -49,8 +55,8 @@ import { CommonModule } from '@angular/common';
       .progress-bar-wrapper {
         width: 100%;
         height: 24px;
-        background-color: #1e1e1e;
-        border: 1px solid #444444;
+        background-color: var(--color-bg-main);
+        border: 1px solid var(--color-border);
         border-radius: 4px;
         overflow: hidden;
         position: relative;
@@ -61,7 +67,11 @@ import { CommonModule } from '@angular/common';
         top: 0;
         left: 0;
         bottom: 0;
-        background: linear-gradient(90deg, #4caf50, #66bb6a);
+        background: linear-gradient(
+          90deg,
+          var(--color-accent-positive),
+          var(--color-accent-positive)
+        );
         transition: width 0.3s ease-out;
         width: 0%;
       }
@@ -107,7 +117,7 @@ import { CommonModule } from '@angular/common';
         transform: translateY(-50%);
         font-size: 11px;
         font-weight: 600;
-        color: #e0e0e0;
+        color: var(--color-text-primary);
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         z-index: 1;
         white-space: nowrap;
@@ -117,8 +127,35 @@ import { CommonModule } from '@angular/common';
         display: block;
         text-align: center;
         font-size: 12px;
-        color: #b0b0b0;
+        color: var(--color-text-secondary);
         margin-top: 4px;
+      }
+
+      .progress-bar-wrapper.active::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -55%;
+        width: 45%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.13) 50%,
+          transparent 100%
+        );
+        animation: pb-shine 2.2s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      @keyframes pb-shine {
+        0% {
+          left: -55%;
+        }
+        100% {
+          left: 110%;
+        }
       }
     `,
   ],
@@ -173,5 +210,13 @@ export class ProgressBarComponent {
    */
   isCompleting = computed(() => {
     return this.clampedProgress() >= 0.98;
+  });
+
+  /**
+   * Detecta si la barra está activa (0 < progress < 98%)
+   */
+  isActive = computed(() => {
+    const p = this.clampedProgress();
+    return p > 0 && p < 0.98;
   });
 }

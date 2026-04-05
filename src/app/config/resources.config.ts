@@ -35,7 +35,14 @@ export const INITIAL_RESOURCES: Resource[] = [
     name: 'Dinero',
     amount: 100,
     capacity: INITIAL_CAPACITIES.MONEY,
-    icon: 'assets/icons/gold_resource.png',
+    icon: 'assets/icons/gold_resource_1.png',
+  },
+  {
+    id: ResourceType.COPPER,
+    name: 'Cobre',
+    amount: 0,
+    capacity: INITIAL_CAPACITIES.COPPER,
+    icon: 'assets/icons/copper_resource.png',
   },
   {
     id: ResourceType.RECYCLED_PLASTIC,

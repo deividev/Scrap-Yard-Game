@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, OnDestroy } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { MachinesService } from './machines.service';
 import { ScrapGenerationService } from './scrap-generation.service';
@@ -7,15 +7,18 @@ import { UpgradesService } from './upgrades.service';
 import { UpgradeProgressService } from './upgrade-progress.service';
 import { MachineUnlockService } from './machine-unlock.service';
 import { UpgradeId } from '../models/upgrade.model';
+import { MachineType } from '../models/machine.model';
 import { ResourceType } from '../models/resource.model';
 import { AudioService } from './audio.service';
 import { StatisticsService } from './statistics.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GameLoopService {
-  private intervalId: any = null;
+export class GameLoopService implements OnDestroy {
+  private intervalId: number | null = null;
+  private pendingTimeouts = new Set<number>();
   private tickCount = signal(0);
   private saveService = inject(SaveService);
   private upgradesService = inject(UpgradesService);
@@ -23,13 +26,12 @@ export class GameLoopService {
   private machineUnlockService = inject(MachineUnlockService);
   private audioService = inject(AudioService);
   private statisticsService = inject(StatisticsService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
-  constructor(
-    private resourcesService: ResourcesService,
-    private machinesService: MachinesService,
-    private scrapGenerationService: ScrapGenerationService,
-  ) {}
+  private resourcesService = inject(ResourcesService);
+  private machinesService = inject(MachinesService);
+  private scrapGenerationService = inject(ScrapGenerationService);
 
   start(): void {
     if (this.intervalId !== null) {
@@ -46,6 +48,12 @@ export class GameLoopService {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    this.pendingTimeouts.forEach((id) => clearTimeout(id));
+    this.pendingTimeouts.clear();
+  }
+
+  ngOnDestroy(): void {
+    this.stop();
   }
 
   private tick(): void {
@@ -70,7 +78,7 @@ export class GameLoopService {
 
     // Auto-guardado
     if (this.tickCount() % this.AUTO_SAVE_INTERVAL === 0) {
-      this.saveService.save();
+      this.saveService.save().catch((err) => console.error('[GameLoop] Auto-save failed:', err));
     }
   }
 
@@ -170,14 +178,21 @@ export class GameLoopService {
       // At cycle END: Produce outputs immediately, but reset progress with delay for visual feedback
       this.resourcesService.add(updatedMachine.baseProduction.resourceId, outputAmount);
       producedInThisTick = true;
+
+      if (updatedMachine.id === MachineType.CRUSHER) {
+        this.firstRunTutorialService.recordEvent('crusher-cycle-completed');
+      }
+
       if (updatedMachine.baseProduction.resourceId === ResourceType.MONEY) {
         this.audioService.playResourceSold();
       } else {
         this.audioService.playMachineComplete();
       }
-      setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
+        this.pendingTimeouts.delete(timeoutId);
         this.machinesService.consumeProgress(updatedMachine.id, 1);
       }, 500);
+      this.pendingTimeouts.add(timeoutId);
     }
 
     if (producedInThisTick) {

@@ -1,0 +1,37 @@
+# Copilot ignore — excluye del contexto de AI todo lo que no es código fuente
+
+# Dependencies
+node_modules/
+**/node_modules/**
+
+# Build artifacts
+dist/
+dist_electron/
+build/
+out/
+out-tsc/
+
+# Angular cache
+.angular/
+.cache/
+
+# Git internals
+.git/
+
+# Binaries / assets grandes que no aportan contexto
+**/*.exe
+**/*.dll
+**/*.asar
+**/*.pak
+**/*.bin
+**/*.wasm
+**/*.node
+src/app/assets/audio/**
+src/assets/cards/**
+public/
+
+# Logs y temporales
+*.log
+*.lock
+coverage/
+__screenshots__/

@@ -27,12 +27,18 @@ export class SettingsService {
   private injector = inject(Injector);
   private _saveService?: SaveService;
 
-  // Señales públicas para cada configuración
-  musicVolume = signal(DEFAULT_SETTINGS.musicVolume);
-  sfxVolume = signal(DEFAULT_SETTINGS.sfxVolume);
-  windowMode = signal<WindowMode>(DEFAULT_SETTINGS.windowMode);
-  resolution = signal(DEFAULT_SETTINGS.resolution);
-  language = signal<'es' | 'en'>(DEFAULT_SETTINGS.language);
+  // Señales de configuración (privadas para forzar uso de setters)
+  private _musicVolume = signal(DEFAULT_SETTINGS.musicVolume);
+  private _sfxVolume = signal(DEFAULT_SETTINGS.sfxVolume);
+  private _windowMode = signal<WindowMode>(DEFAULT_SETTINGS.windowMode);
+  private _resolution = signal(DEFAULT_SETTINGS.resolution);
+  private _language = signal<'es' | 'en'>(DEFAULT_SETTINGS.language);
+
+  readonly musicVolume = this._musicVolume.asReadonly();
+  readonly sfxVolume = this._sfxVolume.asReadonly();
+  readonly windowMode = this._windowMode.asReadonly();
+  readonly resolution = this._resolution.asReadonly();
+  readonly language = this._language.asReadonly();
 
   /**
    * Marca el estado como modificado y guarda inmediatamente
@@ -87,11 +93,11 @@ export class SettingsService {
    */
   private updateSignals(): void {
     const current = this.settings();
-    this.musicVolume.set(current.musicVolume);
-    this.sfxVolume.set(current.sfxVolume);
-    this.windowMode.set(current.windowMode ?? 'windowed');
-    this.resolution.set(current.resolution);
-    this.language.set(current.language);
+    this._musicVolume.set(current.musicVolume);
+    this._sfxVolume.set(current.sfxVolume);
+    this._windowMode.set(current.windowMode ?? 'windowed');
+    this._resolution.set(current.resolution);
+    this._language.set(current.language);
   }
 
   private applyWindowMode(mode: WindowMode, resolution: string): void {
@@ -106,7 +112,7 @@ export class SettingsService {
   setMusicVolume(volume: number): void {
     const clamped = Math.max(0, Math.min(100, volume));
     this.settings.update((s) => ({ ...s, musicVolume: clamped }));
-    this.musicVolume.set(clamped);
+    this._musicVolume.set(clamped);
     this.markDirtyAndSave();
   }
 
@@ -116,7 +122,7 @@ export class SettingsService {
   setSfxVolume(volume: number): void {
     const clamped = Math.max(0, Math.min(100, volume));
     this.settings.update((s) => ({ ...s, sfxVolume: clamped }));
-    this.sfxVolume.set(clamped);
+    this._sfxVolume.set(clamped);
     this.markDirtyAndSave();
   }
 
@@ -125,7 +131,7 @@ export class SettingsService {
    */
   setWindowMode(mode: WindowMode): void {
     this.settings.update((s) => ({ ...s, windowMode: mode }));
-    this.windowMode.set(mode);
+    this._windowMode.set(mode);
     this.markDirtyAndSave();
     this.applyWindowMode(mode, this.resolution());
   }
@@ -135,7 +141,7 @@ export class SettingsService {
    */
   setResolution(resolution: string): void {
     this.settings.update((s) => ({ ...s, resolution }));
-    this.resolution.set(resolution);
+    this._resolution.set(resolution);
     this.markDirtyAndSave();
     if (this.windowMode() === 'windowed') {
       this.applyWindowMode('windowed', resolution);
@@ -147,7 +153,7 @@ export class SettingsService {
    */
   setLanguage(language: 'es' | 'en'): void {
     this.settings.update((s) => ({ ...s, language }));
-    this.language.set(language);
+    this._language.set(language);
     this.markDirtyAndSave();
   }
 

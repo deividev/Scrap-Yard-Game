@@ -8,7 +8,9 @@ import { MachineUnlockService } from './machine-unlock.service';
 import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
-import { SaveState } from '../models/save-state.model';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { DemoEndService } from './demo-end.service';
+import { SaveState, SAVE_VERSION } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 import { INITIAL_RESOURCES } from '../config/resources.config';
 import { INITIAL_MACHINES } from '../config/machines.config';
@@ -27,8 +29,11 @@ export class SaveService {
   private settingsService = inject(SettingsService);
   private translationService = inject(TranslationService);
   private statisticsService = inject(StatisticsService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
+  private demoEndService = inject(DemoEndService);
 
   private isDirty = signal(false);
+  private isSaving = false;
   private gameStarted = signal(false);
   private isElectron = typeof window !== 'undefined' && !!window.electronApi;
   private readonly isDev = isDevMode();
@@ -89,13 +94,15 @@ export class SaveService {
   async save(): Promise<void> {
     this.debugLog('[SaveService] save() called. isDirty:', this.isDirty());
 
-    if (!this.isDirty()) {
+    if (!this.isDirty() || this.isSaving) {
       return;
     }
 
+    this.isSaving = true;
     this.debugLog('[SaveService] Preparing to save...');
 
     const saveState: SaveState = {
+      version: SAVE_VERSION,
       resources: this.resourcesService.getState(),
       machines: this.machinesService.getState(),
       upgrades: this.upgradesService.getState(),
@@ -105,6 +112,8 @@ export class SaveService {
       settings: this.settingsService.getState(),
       gameStarted: this.gameStarted(),
       statistics: this.statisticsService.getState(),
+      firstRunTutorial: this.firstRunTutorialService.serialize(),
+      demoEndSeen: this.demoEndService.getState(),
     };
 
     // Custom replacer to handle Infinity values
@@ -136,6 +145,8 @@ export class SaveService {
       this.isDirty.set(false);
     } catch (error) {
       console.error('Failed to save game state:', error);
+    } finally {
+      this.isSaving = false;
     }
   }
 
@@ -156,13 +167,12 @@ export class SaveService {
           return false;
         }
 
-        // Custom reviver to restore Infinity values
-        const saveState: SaveState = JSON.parse(result.data, (key, value) => {
-          if (value === '__INFINITY__') {
-            return Infinity;
-          }
-          return value;
-        });
+        const saveState: SaveState = this.migrateSave(
+          JSON.parse(result.data, (key, value) => {
+            if (value === '__INFINITY__') return Infinity;
+            return value;
+          }),
+        );
         this.restoreState(saveState);
         return true;
       } else {
@@ -171,18 +181,20 @@ export class SaveService {
           return false;
         }
 
-        // Custom reviver to restore Infinity values
-        const saveState: SaveState = JSON.parse(savedData, (key, value) => {
-          if (value === '__INFINITY__') {
-            return Infinity;
-          }
-          return value;
-        });
+        const saveState: SaveState = this.migrateSave(
+          JSON.parse(savedData, (key, value) => {
+            if (value === '__INFINITY__') return Infinity;
+            return value;
+          }),
+        );
         this.restoreState(saveState);
         return true;
       }
     } catch (error) {
-      console.error('Failed to load game state:', error);
+      console.error('[SaveService] Failed to load game state:', error);
+      alert(
+        'No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva.',
+      );
       return false;
     }
   }
@@ -263,6 +275,12 @@ export class SaveService {
       this.statisticsService.loadState(saveState.statistics);
     }
 
+    this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
+
+    if (saveState.demoEndSeen) {
+      this.demoEndService.loadState(true);
+    }
+
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
 
@@ -321,6 +339,7 @@ export class SaveService {
     }
     this.isDirty.set(false);
     this.gameStarted.set(false);
+    this.firstRunTutorialService.reset();
   }
 
   async resetToNewGame(): Promise<void> {
@@ -331,6 +350,7 @@ export class SaveService {
     this.scrapGenerationService.setAutomaticGenerationRate(0);
     this.upgradeProgressService.reset();
     this.statisticsService.reset();
+    this.firstRunTutorialService.reset();
   }
 
   async getSavePath(): Promise<string | null> {
@@ -339,5 +359,22 @@ export class SaveService {
       return result.success ? result.path : null;
     }
     return null;
+  }
+
+  private migrateSave(save: SaveState): SaveState {
+    const from = save.version ?? 0;
+    if (from === SAVE_VERSION) return save;
+
+    this.debugLog(`[SaveService] Migrating save from v${from} to v${SAVE_VERSION}`);
+
+    // v0 → v1: version field did not exist, no data changes needed
+    if ((save.version ?? 0) < 1) {
+      save = { ...save, version: 1 };
+    }
+
+    // Add future migrations here:
+    // if (save.version < 2) { save = { ...save, version: 2, newField: defaultValue }; }
+
+    return save;
   }
 }

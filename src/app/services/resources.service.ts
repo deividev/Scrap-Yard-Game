@@ -1,12 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 import { Resource } from '../models/resource.model';
 import { INITIAL_RESOURCES } from '../config/resources.config';
+import { SaveMarker } from '../models/save-marker.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ResourcesService {
-  private saveService?: any;
+  private saveService?: SaveMarker;
   private baseCapacities = new Map<string, number>();
   private resources = signal<Resource[]>(this.initializeResources());
 
@@ -44,6 +45,7 @@ export class ResourcesService {
         return r;
       });
     });
+    this.saveService?.markDirty();
   }
 
   getCapacity(resourceId: string): number {
@@ -95,6 +97,7 @@ export class ResourcesService {
     this.resources.update((resources) => {
       return resources.map((r) => (r.id === resourceId ? { ...r, amount: r.amount - amount } : r));
     });
+    this.saveService?.markDirty();
 
     return true;
   }
@@ -126,7 +129,7 @@ export class ResourcesService {
     this.resources.set(resources.map((r) => ({ ...r })));
   }
 
-  setSaveService(saveService: any): void {
+  setSaveService(saveService: SaveMarker): void {
     this.saveService = saveService;
   }
 }

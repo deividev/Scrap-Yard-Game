@@ -40,6 +40,7 @@
     "plastic": "Plastic",
     "components": "Components",
     "money": "Money",
+    "copper": "Copper",
     "recycled_plastic": "Recycled Plastic",
     "electric_components": "Electric Components"
   },
@@ -73,19 +74,74 @@
     "generate_scrap": "Generate {amount} scrap for {cost} money",
     "sell_metal": "Sell 1 metal for 2 money",
     "sell_components": "Sell 1 component for 3 money",
+    "sell_resource": "Sell {amount} {resource} for {money} money",
     "machine_speed": "This machine completes a cycle every {time} seconds",
-    "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle"
+    "machine_multiplier": "Produces ×{production} but consumes ×{consumption} materials per cycle",
+    "adjust_sell_amount": "Adjust sell amount"
   },
   "notifications": {
     "upgrade_completed": "⬆ {name} — Lv {level}",
-    "machine_unlocked": "{name} is online!"
+    "machine_unlocked": "{name} is online!",
+    "upgrade_unlocked": "{name} available!"
   },
   "progression": {
-    "next_unlock": "Next unlock: {machine} ({requirement} Lv {level})",
+    "next_unlock": "Next unlock: {machine} · {requirements}",
     "all_unlocked": "🎉 All machines unlocked!"
+  },
+  "tutorial": {
+    "step_counter": "Step {current} of {total}",
+    "waiting_for_action": "Perform the highlighted action and the tutorial will advance automatically.",
+    "actions": {
+      "start": "Start the yard",
+      "continue": "Understood",
+      "next_step": "Next step",
+      "finish": "Back to work",
+      "close": "Close tutorial",
+      "skip": "Skip tutorial"
+    },
+    "steps": {
+      "welcome": {
+        "title": "Start-up sequence",
+        "body": "Welcome to the yard. This tutorial walks you through the first real loop: generate scrap, run the crusher, sell metal, and buy your first upgrade."
+      },
+      "generate_scrap": {
+        "title": "Generate scrap",
+        "body": "Begin by unloading scrap manually. The highlighted button spends money and fills the crusher's input stock."
+      },
+      "activate_crusher": {
+        "title": "Activate the crusher",
+        "body": "Click the glowing LED button on the Crusher card to power it up. Once it has scrap in stock, it will begin its processing cycle automatically."
+      },
+      "watch_crusher_progress": {
+        "title": "Watch the cycle",
+        "body": "Watch the progress bar at the bottom of the Crusher card fill from left to right — that is one full processing cycle. When the bar completes, your first unit of metal appears in stock."
+      },
+      "collect_metal": {
+        "title": "Metal online",
+        "body": "Your metal stock now shows in the top header. That row tells you what is coming in and what is ready to sell or process further."
+      },
+      "sell_metal": {
+        "title": "Make some cash",
+        "body": "Sell metal to recover money. Early on, this manual sale keeps your loop alive while you unlock more lines."
+      },
+      "buy_first_upgrade": {
+        "title": "Buy an upgrade",
+        "body": "Push progression forward by buying the crusher's first upgrade. The right panel is your main investment and scaling hub."
+      },
+      "check_next_goal": {
+        "title": "Read the next goal",
+        "body": "Look at the progression hint on top. It summarizes the requirements for the next unlock and shows your current bottleneck."
+      },
+      "complete": {
+        "title": "Shift complete",
+        "body": "You have finished the yard's core loop. From here the goal is to scale production, open new machines, and keep throughput stable."
+      }
+    }
   },
   "upgrades": {
     "title": "Upgrades",
+    "expand": "Expand upgrades panel",
+    "collapse": "Collapse upgrades panel",
     "tabs": {
       "scrap": "Scrap",
       "storage": "Storage",
@@ -110,6 +166,7 @@
       "metal": "Expand Metal Depot",
       "plastic": "Expand Plastic Warehouse",
       "components": "Expand Components Rack",
+      "copper": "Expand Copper Depot",
       "recycled_plastic": "Expand Recycled Plastic Silo",
       "electric_components": "Expand Electric Parts Rack"
     },
@@ -124,6 +181,7 @@
       "production_label": "Production",
       "production_multiplier_label": "Production multiplier:",
       "next_bonus_label": "Next bonus:",
+      "in": "in",
       "in_levels": "in {{count}} levels",
       "cycles_per_second": "cycles/s",
       "speed_upgrades_coming": "Speed upgrades coming soon",
@@ -145,14 +203,20 @@
   "debug": {
     "tick": "Tick"
   },
+  "sell": {
+    "bonus_active": "Active bonus +{percent}%"
+  },
   "statistics": {
     "title": "Statistics",
     "total_scrap": "Scrap processed",
     "play_time": "Time on shift",
-    "active_machines": "Active lines"
+    "active_machines": "Active lines",
+    "total_money": "Total earnings",
+    "scrap_rate": "Auto scrap/sec"
   },
   "common": {
     "level_short": "Lv",
-    "cycle_time": "~{{time}}s"
+    "cycle_time": "~{{time}}s",
+    "unlock_requires": "Requires:"
   }
 }

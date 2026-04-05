@@ -1,0 +1,37 @@
+{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/dist_electron/**": true,
+    "**/.angular/**": true,
+    "**/.cache/**": true,
+    "**/coverage/**": true,
+    "**/.git/**": true,
+    "**/build/**": true,
+    "**/public/**": true
+  },
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/dist_electron/**": true,
+    "**/.angular/**": true,
+    "**/.cache/**": true,
+    "**/coverage/**": true,
+    "**/build/**": true,
+    "**/public/**": true
+  },
+  "files.exclude": {
+    "**/.angular": true,
+    "**/.cache": true,
+    "**/dist": true,
+    "**/dist_electron": true,
+    "**/build": true,
+    "**/public": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "editor.minimap.enabled": false,
+  "breadcrumbs.enabled": false,
+  "scm.diffDecorations": "none",
+  "explorer.autoReveal": false
+}

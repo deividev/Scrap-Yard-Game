@@ -5,6 +5,7 @@ import { MachineType } from '../models/machine.model';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
+import { DemoEndService } from './demo-end.service';
 
 export interface UnlockRequirement {
   machineType: MachineType;
@@ -32,6 +33,7 @@ export class MachineUnlockService {
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
   private audioService = inject(AudioService);
+  private demoEndService = inject(DemoEndService);
   private readonly isDev = isDevMode();
 
   private debugLog(message: string): void {
@@ -57,15 +59,55 @@ export class MachineUnlockService {
   /**
    * Checks all unlock conditions and unlocks machines that meet requirements.
    * Should be called whenever a machine level changes.
+   * Single source of truth: uses getUnlockInfo() so UI requirements and
+   * actual unlock logic are always in sync.
    */
   checkAndUnlockMachines(): void {
-    this.checkSmelterUnlock();
-    this.checkPackagerUnlock();
-    this.checkSeparatorUnlock();
-    this.checkAssemblerUnlock();
-    this.checkRecyclerUnlock();
-    this.checkElectricAssemblerUnlock();
-    this.checkElectricPackagerUnlock();
+    const unlockable = [
+      MachineType.SEPARATOR,
+      MachineType.ASSEMBLER,
+      MachineType.PACKAGER,
+      MachineType.SMELTER,
+      MachineType.RECYCLER,
+      MachineType.ELECTRIC_ASSEMBLER,
+      MachineType.ELECTRIC_PACKAGER,
+    ];
+    unlockable.forEach((machineType) => this.checkUnlock(machineType));
+  }
+
+  private checkUnlock(machineType: MachineType): void {
+    const machine = this.machinesService.getMachine(machineType);
+    if (!machine || machine.level > 0) {
+      return;
+    }
+    const { isUnlocked } = this.getUnlockInfo(machineType);
+    if (isUnlocked) {
+      this.machinesService.upgradeLevel(machineType);
+      this.debugLog(`[MachineUnlock] ${machineType} unlocked!`);
+      const machineName = this.translationService.t(`machines.${machineType}`);
+      this.notificationService.show(
+        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
+        'unlock',
+        machine.icon,
+      );
+      this.audioService.playMachineUnlocked();
+
+      // When the Packager unlocks, the manual scrap upgrade also becomes available
+      if (machineType === MachineType.PACKAGER) {
+        const upgradeName = this.translationService.t('upgrades.scrap_manual.name');
+        this.notificationService.show(
+          this.translationService.tp('notifications.upgrade_unlocked', { name: upgradeName }),
+          'unlock',
+          'assets/icons/scrap_manual.png',
+        );
+        // Mostrar el modal de fin de demo 1 minuto después del desbloqueo
+        console.log('[DemoEnd] Packager unlocked — programando modal en 60s');
+        setTimeout(() => {
+          console.log('[DemoEnd] 60s cumplidos — llamando triggerIfNeeded()');
+          this.demoEndService.triggerIfNeeded();
+        }, 60_000);
+      }
+    }
   }
 
   /**
@@ -75,24 +117,24 @@ export class MachineUnlockService {
   getUnlockInfo(machineType: MachineType): MachineUnlockInfo {
     const machine = this.machinesService.getMachine(machineType);
 
-    if (!machine || machine.level > 0) {
+    if (!machine || (machine?.level as any) > 0) {
       return { isUnlocked: true, requirements: [] };
     }
 
     let requirements: UnlockRequirement[] = [];
 
     switch (machineType) {
-      case MachineType.SMELTER:
-        requirements = this.getSmelterRequirements();
-        break;
-      case MachineType.PACKAGER:
-        requirements = this.getPackagerRequirements();
-        break;
       case MachineType.SEPARATOR:
         requirements = this.getSeparatorRequirements();
         break;
       case MachineType.ASSEMBLER:
         requirements = this.getAssemblerRequirements();
+        break;
+      case MachineType.PACKAGER:
+        requirements = this.getPackagerRequirements();
+        break;
+      case MachineType.SMELTER:
+        requirements = this.getSmelterRequirements();
         break;
       case MachineType.RECYCLER:
         requirements = this.getRecyclerRequirements();
@@ -111,52 +153,21 @@ export class MachineUnlockService {
     return { isUnlocked: allMet, requirements };
   }
 
-  private getSmelterRequirements(): UnlockRequirement[] {
-    const currentLevel = this.getMachineLevel(MachineType.CRUSHER);
-    return [
-      {
-        machineType: MachineType.CRUSHER,
-        requiredLevel: 4,
-        currentLevel,
-        isMet: currentLevel >= 4,
-      },
-    ];
-  }
-
-  private getPackagerRequirements(): UnlockRequirement[] {
-    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
+  private getSeparatorRequirements(): UnlockRequirement[] {
     const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     return [
       {
         machineType: MachineType.CRUSHER,
-        requiredLevel: 8,
+        requiredLevel: 4,
         currentLevel: crusherLevel,
-        isMet: crusherLevel >= 8,
-      },
-      {
-        machineType: MachineType.SMELTER,
-        requiredLevel: 5,
-        currentLevel: smelterLevel,
-        isMet: smelterLevel >= 5,
-      },
-    ];
-  }
-
-  private getSeparatorRequirements(): UnlockRequirement[] {
-    const currentLevel = this.getMachineLevel(MachineType.PACKAGER);
-    return [
-      {
-        machineType: MachineType.PACKAGER,
-        requiredLevel: 5,
-        currentLevel,
-        isMet: currentLevel >= 5,
+        isMet: crusherLevel >= 4,
       },
     ];
   }
 
   private getAssemblerRequirements(): UnlockRequirement[] {
     const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
-    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
+    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     return [
       {
         machineType: MachineType.SEPARATOR,
@@ -165,55 +176,79 @@ export class MachineUnlockService {
         isMet: separatorLevel >= 4,
       },
       {
-        machineType: MachineType.SMELTER,
-        requiredLevel: 7,
-        currentLevel: smelterLevel,
-        isMet: smelterLevel >= 7,
+        machineType: MachineType.CRUSHER,
+        requiredLevel: 6,
+        currentLevel: crusherLevel,
+        isMet: crusherLevel >= 6,
       },
     ];
   }
 
-  private getRecyclerRequirements(): UnlockRequirement[] {
-    const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
+  private getPackagerRequirements(): UnlockRequirement[] {
     const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
+    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
     return [
-      {
-        machineType: MachineType.SEPARATOR,
-        requiredLevel: 5,
-        currentLevel: separatorLevel,
-        isMet: separatorLevel >= 5,
-      },
       {
         machineType: MachineType.ASSEMBLER,
         requiredLevel: 3,
         currentLevel: assemblerLevel,
         isMet: assemblerLevel >= 3,
       },
+      {
+        machineType: MachineType.CRUSHER,
+        requiredLevel: 8,
+        currentLevel: crusherLevel,
+        isMet: crusherLevel >= 8,
+      },
+    ];
+  }
+
+  private getSmelterRequirements(): UnlockRequirement[] {
+    const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
+    return [
+      {
+        machineType: MachineType.PACKAGER,
+        requiredLevel: 3,
+        currentLevel: packagerLevel,
+        isMet: packagerLevel >= 3,
+      },
+    ];
+  }
+
+  private getRecyclerRequirements(): UnlockRequirement[] {
+    const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
+    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
+    return [
+      {
+        machineType: MachineType.PACKAGER,
+        requiredLevel: 5,
+        currentLevel: packagerLevel,
+        isMet: packagerLevel >= 5,
+      },
+      {
+        machineType: MachineType.SMELTER,
+        requiredLevel: 3,
+        currentLevel: smelterLevel,
+        isMet: smelterLevel >= 3,
+      },
     ];
   }
 
   private getElectricAssemblerRequirements(): UnlockRequirement[] {
-    const recyclerLevel = this.getMachineLevel(MachineType.RECYCLER);
     const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
+    const recyclerLevel = this.getMachineLevel(MachineType.RECYCLER);
     return [
       {
-        machineType: MachineType.RECYCLER,
-        requiredLevel: 4,
-        currentLevel: recyclerLevel,
-        isMet: recyclerLevel >= 4,
-      },
-      {
         machineType: MachineType.SMELTER,
-        requiredLevel: 8,
+        requiredLevel: 3,
         currentLevel: smelterLevel,
-        isMet: smelterLevel >= 8,
+        isMet: smelterLevel >= 3,
       },
       {
-        machineType: MachineType.ASSEMBLER,
-        requiredLevel: 4,
-        currentLevel: assemblerLevel,
-        isMet: assemblerLevel >= 4,
+        machineType: MachineType.RECYCLER,
+        requiredLevel: 3,
+        currentLevel: recyclerLevel,
+        isMet: recyclerLevel >= 3,
       },
     ];
   }
@@ -238,179 +273,7 @@ export class MachineUnlockService {
   }
 
   /**
-   * DESBLOQUEO 0: Fundidora
-   * Condición: Trituradora nivel 3
+   * DESBLOQUEO 1: Separador
+   * Condición: Trituradora nivel 4
    */
-  private checkSmelterUnlock(): void {
-    const smelter = this.machinesService.getMachine(MachineType.SMELTER);
-    if (!smelter || smelter.level > 0) {
-      return;
-    }
-
-    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
-    if (crusherLevel >= 4) {
-      this.machinesService.upgradeLevel(MachineType.SMELTER);
-      this.debugLog('[MachineUnlock] Smelter unlocked! (Crusher level 4 reached)');
-      const machineName = this.translationService.t('machines.smelter');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 1: Empaquetadora
-   * Condición: Trituradora nivel 5 + Fundidora nivel 3
-   */
-  private checkPackagerUnlock(): void {
-    const packager = this.machinesService.getMachine(MachineType.PACKAGER);
-    if (!packager || packager.level > 0) {
-      return; // Already unlocked or doesn't exist
-    }
-
-    const crusherLevel = this.getMachineLevel(MachineType.CRUSHER);
-    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    if (crusherLevel >= 8 && smelterLevel >= 5) {
-      this.machinesService.upgradeLevel(MachineType.PACKAGER);
-      this.debugLog(
-        '[MachineUnlock] Packager unlocked! (Crusher level 8 + Smelter level 5 reached)',
-      );
-      const machineName = this.translationService.t('machines.packager');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 2: Separador
-   * Condición: Empaquetadora nivel 3
-   */
-  private checkSeparatorUnlock(): void {
-    const separator = this.machinesService.getMachine(MachineType.SEPARATOR);
-    if (!separator || separator.level > 0) {
-      return;
-    }
-
-    const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
-    if (packagerLevel >= 5) {
-      this.machinesService.upgradeLevel(MachineType.SEPARATOR);
-      this.debugLog('[MachineUnlock] Separator unlocked! (Packager level 5 reached)');
-      const machineName = this.translationService.t('machines.separator');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 3: Ensambladora
-   * Condición: Separador nivel 2 Y Fundidora nivel 4
-   */
-  private checkAssemblerUnlock(): void {
-    const assembler = this.machinesService.getMachine(MachineType.ASSEMBLER);
-    if (!assembler || assembler.level > 0) {
-      return;
-    }
-
-    const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
-    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-
-    if (separatorLevel >= 3 && smelterLevel >= 5) {
-      this.machinesService.upgradeLevel(MachineType.ASSEMBLER);
-      this.debugLog(
-        '[MachineUnlock] Assembler unlocked! (Separator level 3 + Smelter level 5 reached)',
-      );
-      const machineName = this.translationService.t('machines.assembler');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 4: Recicladora
-   * Condición: Separador nivel 3
-   */
-  private checkRecyclerUnlock(): void {
-    const recycler = this.machinesService.getMachine(MachineType.RECYCLER);
-    if (!recycler || recycler.level > 0) {
-      return;
-    }
-
-    const separatorLevel = this.getMachineLevel(MachineType.SEPARATOR);
-    if (separatorLevel >= 4) {
-      this.machinesService.upgradeLevel(MachineType.RECYCLER);
-      this.debugLog('[MachineUnlock] Recycler unlocked! (Separator level 4 reached)');
-      const machineName = this.translationService.t('machines.recycler');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 5: Ensambladora eléctrica
-   * Condición: Recicladora nivel 2 Y Fundidora nivel 5 Y Ensambladora desbloqueada
-   */
-  private checkElectricAssemblerUnlock(): void {
-    const electricAssembler = this.machinesService.getMachine(MachineType.ELECTRIC_ASSEMBLER);
-    if (!electricAssembler || electricAssembler.level > 0) {
-      return;
-    }
-
-    const recyclerLevel = this.getMachineLevel(MachineType.RECYCLER);
-    const smelterLevel = this.getMachineLevel(MachineType.SMELTER);
-    const assemblerLevel = this.getMachineLevel(MachineType.ASSEMBLER);
-
-    if (recyclerLevel >= 3 && smelterLevel >= 6 && assemblerLevel >= 2) {
-      this.machinesService.upgradeLevel(MachineType.ELECTRIC_ASSEMBLER);
-      this.debugLog(
-        '[MachineUnlock] Electric Assembler unlocked! (Recycler level 3 + Smelter level 6 + Assembler level 2)',
-      );
-      const machineName = this.translationService.t('machines.electric_assembler');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
-
-  /**
-   * DESBLOQUEO 6: Empaquetadora eléctrica
-   * Condición: Ensambladora eléctrica nivel 2 Y Empaquetadora nivel 3
-   */
-  private checkElectricPackagerUnlock(): void {
-    const electricPackager = this.machinesService.getMachine(MachineType.ELECTRIC_PACKAGER);
-    if (!electricPackager || electricPackager.level > 0) {
-      return;
-    }
-
-    const electricAssemblerLevel = this.getMachineLevel(MachineType.ELECTRIC_ASSEMBLER);
-    const packagerLevel = this.getMachineLevel(MachineType.PACKAGER);
-
-    if (electricAssemblerLevel >= 3 && packagerLevel >= 5) {
-      this.machinesService.upgradeLevel(MachineType.ELECTRIC_PACKAGER);
-      this.debugLog(
-        '[MachineUnlock] Electric Packager unlocked! (Electric Assembler level 3 + Packager level 5)',
-      );
-      const machineName = this.translationService.t('machines.electric_packager');
-      this.notificationService.show(
-        this.translationService.tp('notifications.machine_unlocked', { name: machineName }),
-        'unlock',
-      );
-      this.audioService.playMachineUnlocked();
-    }
-  }
 }

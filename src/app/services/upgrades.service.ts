@@ -12,6 +12,8 @@ import { UpgradeProgressService } from './upgrade-progress.service';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
+import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { SaveMarker } from '../models/save-marker.model';
 
 /**
  * G) Upgrades Service - Placeholder
@@ -27,16 +29,22 @@ import { AudioService } from './audio.service';
  * - NO purchase logic
  * - NO effect application
  */
+interface StorageUpdater {
+  getBaseCapacity(resourceId: ResourceType): number;
+  setCapacity(resourceId: ResourceType, capacity: number): void;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class UpgradesService {
   private upgrades = signal<UpgradeState[]>(this.initializeUpgrades());
-  private saveService?: any;
+  private saveService?: SaveMarker;
   private upgradeProgressService = inject(UpgradeProgressService);
   private notificationService = inject(NotificationService);
   private translationService = inject(TranslationService);
   private audioService = inject(AudioService);
+  private firstRunTutorialService = inject(FirstRunTutorialService);
 
   private initializeUpgrades(): UpgradeState[] {
     return UPGRADE_DEFINITIONS.map((def) => ({
@@ -114,8 +122,13 @@ export class UpgradesService {
       currentLevel >= SCRAP_GENERATION_CONFIG.COMPONENTS_START_LEVEL
     ) {
       componentsCost = currentLevel - SCRAP_GENERATION_CONFIG.COMPONENTS_START_LEVEL + 1;
-    } else if (isMachineUpgrade && currentLevel >= MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL) {
-      componentsCost = currentLevel - MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL + 1;
+    } else if (isMachineUpgrade) {
+      const componentsStart =
+        MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL_OVERRIDES[upgradeId] ??
+        MACHINE_UPGRADE_CONFIG.COMPONENTS_START_LEVEL;
+      if (currentLevel >= componentsStart) {
+        componentsCost = currentLevel - componentsStart + 1;
+      }
     }
 
     return {
@@ -149,6 +162,7 @@ export class UpgradesService {
     // Iniciar el progreso del upgrade
     this.upgradeProgressService.startUpgrade(upgradeId, targetLevel, category);
     this.audioService.playUpgradeStarted();
+    this.firstRunTutorialService.recordEvent('first-upgrade-purchased');
     this.saveService?.markDirty();
   }
 
@@ -174,7 +188,7 @@ export class UpgradesService {
         name: definition.name,
         level: newLevel.toString(),
       });
-      this.notificationService.show(message, 'success');
+      this.notificationService.show(message, 'success', definition.icon);
     }
 
     this.audioService.playUpgradeCompleted();
@@ -203,7 +217,7 @@ export class UpgradesService {
    * Apply all storage upgrade effects to resources service.
    * Should be called after loading a save or purchasing a storage upgrade.
    */
-  applyStorageUpgrades(resourcesService: any): void {
+  applyStorageUpgrades(resourcesService: StorageUpdater): void {
     const storageUpgrades = [
       { upgradeId: UpgradeId.UPG_STORE_001, resourceId: ResourceType.SCRAP },
       { upgradeId: UpgradeId.UPG_STORE_002, resourceId: ResourceType.METAL },
@@ -211,6 +225,7 @@ export class UpgradesService {
       { upgradeId: UpgradeId.UPG_STORE_004, resourceId: ResourceType.COMPONENTS },
       { upgradeId: UpgradeId.UPG_STORE_005, resourceId: ResourceType.RECYCLED_PLASTIC },
       { upgradeId: UpgradeId.UPG_STORE_006, resourceId: ResourceType.ELECTRIC_COMPONENTS },
+      { upgradeId: UpgradeId.UPG_STORE_007, resourceId: ResourceType.COPPER },
     ];
 
     for (const { upgradeId, resourceId } of storageUpgrades) {
@@ -248,6 +263,9 @@ export class UpgradesService {
         break;
       case UpgradeId.UPG_STORE_006: // Electric Components
         increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.ELECTRIC_COMPONENTS;
+        break;
+      case UpgradeId.UPG_STORE_007: // Copper
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.COPPER;
         break;
       default:
         return baseCapacity;
@@ -318,7 +336,7 @@ export class UpgradesService {
     this.upgrades.set(upgrades.map((u) => ({ ...u })));
   }
 
-  setSaveService(saveService: any): void {
+  setSaveService(saveService: SaveMarker): void {
     this.saveService = saveService;
   }
 }

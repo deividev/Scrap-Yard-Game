@@ -1,8 +1,10 @@
 :root {
-  --color-bg-main: #1e1e1e;
-  --color-bg-panel: rgba(42, 42, 42, 0.84);
-  --color-border: #444444;
+  --color-bg-main: #181818;
+  --color-bg-panel: rgba(28, 28, 28, 0.86);
+  --color-bg-section: rgba(26, 26, 26, 0.97);   /* fondo de secciones: header, stats, upgrades, resources */
+  --color-border: #3a3a3a;
   --color-accent-main: #ff9800;
+  --color-accent-light: #ffb74d;
   --color-accent-positive: #66bb6a;
   --color-text-primary: #e0e0e0;
   --color-text-secondary: #b0b0b0;
@@ -21,15 +23,32 @@
   );
   --scrollbar-thumb-border: rgba(58, 36, 4, 0.92);
 
-  --font-family-base: system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+  /* Typography */
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-ui: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+  --font-family-base: var(--font-ui);
+
   --border-radius-small: 4px;
   --border-radius-medium: 6px;
+  --border-radius-large: 12px;
 
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
+  --space-6: 32px;
+
+  /* Semantic state colors */
+  --color-state-success: #22c55e;
+  --color-state-danger: #ef4444;
+  --color-state-danger-light: #f87171;
+  --color-state-warning: #f97316;
+
+  /* Typography sizes */
+  --font-size-sm: 11px;
+  --color-text-muted: #6b7280;
 }
 
 * {
@@ -74,15 +93,41 @@
 }
 
 html {
-  background: #1e1e1e;
+  background: #181818;
 }
 
 body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family-base);
-  background-color: #1e1e1e;
+  background-color: #181818;
   color: var(--color-text-primary);
   min-height: 100vh;
   line-height: 1.4;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Section labels in UI components use the UI font, not the display font */
+.section-title {
+  font-family: var(--font-ui);
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-accent-main), transparent);
 }

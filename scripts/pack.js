@@ -22,6 +22,9 @@ function cleanDistElectron() {
 }
 
 try {
+  console.log('Generating icons...');
+  execSync('node scripts/generate-ico.js', { stdio: 'inherit' });
+
   console.log('Cleaning previous builds...');
   cleanDistElectron();
 
@@ -46,11 +49,22 @@ try {
   const pkg = require(path.join(process.cwd(), 'package.json'));
   const baseBuild = pkg.build || {};
 
+  // Version is the single source of truth from package.json
+  const label = pkg.releaseLabel ? `${pkg.releaseLabel}-` : '';
+  const fileVersion = `${label}v${pkg.version}`;
+  console.log(`Using version from package.json for artifact names: ${fileVersion}`);
+
   const outDir = path.join(process.cwd(), 'dist_electron');
   console.log('Using electron-builder output dir:', outDir);
 
   const tmpConfig = Object.assign({}, baseBuild, {
     directories: Object.assign({}, baseBuild.directories || {}, { output: outDir }),
+    nsis: Object.assign({}, baseBuild.nsis || {}, {
+      artifactName: `\${productName}-${fileVersion}-Setup.\${ext}`,
+    }),
+    portable: Object.assign({}, baseBuild.portable || {}, {
+      artifactName: `\${productName}-${fileVersion}-Portable.\${ext}`,
+    }),
   });
 
   const tmpPath = path.join(process.cwd(), '.electron-builder.tmp.json');

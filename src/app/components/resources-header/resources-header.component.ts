@@ -2,19 +2,17 @@ import { Component, OnDestroy, computed, effect, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
-import { MachinesService } from '../../services/machines.service';
-import { MachineType } from '../../models/machine.model';
-import { DebugControlsComponent } from '../debug-controls/debug-controls.component';
 import { ScrapButtonComponent } from '../scrap-button/scrap-button.component';
-import { SellComponentsButtonComponent } from '../sell-components-button/sell-components-button.component';
-import { SellMetalButtonComponent } from '../sell-metal-button/sell-metal-button.component';
+import { SellResourceButtonComponent } from '../sell-resource-button/sell-resource-button.component';
 import { ProgressionHintComponent } from '../progression-hint/progression-hint.component';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { TooltipComponent } from '../ui/tooltip/tooltip.component';
 import { TranslationService } from '../../services/translation.service';
 import { GameStateService } from '../../services/game-state.service';
+import { ScrapGenerationService } from '../../services/scrap-generation.service';
 import { SaveService } from '../../services/save.service';
+import { AudioService } from '../../services/audio.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
 @Component({
@@ -22,10 +20,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   standalone: true,
   imports: [
     CommonModule,
-    DebugControlsComponent,
     ScrapButtonComponent,
-    SellComponentsButtonComponent,
-    SellMetalButtonComponent,
+    SellResourceButtonComponent,
     ProgressionHintComponent,
     FormatNumberPipe,
     TooltipComponent,
@@ -51,7 +47,6 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             size="sm"
             (clicked)="returnToMenu()"
           />
-          <app-debug-controls></app-debug-controls>
         </div>
       </div>
 
@@ -67,7 +62,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
             [inline]="true"
             [position]="'bottom'"
           >
-            <img [src]="moneyResource().icon" class="resource-icon" alt="Money" />
+            <img
+              [src]="moneyResource().icon"
+              class="resource-icon"
+              [attr.alt]="translationService.t('resources.money')"
+            />
           </app-tooltip>
           <span class="resource-amount">{{ moneyResource().amount }}</span>
         </div>
@@ -77,16 +76,23 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           <div class="resource-column">
             <div
               class="resource-item"
+              data-tutorial-id="resource-scrap"
               [class.feedback-up]="isFeedback(scrapResource().id, 'up')"
               [class.feedback-down]="isFeedback(scrapResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(scrapResource().id)"
+              [class.storage-full]="isStorageFull(scrapResource().id)"
+              [class.near-capacity]="isNearCapacity(scrapResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.scrap')"
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="scrapResource().icon" class="resource-icon" alt="Chatarra" />
+                <img
+                  [src]="scrapResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.scrap')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -94,6 +100,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >{{ scrapResource().amount | formatNumber }}</span
               >
               <span class="resource-capacity">/ {{ scrapResource().capacity | formatNumber }}</span>
+              @for (f of autoFloatingTexts(); track f.id) {
+                <span class="auto-scrap-float" aria-hidden="true"
+                  >+{{ formatAutoAmount(f.amount) }}</span
+                >
+              }
             </div>
             <app-scrap-button></app-scrap-button>
           </div>
@@ -102,16 +113,23 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
           <div class="resource-column">
             <div
               class="resource-item"
+              data-tutorial-id="resource-metal"
               [class.feedback-up]="isFeedback(metalResource().id, 'up')"
               [class.feedback-down]="isFeedback(metalResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(metalResource().id)"
+              [class.storage-full]="isStorageFull(metalResource().id)"
+              [class.near-capacity]="isNearCapacity(metalResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.metal')"
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="metalResource().icon" class="resource-icon" alt="Metal" />
+                <img
+                  [src]="metalResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.metal')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -120,36 +138,10 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               >
               <span class="resource-capacity">/ {{ metalResource().capacity | formatNumber }}</span>
             </div>
-            <app-sell-metal-button></app-sell-metal-button>
-          </div>
-
-          <!-- Componentes -->
-          <div class="resource-column">
-            <div
-              class="resource-item"
-              [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
-              [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
-              [class.capacity-pop]="isCapacityPop(componentsResource().id)"
-            >
-              <app-tooltip
-                [text]="translationService.t('resources.components')"
-                [inline]="true"
-                [position]="'bottom'"
-              >
-                <img [src]="componentsResource().icon" class="resource-icon" alt="Componentes" />
-              </app-tooltip>
-              <span
-                class="resource-amount"
-                [class.full]="componentsResource().amount >= componentsResource().capacity"
-                >{{ componentsResource().amount | formatNumber }}</span
-              >
-              <span class="resource-capacity"
-                >/ {{ componentsResource().capacity | formatNumber }}</span
-              >
-            </div>
-            @if (isSmelterUnlocked()) {
-              <app-sell-components-button></app-sell-components-button>
-            }
+            <app-sell-resource-button
+              [resourceId]="ResourceType.METAL"
+              [tutorialId]="'sell-metal-button'"
+            ></app-sell-resource-button>
           </div>
 
           <!-- Plástico -->
@@ -159,13 +151,19 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(plasticResource().id, 'up')"
               [class.feedback-down]="isFeedback(plasticResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(plasticResource().id)"
+              [class.storage-full]="isStorageFull(plasticResource().id)"
+              [class.near-capacity]="isNearCapacity(plasticResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.plastic')"
                 [inline]="true"
                 [position]="'bottom'"
               >
-                <img [src]="plasticResource().icon" class="resource-icon" alt="Plástico" />
+                <img
+                  [src]="plasticResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.plastic')"
+                />
               </app-tooltip>
               <span
                 class="resource-amount"
@@ -176,6 +174,77 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ plasticResource().capacity | formatNumber }}</span
               >
             </div>
+            <app-sell-resource-button
+              [resourceId]="ResourceType.PLASTIC"
+            ></app-sell-resource-button>
+          </div>
+
+          <!-- Componentes -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(componentsResource().id, 'up')"
+              [class.feedback-down]="isFeedback(componentsResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(componentsResource().id)"
+              [class.storage-full]="isStorageFull(componentsResource().id)"
+              [class.near-capacity]="isNearCapacity(componentsResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.components')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="componentsResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.components')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="componentsResource().amount >= componentsResource().capacity"
+                >{{ componentsResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ componentsResource().capacity | formatNumber }}</span
+              >
+            </div>
+            <app-sell-resource-button
+              [resourceId]="ResourceType.COMPONENTS"
+            ></app-sell-resource-button>
+          </div>
+
+          <!-- Cobre -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(copperResource().id, 'up')"
+              [class.feedback-down]="isFeedback(copperResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(copperResource().id)"
+              [class.storage-full]="isStorageFull(copperResource().id)"
+              [class.near-capacity]="isNearCapacity(copperResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.copper')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="copperResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.copper')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="copperResource().amount >= copperResource().capacity"
+                >{{ copperResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ copperResource().capacity | formatNumber }}</span
+              >
+            </div>
+            <app-sell-resource-button [resourceId]="ResourceType.COPPER"></app-sell-resource-button>
           </div>
 
           <!-- Plástico Reciclado -->
@@ -185,6 +254,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(recycledPlasticResource().id, 'up')"
               [class.feedback-down]="isFeedback(recycledPlasticResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(recycledPlasticResource().id)"
+              [class.storage-full]="isStorageFull(recycledPlasticResource().id)"
+              [class.near-capacity]="isNearCapacity(recycledPlasticResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.recycled_plastic')"
@@ -194,7 +265,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 <img
                   [src]="recycledPlasticResource().icon"
                   class="resource-icon"
-                  alt="Plástico reciclado"
+                  [attr.alt]="translationService.t('resources.recycled_plastic')"
                 />
               </app-tooltip>
               <span
@@ -217,6 +288,8 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               [class.feedback-up]="isFeedback(electricComponentsResource().id, 'up')"
               [class.feedback-down]="isFeedback(electricComponentsResource().id, 'down')"
               [class.capacity-pop]="isCapacityPop(electricComponentsResource().id)"
+              [class.storage-full]="isStorageFull(electricComponentsResource().id)"
+              [class.near-capacity]="isNearCapacity(electricComponentsResource().id)"
             >
               <app-tooltip
                 [text]="translationService.t('resources.electric_components')"
@@ -226,7 +299,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 <img
                   [src]="electricComponentsResource().icon"
                   class="resource-icon"
-                  alt="Componentes eléctricos"
+                  [attr.alt]="translationService.t('resources.electric_components')"
                 />
               </app-tooltip>
               <span
@@ -248,13 +321,18 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
   styles: [
     `
       .resources-header {
-        background: var(--color-bg-panel);
-        border-bottom: 2px solid rgba(255, 152, 0, 0.35);
+        position: relative;
+        z-index: 100;
+        background: var(--color-bg-section);
         border-top: 2px solid var(--color-accent-main);
-        padding: var(--space-1) var(--space-4) var(--space-2);
+        border-bottom: 1px solid var(--color-border);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.04),
+          0 4px 24px rgba(0, 0, 0, 0.55);
+        padding: var(--space-2) var(--space-4) var(--space-3);
         display: flex;
         flex-direction: column;
-        gap: var(--space-1);
+        gap: var(--space-3);
       }
 
       .header-topbar {
@@ -272,11 +350,14 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resources-row {
         display: flex;
-        gap: var(--space-3);
-        align-items: flex-start;
+        gap: var(--space-4);
+        align-items: center;
+        overflow: visible;
       }
 
       .resource-item {
+        position: relative;
+        overflow: visible;
         display: flex;
         align-items: center;
         gap: var(--space-2);
@@ -302,15 +383,16 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resources-container {
         display: flex;
-        gap: var(--space-3);
+        gap: var(--space-4);
         flex: 1;
+        overflow: visible;
       }
 
       .resource-column {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
         gap: var(--space-2);
-        align-items: flex-start;
         min-width: fit-content;
       }
 
@@ -323,16 +405,16 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-icon {
-        width: 56px;
-        height: 56px;
+        width: 44px;
+        height: 44px;
         object-fit: contain;
         transition: transform 0.2s ease;
       }
 
       @media (max-width: 1400px) {
         .resource-icon {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
         }
         .resource-item.money {
           font-size: 16px;
@@ -342,6 +424,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
         .resources-container {
           gap: var(--space-2);
+        }
+        .resource-column {
+          gap: var(--space-1);
         }
       }
 
@@ -359,10 +444,15 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         .resources-container {
           gap: var(--space-1);
         }
+        .resource-column {
+          gap: 6px;
+        }
       }
 
       .resource-amount {
+        font-family: var(--font-mono);
         font-weight: 600;
+        letter-spacing: 0.04em;
         color: var(--color-text-primary);
         transition:
           color 0.2s ease,
@@ -377,7 +467,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.feedback-up .resource-amount {
-        color: #22c55e;
+        color: var(--color-state-success);
         animation: amount-pop 0.52s ease-out;
       }
 
@@ -394,7 +484,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-item.feedback-down .resource-amount {
-        color: #f87171;
+        color: var(--color-state-danger-light);
         animation: amount-drop 0.52s ease-out;
       }
 
@@ -408,7 +498,7 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       }
 
       .resource-amount.full {
-        color: #f59e0b;
+        color: var(--color-state-danger);
         animation: pulse-warning 1.5s ease-in-out infinite;
       }
 
@@ -495,10 +585,79 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
       }
 
+      .resource-item.near-capacity {
+        border-color: rgba(249, 115, 22, 0.38);
+        background: rgba(249, 115, 22, 0.035);
+      }
+
+      .resource-item.near-capacity .resource-amount {
+        color: var(--color-state-warning);
+      }
+
+      .resource-item.storage-full {
+        border-color: rgba(239, 68, 68, 0.5);
+        background: rgba(239, 68, 68, 0.05);
+        animation: storage-full-pulse 2s ease-in-out infinite;
+      }
+
+      .resource-item.storage-full .resource-icon {
+        animation: storage-full-icon 2s ease-in-out infinite;
+      }
+
+      @keyframes storage-full-pulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 1px rgba(239, 68, 68, 0.2),
+            inset 0 0 6px rgba(239, 68, 68, 0.06);
+        }
+        50% {
+          box-shadow:
+            0 0 0 2px rgba(239, 68, 68, 0.45),
+            inset 0 0 10px rgba(239, 68, 68, 0.12),
+            0 0 14px rgba(239, 68, 68, 0.2);
+        }
+      }
+
+      @keyframes storage-full-icon {
+        0%,
+        100% {
+          filter: none;
+        }
+        50% {
+          filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+        }
+      }
+
       .resource-capacity {
         color: var(--color-text-secondary);
         font-size: clamp(10px, 0.9vw, 13px);
         white-space: nowrap;
+      }
+
+      .auto-scrap-float {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-accent-positive);
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+        z-index: 100;
+        white-space: nowrap;
+        animation: auto-scrap-float-up 0.7s ease-out forwards;
+      }
+
+      @keyframes auto-scrap-float-up {
+        0% {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-50%) translateY(-38px);
+          opacity: 0;
+        }
       }
     `,
   ],
@@ -506,19 +665,22 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 export class ResourcesHeaderComponent implements OnDestroy {
   readonly ResourceType = ResourceType;
 
+  private resourcesService = inject(ResourcesService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
+  private audioService = inject(AudioService);
+  public translationService = inject(TranslationService);
+  private scrapGenerationService = inject(ScrapGenerationService);
   private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
   private capacityPopState = signal<Record<string, boolean>>({});
   private previousAmounts = new Map<string, number>();
   private feedbackTimers = new Map<string, number>();
   private capacityTimers = new Map<string, number>();
+  private autoFloatIdCounter = 0;
+  private autoFloatTimers = new Map<number, number>();
+  autoFloatingTexts = signal<{ id: number; amount: number }[]>([]);
 
-  constructor(
-    private resourcesService: ResourcesService,
-    private machinesService: MachinesService,
-    public translationService: TranslationService,
-  ) {
+  constructor() {
     effect(() => {
       const resources = this.resourcesService.getAll();
 
@@ -539,19 +701,34 @@ export class ResourcesHeaderComponent implements OnDestroy {
             resource.amount >= resource.capacity
           ) {
             this.triggerCapacityPop(resource.id);
+            this.audioService.playStorageFull();
           }
         }
 
         this.previousAmounts.set(resource.id, resource.amount);
       }
     });
+
+    effect(() => {
+      const event = this.scrapGenerationService.autoGenEvent();
+      if (event.id < 0) return;
+      const id = this.autoFloatIdCounter++;
+      this.autoFloatingTexts.update((arr) => [...arr, { id, amount: event.amount }]);
+      const timerId = window.setTimeout(() => {
+        this.autoFloatingTexts.update((arr) => arr.filter((f) => f.id !== id));
+        this.autoFloatTimers.delete(id);
+      }, 700);
+      this.autoFloatTimers.set(id, timerId);
+    });
   }
 
   ngOnDestroy(): void {
     this.feedbackTimers.forEach((timerId) => clearTimeout(timerId));
     this.capacityTimers.forEach((timerId) => clearTimeout(timerId));
+    this.autoFloatTimers.forEach((timerId) => clearTimeout(timerId));
     this.feedbackTimers.clear();
     this.capacityTimers.clear();
+    this.autoFloatTimers.clear();
   }
 
   isFeedback(resourceId: string, state: 'up' | 'down'): boolean {
@@ -560,6 +737,36 @@ export class ResourcesHeaderComponent implements OnDestroy {
 
   isCapacityPop(resourceId: string): boolean {
     return this.capacityPopState()[resourceId] === true;
+  }
+
+  private fullResourceIds = computed(() => {
+    const result = new Set<string>();
+    for (const r of this.resourcesService.getAll()) {
+      if (Number.isFinite(r.capacity) && r.capacity > 0 && r.amount >= r.capacity) {
+        result.add(r.id);
+      }
+    }
+    return result;
+  });
+
+  isStorageFull(resourceId: string): boolean {
+    return this.fullResourceIds().has(resourceId);
+  }
+
+  private nearCapacityIds = computed(() => {
+    const result = new Set<string>();
+    for (const r of this.resourcesService.getAll()) {
+      const hasFinite = Number.isFinite(r.capacity) && r.capacity > 0;
+      if (hasFinite) {
+        const ratio = r.amount / r.capacity;
+        if (ratio >= 0.8 && ratio < 1) result.add(r.id);
+      }
+    }
+    return result;
+  });
+
+  isNearCapacity(resourceId: string): boolean {
+    return this.nearCapacityIds().has(resourceId);
   }
 
   private triggerFeedback(resourceId: string, state: 'up' | 'down'): void {
@@ -597,6 +804,11 @@ export class ResourcesHeaderComponent implements OnDestroy {
   getResourceIcon(resourceId: string): string {
     const resource = INITIAL_RESOURCES.find((r) => r.id === resourceId);
     return resource?.icon || '?';
+  }
+
+  formatAutoAmount(amount: number): string {
+    if (amount === Math.floor(amount)) return String(amount);
+    return amount.toFixed(2).replace(/\.?0+$/, '');
   }
 
   moneyResource = computed(() => {
@@ -669,6 +881,20 @@ export class ResourcesHeaderComponent implements OnDestroy {
     );
   });
 
+  copperResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.COPPER);
+    return (
+      resource || {
+        id: ResourceType.COPPER,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.COPPER),
+      }
+    );
+  });
+
   recycledPlasticResource = computed(() => {
     const all = this.resourcesService.getAll();
     const resource = all.find((r) => r.id === ResourceType.RECYCLED_PLASTIC);
@@ -695,11 +921,6 @@ export class ResourcesHeaderComponent implements OnDestroy {
         icon: this.getResourceIcon(ResourceType.ELECTRIC_COMPONENTS),
       }
     );
-  });
-
-  isSmelterUnlocked = computed(() => {
-    const smelter = this.machinesService.getMachine(MachineType.SMELTER);
-    return smelter ? smelter.level > 0 : false;
   });
 
   currentLang = computed(() => this.translationService.getLanguage().toUpperCase());

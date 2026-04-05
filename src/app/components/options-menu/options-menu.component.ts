@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
+import { AppSelectComponent, SelectOption } from '../ui/app-select/app-select.component';
 import { BackgroundGridComponent } from '../ui/background-grid/background-grid.component';
 import { ConfirmationModalComponent } from '../ui/confirmation-modal/confirmation-modal.component';
 import { GameStateService } from '../../services/game-state.service';
@@ -13,24 +13,29 @@ import { TranslationService } from '../../services/translation.service';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     AppButtonComponent,
+    AppSelectComponent,
     BackgroundGridComponent,
     ConfirmationModalComponent,
   ],
   template: `
     <div class="options-menu">
+      <!-- Fondo atmosférico -->
+      <img src="assets/image/menu_bg.png" class="menu-bg" aria-hidden="true" />
+      <div class="menu-bg-overlay"></div>
+
       <app-background-grid [opacity]="0.35"></app-background-grid>
 
       <!-- Partículas flotantes -->
       <div class="particles">
-        <div
-          class="particle"
-          *ngFor="let p of particles"
-          [style.left.%]="p.left"
-          [style.animation-delay.s]="p.delay"
-          [style.animation-duration.s]="p.duration"
-        ></div>
+        @for (p of particles; track $index) {
+          <div
+            class="particle"
+            [style.left.%]="p.left"
+            [style.animation-delay.s]="p.delay"
+            [style.animation-duration.s]="p.duration"
+          ></div>
+        }
       </div>
 
       <div class="options-content">
@@ -76,57 +81,39 @@ import { TranslationService } from '../../services/translation.service';
             <label class="option-label">
               {{ translationService.t('options.language') }}
             </label>
-            <select
-              class="select-input"
+            <app-select
+              [options]="languageOptions"
               [value]="settingsService.language()"
-              (change)="onLanguageChange($event)"
-            >
-              <option value="es">Español</option>
-              <option value="en">English</option>
-            </select>
+              (changed)="setLanguage($event)"
+            />
           </div>
 
           <!-- Modo de Pantalla (solo Electron) -->
-          <div class="option-item" *ngIf="isElectron">
-            <label class="option-label">
-              {{ translationService.t('options.window_mode') }}
-            </label>
-            <select
-              class="select-input"
-              [value]="settingsService.windowMode()"
-              (change)="onWindowModeChange($event)"
-            >
-              <option value="windowed">
-                {{ translationService.t('options.window_mode_windowed') }}
-              </option>
-              <option value="maximized">
-                {{ translationService.t('options.window_mode_maximized') }}
-              </option>
-              <option value="fullscreen">
-                {{ translationService.t('options.window_mode_fullscreen') }}
-              </option>
-            </select>
-          </div>
-
+          @if (isElectron) {
+            <div class="option-item">
+              <label class="option-label">
+                {{ translationService.t('options.window_mode') }}
+              </label>
+              <app-select
+                [options]="windowModeOptions"
+                [value]="settingsService.windowMode()"
+                (changed)="setWindowMode($event)"
+              />
+            </div>
+          }
           <!-- Resolución (solo Electron, solo en modo ventana) -->
-          <div
-            class="option-item"
-            *ngIf="isElectron && settingsService.windowMode() === 'windowed'"
-          >
-            <label class="option-label">
-              {{ translationService.t('options.resolution') }}
-            </label>
-            <select
-              class="select-input"
-              [value]="settingsService.resolution()"
-              (change)="onResolutionChange($event)"
-            >
-              <option value="1920x1080">1920 x 1080</option>
-              <option value="1600x900">1600 x 900</option>
-              <option value="1366x768">1366 x 768</option>
-              <option value="1280x720">1280 x 720</option>
-            </select>
-          </div>
+          @if (isElectron && settingsService.windowMode() === 'windowed') {
+            <div class="option-item">
+              <label class="option-label">
+                {{ translationService.t('options.resolution') }}
+              </label>
+              <app-select
+                [options]="resolutionOptions"
+                [value]="settingsService.resolution()"
+                (changed)="setResolution($event)"
+              />
+            </div>
+          }
         </div>
 
         <div class="options-buttons">
@@ -145,17 +132,18 @@ import { TranslationService } from '../../services/translation.service';
         </div>
       </div>
 
-      <!-- Modal de confirmación -->
-      <app-confirmation-modal
-        *ngIf="showResetModal()"
-        titleKey="options.reset_title"
-        messageKey="options.confirm_reset"
-        confirmLabelKey="options.reset_confirm"
-        cancelLabelKey="options.reset_cancel"
-        confirmVariant="primary"
-        (confirmed)="confirmReset()"
-        (cancelled)="cancelReset()"
-      />
+      @if (showResetModal()) {
+        <!-- Modal de confirmación -->
+        <app-confirmation-modal
+          titleKey="options.reset_title"
+          messageKey="options.confirm_reset"
+          confirmLabelKey="options.reset_confirm"
+          cancelLabelKey="options.reset_cancel"
+          confirmVariant="primary"
+          (confirmed)="confirmReset()"
+          (cancelled)="cancelReset()"
+        />
+      }
     </div>
   `,
   styles: [
@@ -166,19 +154,38 @@ import { TranslationService } from '../../services/translation.service';
         left: 0;
         width: 100vw;
         height: 100vh;
-        background:
-          linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, transparent 20%),
-          linear-gradient(-135deg, rgba(255, 193, 7, 0.03) 0%, transparent 20%),
-          radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 50%, #0f0f0f 100%);
+        background: #0f0f0f;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         z-index: 10000;
-        padding-top: var(--space-6);
-        position: relative;
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow: hidden;
+      }
+
+      /* Fondo imagen */
+      .menu-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Overlay oscuro uniforme */
+      .menu-bg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.62);
+        z-index: 0;
+        pointer-events: none;
       }
 
       /* Halos de luz en esquinas */
@@ -190,11 +197,11 @@ import { TranslationService } from '../../services/translation.service';
         width: 100%;
         height: 100%;
         background:
-          radial-gradient(circle at 15% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 15%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 15% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(circle at 85% 85%, rgba(255, 193, 7, 0.1) 0%, transparent 8%),
-          radial-gradient(ellipse at center top, rgba(255, 193, 7, 0.08) 0%, transparent 40%),
+          radial-gradient(circle at 15% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 15%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 15% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(circle at 85% 85%, rgba(255, 152, 0, 0.1) 0%, transparent 8%),
+          radial-gradient(ellipse at center top, rgba(255, 152, 0, 0.08) 0%, transparent 40%),
           linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
         pointer-events: none;
         z-index: 1;
@@ -216,11 +223,11 @@ import { TranslationService } from '../../services/translation.service';
         bottom: -10px;
         width: 3px;
         height: 3px;
-        background: rgba(255, 193, 7, 0.6);
+        background: rgba(255, 152, 0, 0.6);
         border-radius: 50%;
         box-shadow:
-          0 0 4px rgba(255, 193, 7, 0.8),
-          0 0 8px rgba(255, 193, 7, 0.4);
+          0 0 4px rgba(255, 152, 0, 0.8),
+          0 0 8px rgba(255, 152, 0, 0.4);
         animation: float-up linear infinite;
         opacity: 0;
       }
@@ -250,7 +257,10 @@ import { TranslationService } from '../../services/translation.service';
         max-width: 700px;
         position: relative;
         z-index: 3;
-        padding: 0 var(--space-4) var(--space-6);
+        padding: var(--space-6) var(--space-4);
+        max-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .options-title {
@@ -260,21 +270,22 @@ import { TranslationService } from '../../services/translation.service';
         text-align: center;
         margin: 0 0 32px 0;
         text-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.4),
-          0 4px 16px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.4),
+          0 4px 16px rgba(255, 152, 0, 0.2);
         letter-spacing: 2px;
       }
 
       .options-panel {
         width: 100%;
-        background: rgba(26, 26, 26, 0.9);
-        border: 2px solid rgba(255, 193, 7, 0.3);
+        background: var(--color-bg-section);
+        border: 1px solid var(--color-border);
+        border-top: 2px solid rgba(255, 152, 0, 0.5);
         border-radius: 12px;
         padding: 40px;
         margin-bottom: 40px;
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.6),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          0 8px 40px rgba(0, 0, 0, 0.7),
+          inset 0 1px 0 rgba(255, 200, 80, 0.1);
       }
 
       .option-item {
@@ -325,16 +336,16 @@ import { TranslationService } from '../../services/translation.service';
         background: var(--color-accent-main);
         cursor: pointer;
         box-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.5),
-          0 0 0 2px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.5),
+          0 0 0 2px rgba(255, 152, 0, 0.2);
         transition: all 0.2s ease;
       }
 
       .slider::-webkit-slider-thumb:hover {
         background: var(--color-accent-light);
         box-shadow:
-          0 3px 12px rgba(255, 193, 7, 0.7),
-          0 0 0 3px rgba(255, 193, 7, 0.3);
+          0 3px 12px rgba(255, 152, 0, 0.7),
+          0 0 0 3px rgba(255, 152, 0, 0.3);
         transform: scale(1.1);
       }
 
@@ -346,43 +357,20 @@ import { TranslationService } from '../../services/translation.service';
         cursor: pointer;
         border: none;
         box-shadow:
-          0 2px 8px rgba(255, 193, 7, 0.5),
-          0 0 0 2px rgba(255, 193, 7, 0.2);
+          0 2px 8px rgba(255, 152, 0, 0.5),
+          0 0 0 2px rgba(255, 152, 0, 0.2);
         transition: all 0.2s ease;
       }
 
       .slider::-moz-range-thumb:hover {
         background: var(--color-accent-light);
         box-shadow:
-          0 3px 12px rgba(255, 193, 7, 0.7),
-          0 0 0 3px rgba(255, 193, 7, 0.3);
+          0 3px 12px rgba(255, 152, 0, 0.7),
+          0 0 0 3px rgba(255, 152, 0, 0.3);
         transform: scale(1.1);
       }
 
-      /* Select personalizado */
-      .select-input {
-        width: 100%;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.4);
-        border: 2px solid rgba(255, 193, 7, 0.2);
-        border-radius: 8px;
-        color: var(--color-text-primary);
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        outline: none;
-        transition: all 0.2s ease;
-      }
-
-      .select-input:hover {
-        border-color: rgba(255, 193, 7, 0.4);
-        background: rgba(0, 0, 0, 0.5);
-      }
-
-      .select-input:focus {
-        border-color: var(--color-accent-main);
-        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
-      }
+      /* Select: ver AppSelectComponent */
 
       /* Toggle switch */
       .toggle-container {
@@ -396,7 +384,7 @@ import { TranslationService } from '../../services/translation.service';
         width: 60px;
         height: 30px;
         background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 193, 7, 0.2);
+        border: 2px solid rgba(255, 152, 0, 0.2);
         border-radius: 15px;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -405,11 +393,11 @@ import { TranslationService } from '../../services/translation.service';
       }
 
       .toggle-button:hover {
-        border-color: rgba(255, 193, 7, 0.4);
+        border-color: rgba(255, 152, 0, 0.4);
       }
 
       .toggle-button.active {
-        background: rgba(255, 193, 7, 0.3);
+        background: rgba(255, 152, 0, 0.3);
         border-color: var(--color-accent-main);
       }
 
@@ -428,7 +416,7 @@ import { TranslationService } from '../../services/translation.service';
       .toggle-button.active .toggle-slider {
         left: 32px;
         background: var(--color-accent-main);
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.5);
       }
 
       .toggle-text {
@@ -552,21 +540,38 @@ export class OptionsMenuComponent {
     this.settingsService.setSfxVolume(Number(target.value));
   }
 
-  onLanguageChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    const lang = target.value as 'es' | 'en';
+  readonly languageOptions: SelectOption[] = [
+    { value: 'es', label: 'Español' },
+    { value: 'en', label: 'English' },
+  ];
+
+  get windowModeOptions(): SelectOption[] {
+    return [
+      { value: 'windowed', label: this.translationService.t('options.window_mode_windowed') },
+      { value: 'maximized', label: this.translationService.t('options.window_mode_maximized') },
+      { value: 'fullscreen', label: this.translationService.t('options.window_mode_fullscreen') },
+    ];
+  }
+
+  readonly resolutionOptions: SelectOption[] = [
+    { value: '1920x1080', label: '1920 x 1080' },
+    { value: '1600x900', label: '1600 x 900' },
+    { value: '1366x768', label: '1366 x 768' },
+    { value: '1280x720', label: '1280 x 720' },
+  ];
+
+  setLanguage(val: string): void {
+    const lang = val as 'es' | 'en';
     this.settingsService.setLanguage(lang);
     this.translationService.setLanguage(lang);
   }
 
-  onWindowModeChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.settingsService.setWindowMode(target.value as 'windowed' | 'maximized' | 'fullscreen');
+  setWindowMode(val: string): void {
+    this.settingsService.setWindowMode(val as 'windowed' | 'maximized' | 'fullscreen');
   }
 
-  onResolutionChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.settingsService.setResolution(target.value);
+  setResolution(val: string): void {
+    this.settingsService.setResolution(val);
   }
 
   resetToDefaults(): void {
