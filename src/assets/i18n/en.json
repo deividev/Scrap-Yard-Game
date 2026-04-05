@@ -220,6 +220,21 @@
     "unlock_requires": "Requires:"
   },
   "demo_end": {
+    "badge_label": "DEMO COMPLETE",
+    "title": "You've mastered<br>the scrap yard!",
+    "cta_wishlist": "Add to Wishlist",
+    "cta_continue": "Keep playing the demo",
     "body": "You've unlocked the <strong>Packager</strong> and completed the Scrap Yard Idle demo. The full version unlocks new machines, advanced resources and more."
+  },
+  "common": {
+    "level_short": "Lv",
+    "cycle_time": "~{{time}}s",
+    "unlock_requires": "Requires:",
+    "max": "MAX",
+    "stock_label": "Stock",
+    "cycles_per_second": "c/s"
+  },
+  "alerts": {
+    "save_corrupted": "Failed to load saved game. The file may be corrupted.\n\nStarting a new game."
   }
 }

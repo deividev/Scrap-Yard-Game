@@ -63,7 +63,7 @@ import { AudioService } from '../../services/audio.service';
         >
           <div class="sell-panel-header">
             <span class="sell-panel-title">{{ resourceName() }}</span>
-            <span class="sell-panel-meta">Stock {{ maxSellAmount() }}</span>
+            <span class="sell-panel-meta">{{ translationService.t('common.stock_label') }} {{ maxSellAmount() }}</span>
           </div>
 
           <div class="sell-panel-body">
@@ -132,7 +132,7 @@ import { AudioService } from '../../services/audio.service';
                 [disabled]="!canSell()"
                 (click)="setMax()"
               >
-                MAX
+                {{ translationService.t('common.max') }}
               </button>
             </div>
           </div>

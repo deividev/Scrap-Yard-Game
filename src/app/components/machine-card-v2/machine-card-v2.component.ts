@@ -151,7 +151,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
           >
           <span class="mc-v2__s1-sep">/</span>
           <span class="mc-v2__s1-cap">{{ maxMachineLevel }}</span>
-          <span class="mc-v2__s1-cycle">⚡ {{ effectiveSpeed().toFixed(2) }}&nbsp;c/s</span>
+          <span class="mc-v2__s1-cycle">⚡ {{ effectiveSpeed().toFixed(2) }}&nbsp;{{ translationService.t('common.cycles_per_second') }}</span>
         </div>
 
         <!-- SLOT 3: receta -->

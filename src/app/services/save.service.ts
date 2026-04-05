@@ -192,9 +192,7 @@ export class SaveService {
       }
     } catch (error) {
       console.error('[SaveService] Failed to load game state:', error);
-      alert(
-        'No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva.',
-      );
+      alert(this.translationService.t('alerts.save_corrupted'));
       return false;
     }
   }

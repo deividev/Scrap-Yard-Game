@@ -220,6 +220,21 @@
     "unlock_requires": "Necesitas:"
   },
   "demo_end": {
+    "badge_label": "DEMO COMPLETADA",
+    "title": "¡Has dominado<br>el depósito!",
+    "cta_wishlist": "Añadir a la lista de deseados",
+    "cta_continue": "Seguir jugando la demo",
     "body": "Has desbloqueado la <strong>Empaquetadora</strong> y completado la demo de Scrap Yard Idle. La versión completa desbloquea nuevas máquinas, recursos avanzados y más."
+  },
+  "common": {
+    "level_short": "Nv",
+    "cycle_time": "~{{time}}s",
+    "unlock_requires": "Necesitas:",
+    "max": "MÁX",
+    "stock_label": "Stock",
+    "cycles_per_second": "c/s"
+  },
+  "alerts": {
+    "save_corrupted": "No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva."
   }
 }

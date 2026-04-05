@@ -386,7 +386,7 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                               >{{ translationService.t('upgrades.machine_tab.speed_label') }}:</span
                             >
                             <span class="stat-value">
-                              {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} c/s
+                              {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} {{ translationService.t('common.cycles_per_second') }}
                               @if ((machineUpgrade.speedBonus || 0) > 0) {
                                 <span class="bonus">
                                   (+{{ ((machineUpgrade.speedBonus || 0) * 100).toFixed(0) }}%)

@@ -14,12 +14,12 @@ import { ModalShellComponent } from '../ui/modal-shell/modal-shell.component';
 
           <div class="demo-end-panel__inner">
             <div class="demo-end-panel__badge">
-              <span class="demo-end-panel__badge-label">DEMO COMPLETADA</span>
+              <span class="demo-end-panel__badge-label">{{ translationService.t('demo_end.badge_label') }}</span>
             </div>
 
-            <h2 id="demo-end-title" class="demo-end-panel__title">
-              ¡Has dominado<br>el depósito!
-            </h2>
+            <h2 id="demo-end-title" class="demo-end-panel__title"
+              [innerHTML]="translationService.t('demo_end.title')"
+            ></h2>
 
             <div class="demo-end-panel__divider">
               <span class="demo-end-panel__divider-icon">⚙</span>
@@ -29,10 +29,10 @@ import { ModalShellComponent } from '../ui/modal-shell/modal-shell.component';
 
             <div class="demo-end-panel__actions">
               <button class="demo-end-btn demo-end-btn--primary" (click)="openWishlist()">
-                <span class="demo-end-btn__label">Añadir a la lista de deseados</span>
+                <span class="demo-end-btn__label">{{ translationService.t('demo_end.cta_wishlist') }}</span>
               </button>
               <button class="demo-end-btn demo-end-btn--ghost" (click)="dismiss()">
-                Seguir jugando la demo
+                {{ translationService.t('demo_end.cta_continue') }}
               </button>
             </div>
 
