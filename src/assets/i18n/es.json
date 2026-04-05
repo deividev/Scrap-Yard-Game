@@ -214,11 +214,6 @@
     "total_money": "Dinero generado",
     "scrap_rate": "Chatarra auto/seg"
   },
-  "common": {
-    "level_short": "Nv",
-    "cycle_time": "~{{time}}s",
-    "unlock_requires": "Necesitas:"
-  },
   "demo_end": {
     "badge_label": "DEMO COMPLETADA",
     "title": "¡Has dominado<br>el depósito!",

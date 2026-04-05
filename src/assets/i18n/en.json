@@ -214,11 +214,6 @@
     "total_money": "Total earnings",
     "scrap_rate": "Auto scrap/sec"
   },
-  "common": {
-    "level_short": "Lv",
-    "cycle_time": "~{{time}}s",
-    "unlock_requires": "Requires:"
-  },
   "demo_end": {
     "badge_label": "DEMO COMPLETE",
     "title": "You've mastered<br>the scrap yard!",
