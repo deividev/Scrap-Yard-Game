@@ -254,6 +254,10 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
           box-shadow 0.18s ease;
       }
 
+      .mc-v2--locked {
+        cursor: default;
+      }
+
       /* No border, outline or transform on selected — avoids all clipping artifacts
          with the overflow:hidden card-clip wrapper. Selection communicated
          purely via name glow + image brightness (GPU-only). */
