@@ -218,5 +218,8 @@
     "level_short": "Lv",
     "cycle_time": "~{{time}}s",
     "unlock_requires": "Requires:"
+  },
+  "demo_end": {
+    "body": "You've unlocked the <strong>Packager</strong> and completed the Scrap Yard Idle demo. The full version unlocks new machines, advanced resources and more."
   }
 }

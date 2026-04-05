@@ -218,5 +218,8 @@
     "level_short": "Nv",
     "cycle_time": "~{{time}}s",
     "unlock_requires": "Necesitas:"
+  },
+  "demo_end": {
+    "body": "Has desbloqueado la <strong>Empaquetadora</strong> y completado la demo de Scrap Yard Idle. La versión completa desbloquea nuevas máquinas, recursos avanzados y más."
   }
 }

@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DemoEndService } from '../../services/demo-end.service';
 import { DEMO_CONFIG } from '../../config/game-balance.config';
+import { TranslationService } from '../../services/translation.service';
+import { ModalShellComponent } from '../ui/modal-shell/modal-shell.component';
 
 @Component({
   selector: 'app-demo-end-overlay',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [ModalShellComponent],
   template: `
     @if (demoEndService.isVisible()) {
-      <div class="demo-end-backdrop" role="dialog" aria-modal="true" aria-labelledby="demo-end-title">
-        <div class="demo-end-panel">
-
-          <div class="demo-end-panel__top-bar"></div>
+      <app-modal-shell [showTopBar]="true" [showBottomBar]="true" [zIndex]="26000" maxWidth="520px" labelledBy="demo-end-title">
 
           <div class="demo-end-panel__inner">
             <div class="demo-end-panel__badge">
@@ -26,27 +25,10 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
               <span class="demo-end-panel__divider-icon">⚙</span>
             </div>
 
-            <p class="demo-end-panel__body">
-              Has desbloqueado la <strong>Empaquetadora</strong> y completado la
-              demo de Scrap Yard Idle. La versión completa desbloquea nuevas
-              máquinas, recursos avanzados y la cadena de producción eléctrica.
-            </p>
-
-            <div class="demo-end-panel__stats">
-              <div class="demo-end-panel__stat">
-                <span class="demo-end-panel__stat-icon">🏭</span>
-                <span class="demo-end-panel__stat-label">4 máquinas en la demo</span>
-              </div>
-              <div class="demo-end-panel__stat-sep"></div>
-              <div class="demo-end-panel__stat">
-                <span class="demo-end-panel__stat-icon">⚡</span>
-                <span class="demo-end-panel__stat-label">+4 en versión completa</span>
-              </div>
-            </div>
+            <p class="demo-end-panel__body" [innerHTML]="translationService.t('demo_end.body')"></p>
 
             <div class="demo-end-panel__actions">
               <button class="demo-end-btn demo-end-btn--primary" (click)="openWishlist()">
-                <span class="demo-end-btn__icon">♥</span>
                 <span class="demo-end-btn__label">Añadir a la lista de deseados</span>
               </button>
               <button class="demo-end-btn demo-end-btn--ghost" (click)="dismiss()">
@@ -54,57 +36,12 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
               </button>
             </div>
 
-            <p class="demo-end-panel__footnote">
-              Upgrades y producción siguen disponibles en la demo
-            </p>
           </div>
-
-          <div class="demo-end-panel__bottom-bar"></div>
-        </div>
-      </div>
+      </app-modal-shell>
     }
   `,
   styles: [
     `
-      .demo-end-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 26000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-        background:
-          radial-gradient(ellipse 60% 50% at 50% 40%, rgba(255, 152, 0, 0.06) 0%, transparent 70%),
-          rgba(10, 9, 8, 0.86);
-        backdrop-filter: blur(3px);
-      }
-
-      .demo-end-panel {
-        width: min(520px, 100%);
-        background: linear-gradient(180deg, rgba(28, 28, 28, 0.99) 0%, rgba(14, 14, 14, 0.99) 100%);
-        border: 1px solid rgba(255, 152, 0, 0.35);
-        border-radius: var(--border-radius-large);
-        box-shadow:
-          0 0 0 1px rgba(255, 152, 0, 0.10),
-          0 32px 80px rgba(0, 0, 0, 0.75),
-          0 8px 24px rgba(0, 0, 0, 0.5),
-          inset 0 1px 0 rgba(255, 200, 80, 0.08);
-        overflow: hidden;
-      }
-
-      .demo-end-panel__top-bar {
-        height: 3px;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(255, 152, 0, 0.4) 20%,
-          rgba(255, 180, 60, 0.95) 50%,
-          rgba(255, 152, 0, 0.4) 80%,
-          transparent 100%
-        );
-      }
-
       .demo-end-panel__inner {
         padding: 28px 32px 24px;
         display: flex;
@@ -166,7 +103,7 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
       }
 
       .demo-end-panel__divider-icon {
-        font-size: 16px;
+        font-size: 28px;
         color: rgba(255, 152, 0, 0.5);
         line-height: 1;
       }
@@ -184,45 +121,6 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
       .demo-end-panel__body strong {
         color: var(--color-accent-light);
         font-weight: 600;
-      }
-
-      .demo-end-panel__stats {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.25);
-        border: 1px solid rgba(255, 152, 0, 0.12);
-        border-radius: var(--border-radius-medium);
-        overflow: hidden;
-      }
-
-      .demo-end-panel__stat {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 16px;
-      }
-
-      .demo-end-panel__stat-icon {
-        font-size: 16px;
-        line-height: 1;
-      }
-
-      .demo-end-panel__stat-label {
-        font-family: var(--font-ui);
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--color-text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      .demo-end-panel__stat-sep {
-        width: 1px;
-        align-self: stretch;
-        background: rgba(255, 152, 0, 0.12);
       }
 
       .demo-end-panel__actions {
@@ -277,7 +175,7 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
 
       .demo-end-btn--ghost {
         background: rgba(255, 255, 255, 0.04);
-        color: var(--color-text-secondary);
+        color: rgba(255, 255, 255, 0.65);
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
 
@@ -286,30 +184,12 @@ import { DEMO_CONFIG } from '../../config/game-balance.config';
         color: var(--color-text-primary);
       }
 
-      .demo-end-panel__footnote {
-        margin: 0;
-        font-family: var(--font-ui);
-        font-size: 11px;
-        color: var(--color-text-muted, var(--color-text-secondary));
-        text-align: center;
-        letter-spacing: 0.04em;
-      }
-
-      .demo-end-panel__bottom-bar {
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(255, 152, 0, 0.15) 40%,
-          rgba(255, 152, 0, 0.15) 60%,
-          transparent 100%
-        );
-      }
     `,
   ],
 })
 export class DemoEndOverlayComponent {
   protected readonly demoEndService = inject(DemoEndService);
+  protected readonly translationService = inject(TranslationService);
   private readonly wishlistUrl = DEMO_CONFIG.STEAM_WISHLIST_URL;
 
   protected openWishlist(): void {

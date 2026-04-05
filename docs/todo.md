@@ -1,6 +1,6 @@
 # TODO — Scrap Yard Idle
 
-> Última actualización: Abril 4, 2026
+> Última actualización: Abril 5, 2026
 
 ---
 
@@ -19,8 +19,11 @@ AHORA — Preparación del trailer y Steam pages
   ⬜ Steam page de la DEMO creada y configurada
     ↓
 ANTES DE NEXT FEST — Demo lista para lanzar
-  ⬜ Demo cap implementado (máquinas bloqueadas post-Empaquetadora)
-  ⬜ demo-end-overlay apunta a la URL real de la Steam page del juego completo
+  ✅ Demo cap implementado (SMELTER/RECYCLER/E.ASSEMBLER/E.PACKAGER bloqueadas)
+  ✅ Modal demo-end dispara en primer ciclo de Empaquetadora (no timeout)
+  ✅ Icono de la app reemplazado (steampunk scrap press, ICO + PNG + favicon)
+  ✅ Modal demo-end pulido visualmente (ModalShellComponent, i18n body, sin footnote)
+  ⬜ demo-end-overlay apunta a la URL real de la Steam page (pendiente Steam page)
   ⬜ Build de producción verificado (.exe sin errores)
   ⬜ Balance y QA — sesión completa sin softlocks
   ⬜ Lanzamiento: Steam page demo + demo disponible para descarga
@@ -63,35 +66,8 @@ La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son 
 
 ### 🔴 Crítico — bloquea el lanzamiento de la demo
 
-- [ ] **Demo cap no implementado** — `MachineUnlockService.checkAndUnlockMachines()` incluye `SMELTER`, `RECYCLER`, `ELECTRIC_ASSEMBLER`, `ELECTRIC_PACKAGER` en la lista de desbloqueables. Si el jugador sube niveles suficientes, esas máquinas se desbloquean. No existe ninguna constante `DEMO_MACHINE_CAP` ni guard que lo impida.
-  - Añadir `DEMO_MACHINE_CAP` en `dev-flags.config.ts` con la lista de máquinas bloqueadas en demo
-  - `checkAndUnlockMachines()` salta las máquinas del cap en modo demo
-  - `getUnlockInfo()` devuelve un estado `demo-locked` diferenciado para esas máquinas
-
-- [ ] **Modal demo usa `forceShow()` en lugar de `triggerIfNeeded()`** — En `machine-unlock.service.ts` hay un `TODO: REVERT` pendiente. Con `forceShow()` el modal aparece cada vez, ignorando el flag `demoEndSeen` persistido en `SaveState`. Cambiar a `triggerIfNeeded()` antes de publicar.
-
 - [ ] **URL del modal demo sin configurar** — El botón de Steam Wishlist del `demo-end-overlay` necesita apuntar a la URL real de la Steam page del juego completo. Pendiente hasta que la página esté publicada.
-
-- [ ] **Estado visual "demo-locked" en MachineCard** — Las máquinas del cap deben mostrar un estado visual diferente al "bloqueada por requisitos". El jugador tiene que entender que no es cuestión de subir más niveles sino de que es contenido del juego completo.
-
-- [ ] **Icono de la app reemplazado** — El icono actual (`build/icon.png`) es un logo genérico de reciclaje que no representa el estilo del juego. Debe reemplazarse antes del lanzamiento.
-  - Imagen objetivo: prensa industrial steampunk aplastando cubos de chatarra, iluminación naranja-ámbar, fondo oscuro, silueta clara a 16×16
-  - Prompt base ya generado (ver abajo en esta tarea)
-  - Recomendación: pedir variante más centrada (prensa + brillo ocupando 70% del encuadre, recortando elementos laterales) para mejor legibilidad en taskbar y miniatura de Steam
-  - Al tener el PNG final (1024×1024): reemplazar `build/icon.png` y `public/favicon.png`, luego ejecutar `node scripts/generate-ico.js` para regenerar `build/icon.ico`
-  - **Prompt de generación:**
-    ```
-    Game app icon for "Scrap Yard Idle", a steampunk industrial idle game.
-    Central element: a front-facing industrial scrap press/crusher machine,
-    compact and iconic — thick iron frame with rivets and bolts, a glowing
-    orange furnace light source in the center, compressed metal scrap cubes
-    being crushed. Machine feels heavy, powerful, worn.
-    Color palette: background near black (#111111), machine body dark bronze
-    and oxidized iron (#3d2b1f, #5c4033), accent glow orange-amber (#f97316).
-    Style: bold icon silhouette, slightly isometric, painterly texture,
-    heavily detailed but strong readable silhouette at small sizes.
-    NOT flat, NOT cartoon. Square 1024x1024, dark solid background, no text.
-    ```
+  - Archivo: `src/app/config/game-balance.config.ts` → `DEMO_CONFIG.STEAM_WISHLIST_URL`
 
 - [ ] **Build de producción verificado** — Confirmar que `electron-builder` genera el `.exe` sin errores y con todos los assets empaquetados correctamente.
 
@@ -109,6 +85,8 @@ La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son 
 - [ ] **Panel de estadísticas** — Verificar que `statistics-panel` muestra correctamente `totalScrapGenerated`, `playTimeFormatted`, `totalMoneyEarned` y `activeMachinesCount`.
 
 ### 🟢 Post-lanzamiento demo / juego completo
+
+- [ ] **Quitar `IS_DEMO` / `DEMO_MACHINE_CAP` para el juego completo** — Cuando se inicie la implementación del juego completo, cambiar `IS_DEMO = false` en `dev-flags.config.ts`. Esto re-habilita automáticamente el desbloqueo de SMELTER, RECYCLER, ELECTRIC_ASSEMBLER y ELECTRIC_PACKAGER.
 
 ---
 
@@ -131,7 +109,8 @@ La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son 
 - [x] Notificaciones (desbloqueos, upgrades)
 - [x] **Save versioning** — `SAVE_VERSION = 1`, campo `version` en `SaveState`, migración progresiva `migrateSave()` en vez de rechazo. Alerta en JSON corrupto
 - [x] **DevTools bloqueados en producción** — F12/Ctrl+Shift+I deshabilitados cuando `app.isPackaged` en `electron/main.js`
-- [x] **End-game demo — modal de fin de demo** — Implementado. Se muestra 1 minuto después de desbloquear la Empaquetadora. Modal con diseño industrial (Cinzel/Oswald, tema oscuro naranja), botón de Steam Wishlist y "Seguir jugando". Flag `demoEndSeen` persistido en `SaveState`. Componente: `demo-end-overlay`.
+- [x] **End-game demo — modal de fin de demo** — Implementado. Dispara en el primer ciclo completado de la Empaquetadora (no timeout). Modal con diseño industrial via `ModalShellComponent` (shell genérico reutilizable), botón de Steam Wishlist y "Seguir jugando". Flag `demoEndSeen` persistido en `SaveState`. Body text via i18n. Componente: `demo-end-overlay`.
+- [x] **ModalShellComponent** — Componente genérico de modal (`src/app/components/ui/modal-shell/`). Backdrop + panel dark + animación slide-in + top/bottom bars opcionales. `ConfirmationModal` y `DemoEndOverlay` refactorizados para usarlo.
 - [x] i18n / Traducción
 - [x] Settings (idioma, audio)
 - [x] Menú principal y opciones
