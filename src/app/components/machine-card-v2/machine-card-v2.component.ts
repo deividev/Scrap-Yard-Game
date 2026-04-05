@@ -199,7 +199,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         <div class="mc-v2__status"></div>
       }
 
-      @if (isLocked() && !isDemoLocked()) {
+      @if (isLocked()) {
         <div class="mc-v2__locked">
           <div class="mc-v2__lock-icon">
             <img src="assets/icons/lock_icon.png" alt="" aria-hidden="true" />
@@ -695,8 +695,6 @@ export class MachineCardV2Component implements AfterViewInit, OnDestroy {
   unlockInfo = computed(() =>
     this.machineUnlockService.getUnlockInfo(this.machine.id as MachineType),
   );
-
-  isDemoLocked = computed(() => this.unlockInfo().isDemoLocked ?? false);
 
   unlockRequirementLines = computed(() => {
     const info = this.unlockInfo();

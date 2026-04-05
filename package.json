@@ -1,7 +1,7 @@
 {
   "name": "scrap-yard",
-  "version": "0.9.4",
-  "releaseLabel": "Demo",
+  "version": "1.0.1",
+  "releaseLabel": "",
   "main": "electron/main.js",
   "description": "Scrap Yard Idle — Industrial idle game. Turn scrap into profit, machine by machine.",
   "author": "David",
