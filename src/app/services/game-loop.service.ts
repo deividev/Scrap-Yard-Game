@@ -187,6 +187,7 @@ export class GameLoopService implements OnDestroy {
       }
       if (IS_DEMO && updatedMachine.id === MachineType.PACKAGER && !this.demoEndService.seen()) {
         this.demoEndService.triggerIfNeeded();
+        this.audioService.playMaxLevelReached();
       }
 
       if (updatedMachine.baseProduction.resourceId === ResourceType.MONEY) {
