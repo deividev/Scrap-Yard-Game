@@ -351,6 +351,7 @@ export class SaveService {
     this.upgradeProgressService.reset();
     this.statisticsService.reset();
     this.firstRunTutorialService.reset();
+    this.demoEndService.loadState(false);
   }
 
   async getSavePath(): Promise<string | null> {

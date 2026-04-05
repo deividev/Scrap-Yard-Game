@@ -1,3 +1,5 @@
+import { MachineType } from '../models/machine.model';
+
 /**
  * DEV_CALIBRATION_ENABLED
  *
@@ -16,13 +18,11 @@ export const DEV_CALIBRATION_ENABLED = false;
  * When `true`, the game runs in demo mode:
  * - Player can only unlock machines up to and including the Packager.
  * - Machines in DEMO_MACHINE_CAP are permanently locked and shown without requirements.
- * - The demo-end modal fires 60 s after the Packager is unlocked.
+ * - The demo-end modal fires on the first completed Packager cycle.
  *
  * Set to `false` for the full commercial release build.
  */
 export const IS_DEMO = true;
-
-import { MachineType } from '../models/machine.model';
 
 /**
  * Machines that are locked in demo mode.
