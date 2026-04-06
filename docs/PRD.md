@@ -152,16 +152,16 @@ Fundidora:   Scrap → Cobre     (fundición térmica)
 1. La Fundidora consume Scrap directo al igual que Trituradora y Separador.
 2. El ratio de conversión es 2 Scrap → 1 Cobre por ciclo.
 3. La velocidad base se ajusta a 0.33/s (de 0.25/s actual).
-4. El precio de venta del Cobre se revisa a la baja (era 2.8, propuesta 2.0) dado que ahora es más fácil de producir.
+4. El precio de venta del Cobre se fija en **$3.0** (era $2.8). Cobre se desbloquea después de Componentes ($3.0) → debe valer al menos igual. La propuesta $2.0 original se descarta: eliminaba el incentivo de procesado.
 5. La cadena Fundidora → Ensambladora Eléctrica se verifica como viable (la Fundidora a 0.33/s produce suficiente Cobre para la E.Assembler a 0.2/s).
-6. `docs/systems.md` se actualiza para reflejar la nueva cadena.
+6. Verificar en `docs/systems.md` que la descripción de la Fundidora es correcta post-F0; actualizar solo si describe la cadena antigua (4 Metal → 2 Cobre).
 
 ### Criterios de aceptación
 
 - [ ] La Fundidora activa no reduce el suministro de Metal a la Ensambladora en ningún escenario.
 - [ ] Con Fundidora + Ensambladora + Recicladora activas, el Scrap generado a nivel 3 de auto-generación es suficiente para alimentar las tres sin que alguna se quede en espera constantemente.
 - [ ] El Cobre mantiene utilidad como recurso vendible (precio > Metal) y como input de la Ensambladora Eléctrica.
-- [ ] El tutorial first-run no se rompe con el nuevo flujo (si menciona la Fundidora como downstream de Metal, actualizar el texto).
+- [x] El tutorial first-run no menciona la Fundidora en ningún paso — no requiere cambios. (Confirmado D1-9: ni es.json ni en.json hacen referencia al Smelter en la sección `tutorial`.)
 
 ### Out of scope para esta fase
 - Añadir máquinas nuevas.
@@ -487,9 +487,9 @@ El juego completo está terminado cuando:
 | Inputs/ciclo | 4 Metal | 2 Scrap |
 | Output/ciclo | 2 Cobre | 1 Cobre |
 | baseSpeed | 0.25/s | 0.33/s |
-| Precio de venta Cobre | $2.8 | $2.0 |
+| Precio de venta Cobre | $2.8 | $3.0 |
 
-**Rationale:** La Fundidora dejaba de competir con la Ensambladora por Metal. Precio de Cobre baja porque ahora es más fácil de producir (Scrap es abundante). A 0.33/s produce 0.33 Cobre/s — suficiente para alimentar al PCB Printer (0.17 Cobre/s consumido) con margen.
+**Rationale:** La Fundidora dejaba de competir con la Ensambladora por Metal. Precio de Cobre se ajusta a $3.0 (Cobre se desbloquea después de Componentes; $2.0 original eliminaba incentivo de procesado). A 0.33/s produce 0.33 Cobre/s — suficiente para alimentar al PCB Printer (0.17 Cobre/s consumido) con margen.
 
 ---
 
@@ -533,7 +533,7 @@ El juego completo está terminado cuando:
 | Scrap | — (no vendible) | T1 |
 | Metal | $1.0 | T2 |
 | Plástico | $1.2 | T2 |
-| Cobre | $2.0 *(era $2.8)* | T2 |
+| Cobre | $3.0 | T2 |
 | Componentes | $3.0 | T3 |
 | Plástico Reciclado | $3.5 | T3 |
 | Comp. Eléctricos | $5.0 | T3 |

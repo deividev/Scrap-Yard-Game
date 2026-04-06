@@ -12,7 +12,7 @@
 
 ---
 
-### D1-1 — Enum `ResourceType`: confirmar último valor y patrón de naming
+### D1-1 ✅ — Enum `ResourceType`: confirmar último valor y patrón de naming
 
 **Archivo:** `src/app/models/resource.model.ts`
 
@@ -34,7 +34,7 @@ Patrón: `SCREAMING_SNAKE_CASE` como key, `snake_case` como string value.
 
 ---
 
-### D1-2 — Enum `MachineType`: confirmar último valor y patrón
+### D1-2 ✅ — Enum `MachineType`: confirmar último valor y patrón
 
 **Archivo:** `src/app/models/machine.model.ts`
 
@@ -56,7 +56,7 @@ Mismo patrón. Último valor: `ELECTRIC_ASSEMBLER`.
 
 ---
 
-### D1-3 — Enum `UpgradeId`: confirmar colisión `UPG_STORE_007`
+### D1-3 ✅ — Enum `UpgradeId`: confirmar colisión `UPG_STORE_007`
 
 **Archivo:** `src/app/models/upgrade.model.ts`
 
@@ -69,7 +69,7 @@ Estado actual confirmado: `UPG_STORE_007 = 'UPG_STORE_007'` apunta a **Almacén 
 
 ---
 
-### D1-4 — Config de balance: confirmar multiplicadores y conflicto precio Cobre
+### D1-4 ✅ — Config de balance: confirmar multiplicadores y conflicto precio Cobre
 
 **Archivo:** `src/app/config/game-balance.config.ts`
 
@@ -78,14 +78,14 @@ Hechos confirmados:
 - `STORAGE_MULTIPLIER` = **1.20**
 - `AUTO_GENERATION_RATES[3]` = **0.32 Scrap/s** (nivel 3)
 - `MARKET_CONFIG.BASE_PRICES` solo tiene: `METAL: 1`, `PLASTIC: 1.2`, `COMPONENTS: 3`, `COPPER: 2.8`
-  - `COPPER` sigue en 2.8 aunque el PRD lo bajó a 2.0 — **conflicto real, resolver en D2-1**
+  - `COPPER` precio decidido en análisis D1: **$3.0** (la propuesta $2.0 eliminaba incentivo de procesado; Cobre se desbloquea después de Componentes → debe valer ≥ igual). D2-1 cerrado.
   - `RECYCLED_PLASTIC` y `ELECTRIC_COMPONENTS` no están en `BASE_PRICES` → tampoco son vendibles actualmente
 
 **Acción:** Confirmar estos valores. El precio de Cobre en config vs PRD es la primera discrepancia real.
 
 ---
 
-### D1-5 — `MachineUnlockService`: confirmar ausencia de event emitter
+### D1-5 ✅ — `MachineUnlockService`: confirmar ausencia de event emitter
 
 **Archivo:** `src/app/services/machine-unlock.service.ts`
 
@@ -97,7 +97,7 @@ Estado actual confirmado: el servicio **no tiene ningún `Subject`, `EventEmitte
 
 ---
 
-### D1-6 — `upgrades.service.ts`: confirmar `getMachineUpgradeIdByMachineType` con 8 entradas
+### D1-6 ✅ — `upgrades.service.ts`: confirmar `getMachineUpgradeIdByMachineType` con 8 entradas
 
 **Archivo:** `src/app/services/upgrades.service.ts`, buscar `getMachineUpgradeIdByMachineType`
 
@@ -122,7 +122,7 @@ getMachineUpgradeIdByMachineType(machineType: string): UpgradeId | null {
 
 ---
 
-### D1-7 — `UpgradeDefinition`: confirmar ausencia de campo `unlockCondition`
+### D1-7 ✅ — `UpgradeDefinition`: confirmar ausencia de campo `unlockCondition`
 
 **Archivo:** `src/app/models/upgrade.model.ts`, interface `UpgradeDefinition`
 
@@ -134,7 +134,7 @@ Estado actual confirmado: los campos son `id`, `category`, `name`, `baseCostMone
 
 ---
 
-### D1-8 — `sell-resource-button`: confirmar que ya está parametrizado
+### D1-8 ✅ — `sell-resource-button`: confirmar que ya está parametrizado
 
 **Archivo:** `src/app/components/sell-resource-button/sell-resource-button.component.ts`
 
@@ -152,7 +152,7 @@ En `resources-header.component.ts` se instancia así:
 
 ---
 
-### D1-9 — i18n: verificar si el tutorial menciona Fundidora → Metal
+### D1-9 ✅ — i18n: verificar si el tutorial menciona Fundidora → Metal
 
 **Archivos:** `src/assets/i18n/es.json` y `en.json`, sección `tutorial`
 
@@ -168,14 +168,13 @@ Estado encontrado: el tutorial menciona "procesar metal" y la "trituradora". La 
 
 ---
 
-### D2-1 — F0: Corregir precio de Cobre en `game-balance.config.ts`
+### D2-1 — F0: Precio de Cobre → ✅ CERRADO ($3.0)
 
-**Problema:** `MARKET_CONFIG.BASE_PRICES.COPPER = 2.8` en el config actual, pero el PRD A.3 dice que debe bajar a **$2.0** con el rebalanceo F0 (descubierto en D1-4).
+**Resolución:** Precio definitivo **$3.0** (ni $2.0 del PRD original ni $2.8 actual).
 
-**Acción en el PRD:** Añadir en Requisitos funcionales de F0 una nueva línea:
-> "5b. Actualizar `MARKET_CONFIG.BASE_PRICES.COPPER` de `2.8` a `2.0` en `game-balance.config.ts`."
+**Razonamiento:** Cobre se desbloquea *después* de Componentes ($3.0) → debe valer al menos igual. A precio $2.0 la Fundidora daba margen neto cero vs vender Metal raw, eliminando cualquier incentivo de procesado. La diferencia $2.8→$3.0 es insignificante en economía pero correcta en progresión.
 
-Esto es una tarea de implementación F0, no una decisión de diseño — el precio ya está decidido en A.3. Solo faltaba que el requisito funcional lo nombrara explícitamente.
+**Cambio aplicado:** `MARKET_CONFIG.BASE_PRICES.COPPER = 3.0` en `game-balance.config.ts`. PRD A.3 y tabla A.1 actualizados.
 
 ---
 
@@ -195,12 +194,11 @@ Conclusión: con las tres activas y solo auto-generación nivel 3, el Scrap se a
 
 ---
 
-### D2-3 — F0: Eliminar requisito 6 del tutorial (resultado de D1-9)
+### D2-3 — F0: Eliminar requisito 6 del tutorial → ✅ CERRADO (resultado de D1-9)
 
-Si D1-9 confirmó que el tutorial no menciona Fundidora → Metal:
+D1-9 confirmó que el tutorial **no menciona Fundidora en ningún punto** (ni en es.json ni en en.json).
 
-**Acción en el PRD:** Eliminar el punto "6. Actualizar el tutorial si menciona Fundidora → Metal" de Requisitos funcionales de F0. Sustituir por:
-> "6. Verificar en `docs/systems.md` que la descripción de la Fundidora es correcta post-F0; actualizar solo si describe la cadena antigua."
+**Aplicado:** Requisito funcional 6 de F0 actualizado a "Verificar en `docs/systems.md` que la descripción de la Fundidora es correcta post-F0". Criterio de aceptación del tutorial marcado como no aplicable.
 
 ---
 
@@ -284,7 +282,7 @@ getPrice(resourceId: string): number {
 BASE_PRICES: {
   [ResourceType.METAL]:               1,
   [ResourceType.PLASTIC]:             1.2,
-  [ResourceType.COPPER]:              2.0,  // F0 baja de 2.8 a 2.0
+  [ResourceType.COPPER]:              3.0,  // Precio definitivo: $3.0 (igual a Componentes; se desbloquea después)
   [ResourceType.COMPONENTS]:          3,
   [ResourceType.RECYCLED_PLASTIC]:    3.5,
   [ResourceType.ELECTRIC_COMPONENTS]: 5,

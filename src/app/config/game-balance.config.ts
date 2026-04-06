@@ -63,7 +63,7 @@ export const MARKET_CONFIG = {
     METAL: 1,
     PLASTIC: 1.2,
     COMPONENTS: 3,
-    COPPER: 2.8, // Fix: was 1.5 (selling copper was worse than selling metal)
+    COPPER: 3.0, // Precio definitivo: >= Componentes ($3), Cobre se desbloquea después de Componentes
   },
   BATCH_BONUSES: {
     MEDIUM: {

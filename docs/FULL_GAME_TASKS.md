@@ -60,8 +60,8 @@ Fundidora:     2 Scrap → 1 Cobre      (fundición térmica → cobre)
 **Archivo:** `src/app/config/game-balance.config.ts`
 
 - Actualmente: `COPPER: 2.8` en `MARKET_CONFIG.BASE_PRICES`
-- El Cobre ahora se produce desde Scrap directamente (más fácil de obtener) → bajar ligeramente a `2.0`
-- También es input de la Ensambladora Eléctrica → no bajarlo demasiado para que vender sea siempre una alternativa real
+- Precio definitivo: `3.0` (Cobre se desbloquea después de Componentes $3.0 → debe valer al menos igual; $2.0 eliminaba el incentivo de procesado)
+- También es input de la Ensambladora Eléctrica → precio alto hace la alternativa de venta real
 
 ---
 
