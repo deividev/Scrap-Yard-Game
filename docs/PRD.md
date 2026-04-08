@@ -159,7 +159,7 @@ Fundidora:   Scrap → Cobre     (fundición térmica)
 ### Criterios de aceptación
 
 - [ ] La Fundidora activa no reduce el suministro de Metal a la Ensambladora en ningún escenario.
-- [ ] Con Fundidora + Ensambladora + Recicladora activas, el Scrap generado a nivel 3 de auto-generación es suficiente para alimentar las tres sin que alguna se quede en espera constantemente.
+- [ ] Con Fundidora activa y auto-generación nivel 3, la cadena es sostenible con Scrap manual moderado (~5-10 clicks/min). Las pausas en producción son intencionales — no se requiere que las tres cadenas T2 corran simultáneamente sin intervención del jugador.
 - [ ] El Cobre mantiene utilidad como recurso vendible (precio > Metal) y como input de la Ensambladora Eléctrica.
 - [x] El tutorial first-run no menciona la Fundidora en ningún paso — no requiere cambios. (Confirmado D1-9: ni es.json ni en.json hacen referencia al Smelter en la sección `tutorial`.)
 
@@ -178,6 +178,16 @@ Fundidora:   Scrap → Cobre     (fundición térmica)
 4. Preservar `level` e `isActive`. Resetear `progress = 0`.
 5. Inicializar campos F1 con defaults: `save.contracts = []`, `save.lastContractSpawnCheck = Date.now()`, `save.firstContractSpawned = false`.
 6. Llamar `this.isDirty.set(true)` al terminar — sin esto el save migrado no se persiste si el jugador cierra el juego antes de una acción.
+
+### Spec de migración de save — F2 (SAVE_VERSION 2 → 3)
+
+`SAVE_VERSION` sube de **2 a 3** con F2. En `migrateSave()`, rama `v2 → v3`:
+
+1. Inicializar los 9 recursos T4-T7 en `save.resources` con `amount: 0` y `capacity` inicial según A.5 si no existen ya en el save.
+2. Inicializar las 9 máquinas T4-T7 en `save.machines` con `level: 0, isActive: false, progress: 0` si no existen ya en el save.
+3. Llamar `this.isDirty.set(true)` al terminar.
+
+> **Nota:** No se asume merge implícito de `restoreState()`. La inicialización es explícita en esta rama. Los nuevos recursos y máquinas se añaden como entradas adicionales a los arrays **existentes** `save.resources[]` y `save.machines[]` — **NO** se crean campos nuevos en el objeto `save`. Los saves de jugadores que instalaron F0 (v2) y luego saltan a F2 (v3) pasan por esta rama y quedan correctamente inicializados.
 
 ---
 
@@ -207,13 +217,25 @@ Los contratos locales son fáciles (Metal, Plástico, Cobre) y muy frecuentes. L
 2. Un contrato tiene: tipo, recurso requerido, cantidad, timer, reward en $, penalización en $ (si urgente).
 3. Tipos de contrato: LOCAL, CORPORATE, URGENT. El tipo CHAIN se pospone para una versión posterior.
 4. El jugador puede aceptar o ignorar cada contrato ofertado.
+4b. Ignorar un contrato lo elimina del slot inmediatamente sin penalización. El slot queda libre para el próximo spawn check. Solo los contratos **aceptados** que expiran generan penalización.
 5. Al aceptar, el contrato queda activo y el timer empieza.
 6. El botón "Entregar" solo se habilita cuando el jugador tiene la cantidad requerida en inventario.
 7. Al entregar, los recursos se descuentan y el reward se añade al dinero.
 8. Al llegar el timer a 0 con el contrato activo y no completado: si era URGENT, se aplica la penalización; si no, simplemente caduca sin penalización.
-9. Los contratos se persisten en el save — si el jugador cierra el juego, los timers se recalculan al cargar como `acceptedAt + durationSeconds * 1000 - Date.now()`. Un contrato que ya expiró mientras el juego estuvo cerrado se marca como expirado en la carga; la penalización URGENT **no se aplica retroactivamente**.
+9. Los contratos se persisten en el save — si el jugador cierra el juego, los timers se recalculan al cargar como `acceptedAt + durationSeconds * 1000 - Date.now()`. Un contrato que ya expiró mientras el juego estuvo cerrado se marca como expirado en la carga; la penalización URGENT **no se aplica retroactivamente**. Cada vez que `ContractsService` muta el array `contracts` (spawn, aceptar, entregar, expirar, ignorar), debe llamar `this.saveService.markDirty()` para asegurar la persistencia.
 10. Un nuevo contrato puede generarse solo cuando hay slot libre (< 3 activos/disponibles).
 11. Spawn del primer contrato LOCAL disponible cuando la Ensambladora está desbloqueada.
+11b. El primer contrato forzado se detecta mediante `effect()` en `ContractsService` que observa `machinesService.getMachine(MachineType.ASSEMBLER)?.level`. Cuando level ≥ 1 y `firstContractSpawned = false`, se dispara. No se modifica `MachineUnlockService`. El efecto se evalúa solo una vez con éxito: en saves cargados donde la Ensambladora ya estaba desbloqueada, `firstContractSpawned` llega como `true` desde el save y el efecto no re-dispara.
+
+```typescript
+// En ContractsService constructor:
+effect(() => {
+  const level = this.machinesService.getMachine(MachineType.ASSEMBLER)?.level ?? 0;
+  if (level >= 1 && !this.saveService.getState().firstContractSpawned) {
+    this.spawnForcedLocalContract();
+  }
+});
+```
 
 ### Requisitos no funcionales
 
@@ -221,6 +243,7 @@ Los contratos locales son fáciles (Metal, Plástico, Cobre) y muy frecuentes. L
 - Timer visual: barra de progreso + número de segundos en formato mm:ss.
 - Para contratos URGENT: borde naranja/rojo, timer en rojo cuando queda < 30s, penalización claramente visible.
 - Sin animaciones bloqueantes — el jugador nunca pierde control del juego por un contrato.
+- El panel de contratos se implementa como una nueva tab 'Contratos' en el panel de upgrades existente. Reutiliza el sistema de tabs y colapsado. Posición y estilo definitivos se confirman en QA.
 
 ### Criterios de aceptación
 
@@ -235,7 +258,7 @@ Los contratos locales son fáciles (Metal, Plástico, Cobre) y muy frecuentes. L
 - Contratos tipo CHAIN (narrativos, encadenados).
 - Penalización de "reputación" — solo penalización monetaria.
 - Contratos que desbloqueen máquinas como reward.
-- Contratos para recursos T4-T7 (esos llegan en F2).
+- Contratos para productos T6-T7 de producción larga (Laptop, PC, Server Rack, Mining Rig) — sus tiempos de producción son demasiado largos para timers de horas. Se pueden habilitar en v1.1 con timers de 24h+.
 
 > ⚠️ **REQUERIMIENTO TRANSVERSAL (CB-07):** `resetToNewGame()` en `save.service.ts` debe extenderse para limpiar el estado de contratos: llamar a `contractsService.reset()` (o equivalente) y reiniciar `lastContractSpawnCheck` y `firstContractSpawned`.
 
@@ -260,17 +283,17 @@ T3: Componentes · Plástico Reciclado · Comp. Eléctricos
 T4: Circuit Board          ← PCB Printer [Cobre + Componentes]
 T5: Disco Duro             ← HDD Assembler [Circuit Board + Metal]
     Pantalla               ← Screen Fabricator [Circuit Board + CE + Plástico]
-T6: GPU                    ← GPU Fab [Circuit Board x2 + Cobre]
-    Smartphone             ← Smartphone Factory [Pantalla + Circuit Board]
-    Laptop                 ← Laptop Workshop [HDD + Pantalla + Circuit Board]
-    Desktop PC             ← PC Builder [HDD + GPU + Metal]
-T7: Server Rack            ← Data Center Assembly [Desktop PC x2 + Circuit Board x4]
-    Mining Rig             ← Mining Rig Assembly [Desktop PC + GPU x2 + CE x2]
+T6: GPU                    ← GPU Fab [Circuit Board x2 + Cobre + CE]
+    Smartphone             ← Smartphone Factory [Pantalla + GPU + Circuit Board]
+    Laptop                 ← Laptop Workshop [HDD + Pantalla + GPU + Circuit Board]
+    Desktop PC             ← PC Builder [HDD + GPU x2 + Circuit Board x2 + Metal]
+T7: Mining Rig             ← Mining Rig Assembly [Desktop PC + GPU x4 + CE x2]
+    Server Rack            ← Data Center Assembly [Desktop PC x2 + GPU x2 + Circuit Board x4]
 ```
 
 ### Principios de diseño del árbol
 
-- **Ningún recurso T2-T3 queda obsoleto:** Metal entra en HDD (T5) y Desktop PC (T6). Plástico entra en Pantalla (T5). Cobre entra en Circuit Board (T4) y GPU (T6). Comp. Eléctricos entra en Pantalla (T5) y Mining Rig (T7).
+- **Ningún recurso T2-T3 queda obsoleto:** Metal entra en HDD (T5) y Desktop PC (T6). Plástico entra en Pantalla (T5). Cobre entra en Circuit Board (T4) y GPU (T6). Comp. Eléctricos entra en Pantalla (T5), GPU Fab (T6) y Mining Rig (T7).
 - **Sin recetas variables** — cada producto es exactamente una máquina. Sin ambigüedad.
 - **Todos los productos intermedios son vendibles** — el jugador nunca está forzado a seguir la cadena.
 - **El PCB Printer (T4) es el pivot** — desbloquear el T4 abre todo lo demás. Es el momento wow del mid-game.
@@ -287,12 +310,41 @@ T7: Server Rack            ← Data Center Assembly [Desktop PC x2 + Circuit Boa
 1. Los 9 recursos nuevos existen como `ResourceType`, tienen capacidad inicial, precio de mercado y upgrade de almacenamiento.
 2. Las 9 máquinas existen como `MachineType`, con inputs/outputs/speed definidos en config.
 3. Cada máquina tiene condición de unlock en `MachineUnlockService` — nunca aparecen todas a la vez.
+   > **Nota de implementación F2a:** Las 9 máquinas nuevas se añaden a `INITIAL_MACHINES` con `level: 0` desde F2a. El sistema de tarjetas bloqueadas ya existe (`isLocked = machine.level === 0` en `machine-card`). `MachineUnlockService` necesita las nuevas condiciones de A.6 añadidas en `checkAndUnlockMachines()`. No se requiere nueva UI.
 4. Orden de unlock progresivo: PCB Printer primero; Data Center y Mining Rig los últimos.
 5. Los nuevos recursos tienen botón de venta en el mercado.
+   > **Patrón de implementación F2b (D3-1):** Los sell buttons T4-T7 se añaden en `resources-header.component.ts` usando el componente `<app-sell-resource-button>` existente, envueltos en `@if(machinesService.isUnlocked(MachineType.X))`. Aparecen solo al desbloquear la máquina upstream. Ejemplo: `@if (machinesService.isUnlocked(MachineType.PCB_PRINTER)) { <app-sell-resource-button [resourceId]="ResourceType.CIRCUIT_BOARD"></app-sell-resource-button> }`
 6. Los upgrades de velocidad existen para todas las máquinas nuevas.
-7. Los upgrades de almacenamiento existen para los recursos intermedios (CB, HDD, Screen, GPU).
-8. El save versioning se incrementa a v2 con migración progresiva (spec en F0 — los campos F2 nuevos se inicializan a defaults en la misma rama de migración).
+7. Los upgrades de almacenamiento existen para todos los recursos T4-T7: CB, HDD, Screen, GPU, Smartphone, Laptop, Desktop PC, Mining Rig y Server Rack (9 upgrades en total, UPG_STORE_008–016, ver A.5).
+   > **Patrón de implementación F2b (D3-2):** Los storage upgrades T4-T7 se añaden al computed `storageUpgrades()` en `upgrades-panel.component.ts` con un campo interno `unlockedBy: MachineType`. Se muestran bloqueados (`isLocked: true`) hasta que la máquina upstream se desbloquea. Ejemplo: `{ id: UpgradeId.UPG_STORE_008, resourceId: ResourceType.CIRCUIT_BOARD, nameKey: 'upgrades.storage.circuit_board', unlockedBy: MachineType.PCB_PRINTER }` — en el map: `isLocked: !this.machinesService.isUnlocked(entry.unlockedBy)`. El modelo `UpgradeDefinition` no cambia — `unlockedBy` es solo un campo interno del computed.
+8. El save versioning: F0 sube a v2 (spec en F0). F2 sube a **v3** con su propia rama `v2 → v3` en `migrateSave()` que inicializa los 9 recursos y 9 máquinas nuevas. No se confía en merge implícito de `restoreState()` — la inicialización es explícita en la rama de migración.
 9. `MarketService.getPrice()` se refactoriza a mapa de config (`BASE_PRICES: Record<ResourceType, number>`) cubriendo **todos** los recursos (existentes y nuevos). Actualmente es una cadena `if` hardcodeada que retorna 0 para recursos desconocidos, haciendo `isManuallySellable() = false` para cualquier recurso nuevo — con lo que **todos los productos T4-T7 serían insellables** sin este cambio. La refactorización cubre todos los recursos a la vez (no solo los nuevos) porque: (a) evita mantener dos patrones en paralelo, y (b) es prerequisito necesario para que el sistema de multiplicadores de F3 funcione de forma uniforme sobre todos los recursos.
+   > **Patrón exacto de implementación:**
+   > ```typescript
+   > // game-balance.config.ts — ampliar BASE_PRICES con todos los recursos
+   > BASE_PRICES: {
+   >   [ResourceType.METAL]:               1,
+   >   [ResourceType.PLASTIC]:             1.2,
+   >   [ResourceType.COPPER]:              3.0,
+   >   [ResourceType.COMPONENTS]:          3,
+   >   [ResourceType.RECYCLED_PLASTIC]:    3.5,
+   >   [ResourceType.ELECTRIC_COMPONENTS]: 6.5,
+   >   [ResourceType.CIRCUIT_BOARD]:       15,
+   >   [ResourceType.HDD]:                 35,
+   >   [ResourceType.SCREEN]:              40,
+   >   [ResourceType.GPU]:                 80,
+   >   [ResourceType.SMARTPHONE]:          300,
+   >   [ResourceType.LAPTOP]:              600,
+   >   [ResourceType.DESKTOP_PC]:          800,
+   >   [ResourceType.MINING_RIG]:          2200,
+   >   [ResourceType.SERVER_RACK]:         3000,
+   > } as Partial<Record<ResourceType, number>>
+   >
+   > // market.service.ts — getPrice() refactorizado
+   > getPrice(resourceId: ResourceType): number {
+   >   return MARKET_CONFIG.BASE_PRICES[resourceId] ?? 0;
+   > }
+   > ```
 10. Los enums `ResourceType`, `MachineType` y `UpgradeId` se extienden con todos los valores nuevos antes de cualquier código de config. Los IDs a añadir: `UPG_MACH_009`–`UPG_MACH_017` y `UPG_STORE_008`–`UPG_STORE_016`.
 11. Todos los assets (iconos y cards) existen al menos como placeholders del tamaño correcto.
 12. Todos los textos en i18n (es y en).
@@ -301,20 +353,21 @@ T7: Server Rack            ← Data Center Assembly [Desktop PC x2 + Circuit Boa
 
 - La UI de machine-list soporta el mayor número de cards sin overflow o layout roto.
 - El rendimiento del game loop no degrada con 17 máquinas activas simultáneamente.
+- El panel de upgrades soporta 33 entradas (16 storage + 17 machine speed) con scroll vertical. `machineOrder` en `upgrades-panel.component.ts` se amplía con 9 valores de `MachineType` en orden de unlock: `PCB_PRINTER, HDD_ASSEMBLER, SCREEN_FABRICATOR, GPU_FAB, SMARTPHONE_FACTORY, LAPTOP_WORKSHOP, PC_BUILDER, MINING_RIG_ASSEMBLY, DATA_CENTER_ASSEMBLY`. Los bloqueados aparecen al final de cada sección con estilo gris.
 
 ### Balance objetivo (T4-T7)
 
 | Producto | $/unidad | Tiempo producción estimado (sin upgrades) | $/s efectivo |
 |---|---|---|---|
-| Circuit Board | 15 | ~6s | 2.5 |
-| Disco Duro | 35 | ~12s | 2.9 |
-| Pantalla | 40 | ~14s | 2.9 |
+| Circuit Board | 15 | ~6s | 2.55 |
+| Disco Duro | 35 | ~12s | 2.80 |
+| Pantalla | 40 | ~14s | 2.80 |
 | GPU | 80 | ~20s | 4.0 |
-| Smartphone | 70 | ~14s | 5.0 |
-| Laptop | 150 | ~26s | 5.8 |
-| Desktop PC | 200 | ~32s | 6.3 |
-| Server Rack | 600 | ~60s | 10.0 |
-| Mining Rig | 500 | ~55s | 9.1 |
+| Smartphone | 300 | ~22s | 13.5 |
+| Laptop | 600 | ~28s | 21.0 |
+| Desktop PC | 800 | ~40s | 20.0 |
+| Mining Rig | 2200 | ~56s | 39.6 |
+| Server Rack | 3000 | ~59s | 51.0 |
 
 Nota: estos números se ajustan en QA (T-15). Son targets de diseño, no valores hardcodeados.
 
@@ -367,6 +420,8 @@ Solo puede estar activo un evento a la vez. Entre eventos hay un intervalo míni
 ### Requisitos funcionales
 
 1. Un evento de mercado es un estado global temporal con un timer.
+1b. `MarketEventService` se integra en el game loop mediante `tick()` llamado cada segundo. El spawn es garantizado al cumplirse el cooldown; solo la distribución de tipos usa probabilidades (35/35/20/10%). El timer del cooldown es interno y no persiste en el save.
+1c. Nuevo servicio: `MarketEventService` en `src/app/services/market-event.service.ts`. Nuevo componente: `EventBannerComponent` en `src/app/components/event-banner/event-banner.component.ts`. El banner se inserta en `app.html` al mismo nivel que `notification-container`.
 2. Solo puede haber un evento activo simultáneamente.
 3. El evento afecta los precios de venta en tiempo real (los botones de venta muestran el precio modificado). **Arquitectura:** `MarketService` expone un signal `activeEventMultipliers = signal<Partial<Record<ResourceType, number>>>({})`. El precio efectivo de un recurso es `BASE_PRICES[resourceId] * (activeEventMultipliers()[resourceId] ?? 1.0)`. Esto permite que cada evento afecte exactamente los recursos que le corresponden (Boom PCs → solo Laptop/Desktop/Smartphone; Market Crash → todos; etc.) sin que se filtren unos con otros. No mutar `BASE_PRICES` — es una constante estática. Fórmula final con batch bonus: `BASE_PRICE × eventMultiplier × batchBonus` (multiplicativo). Al terminar un evento, se resetea `activeEventMultipliers` a `{}`.
 4. El banner de evento es visible mientras el evento está activo y desaparece al terminar.
@@ -405,8 +460,8 @@ Esta fase hace que el juego se sienta vivo con el mínimo de trabajo.
 | Milestone | Trigger | Texto (ES) |
 |---|---|---|
 | Primera Circuit Board | Producir 1 CB | "Primera placa ensamblada. Empieza lo bueno." |
-| Primer Laptop vendido | Vender 1 Laptop | "Un laptop. Alguien va a pagar mucho por esto." |
-| Primer Desktop PC vendido | Vender 1 PC | "Un PC completo. Esto es industria de verdad." |
+| Primer Laptop vendido | Producir 1 Laptop por primera vez | "Un laptop. Alguien va a pagar mucho por esto." |
+| Primer Desktop PC vendido | Producir 1 Desktop PC por primera vez | "Un PC completo. Esto es industria de verdad." |
 | Primer Server Rack completado | Completar 1 Server Rack | "Un rack de servidores. El patio ya no parece un patio." |
 | Primer contrato aceptado | Aceptar cualquier contrato | "Tu primer contrato. Que empiece el negocio." |
 | Primer contrato urgente completado | Completar un contrato URGENT | "Presión, velocidad, dinero. Bienvenido." |
@@ -415,11 +470,17 @@ Esta fase hace que el juego se sienta vivo con el mínimo de trabajo.
 ### Requisitos funcionales
 
 1. Cada milestone solo se dispara una vez por partida (persistido en save).
+1b. Nuevo `MilestoneService` en `src/app/services/milestone.service.ts`. Expone `completedMilestones = signal<string[]>([])` cargado desde save. Método `check(id: string, condition: boolean): void` — si `condition = true` y el milestone no está completado, marca completado y llama `NotificationService.show(msg, 'milestone')`. No inyecta `ResourcesService` — recibe push desde quien detecta el evento.
+- Para triggers de producción: `GameLoopService` llama `milestoneService.check()` tras cada output de máquina.
+- Para triggers de contrato: `ContractsService` llama `check()` al aceptar y al completar.
+- Para triggers de boom: `MarketService.sell()` llama `milestoneService.check('first_boom_sell', this.activeEventMultipliers().size > 0)` directamente al completar una venta. `MarketService` inyecta `MilestoneService` (no hay ciclo DI: MarketService → MilestoneService es directo). `MarketEventService` no participa en este flujo.
 2. El flavor text aparece como notificación especial (no modal — no bloquea el juego).
 3. La notificación de flavor tiene una duración mayor que las notificaciones estándar (5s vs 2s).
 4. Estilo visual diferenciado (borde o color distinto) para distinguished del feedback de sistema.
+4b. En `notification.service.ts`: añadir `'milestone'` al union type y `DURATIONS.milestone = 5000`. En `notification-container.component.ts`: añadir CSS `.notification--milestone { border-left: 3px solid #f97316; }` (naranja Tailwind 500).
 5. Textos en i18n (es y en).
 6. Los milestones completados se guardan en el save como `string[]`.
+6b. `resetToNewGame()` en `save.service.ts` incluye `milestoneService.reset()` que limpia `completedMilestones = []`. Mismo patrón que el reset de contratos.
 
 ### Criterios de aceptación
 
@@ -480,6 +541,56 @@ El juego completo está terminado cuando:
 
 ---
 
+### A.0 — Enum values nuevos (F2a)
+
+Valores exactos a añadir en los enums existentes. Patrón: `SCREAMING_SNAKE_CASE` como key, `snake_case` como string value.
+
+```typescript
+// ResourceType — añadir después de ELECTRIC_COMPONENTS
+CIRCUIT_BOARD  = 'circuit_board',
+HDD            = 'hdd',
+SCREEN         = 'screen',
+GPU            = 'gpu',
+SMARTPHONE     = 'smartphone',
+LAPTOP         = 'laptop',
+DESKTOP_PC     = 'desktop_pc',
+SERVER_RACK    = 'server_rack',
+MINING_RIG     = 'mining_rig',
+
+// MachineType — añadir después de ELECTRIC_ASSEMBLER
+PCB_PRINTER          = 'pcb_printer',
+HDD_ASSEMBLER        = 'hdd_assembler',
+SCREEN_FABRICATOR    = 'screen_fabricator',
+GPU_FAB              = 'gpu_fab',
+SMARTPHONE_FACTORY   = 'smartphone_factory',
+LAPTOP_WORKSHOP      = 'laptop_workshop',
+PC_BUILDER           = 'pc_builder',
+DATA_CENTER_ASSEMBLY = 'data_center_assembly',
+MINING_RIG_ASSEMBLY  = 'mining_rig_assembly',
+
+// UpgradeId — añadir después de UPG_MACH_008 y UPG_STORE_007
+UPG_MACH_009  = 'UPG_MACH_009',   // PCB Printer speed
+UPG_MACH_010  = 'UPG_MACH_010',   // HDD Assembler speed
+UPG_MACH_011  = 'UPG_MACH_011',   // Screen Fabricator speed
+UPG_MACH_012  = 'UPG_MACH_012',   // GPU Fab speed
+UPG_MACH_013  = 'UPG_MACH_013',   // Smartphone Factory speed
+UPG_MACH_014  = 'UPG_MACH_014',   // Laptop Workshop speed
+UPG_MACH_015  = 'UPG_MACH_015',   // PC Builder speed
+UPG_MACH_016  = 'UPG_MACH_016',   // Mining Rig Assembly speed
+UPG_MACH_017  = 'UPG_MACH_017',   // Data Center Assembly speed
+UPG_STORE_008 = 'UPG_STORE_008',  // Circuit Board storage
+UPG_STORE_009 = 'UPG_STORE_009',  // HDD storage
+UPG_STORE_010 = 'UPG_STORE_010',  // Screen storage
+UPG_STORE_011 = 'UPG_STORE_011',  // GPU storage
+UPG_STORE_012 = 'UPG_STORE_012',  // Smartphone storage
+UPG_STORE_013 = 'UPG_STORE_013',  // Laptop storage
+UPG_STORE_014 = 'UPG_STORE_014',  // Desktop PC storage
+UPG_STORE_015 = 'UPG_STORE_015',  // Mining Rig storage
+UPG_STORE_016 = 'UPG_STORE_016',  // Server Rack storage
+```
+
+---
+
 ### A.1 — Rebalanceo F0: Fundidora
 
 | Parámetro | Antes | Después |
@@ -500,12 +611,12 @@ El juego completo está terminado cuando:
 | **PCB Printer** | 1 Cobre + 1 Componente | 1 Circuit Board | 0.17/s | ~6s | $2.55 |
 | **HDD Assembler** | 1 Circuit Board + 1 Metal | 1 Disco Duro | 0.08/s | ~12s | $2.80 |
 | **Screen Fabricator** | 1 Circuit Board + 1 Comp. Eléctrico + 1 Plástico | 1 Pantalla | 0.07/s | ~14s | $2.80 |
-| **GPU Fab** | 2 Circuit Board + 1 Cobre | 1 GPU | 0.05/s | ~20s | $4.00 |
-| **Smartphone Factory** | 1 Pantalla + 1 Circuit Board | 1 Smartphone | 0.07/s | ~14s | $4.90 |
-| **Laptop Workshop** | 1 Disco Duro + 1 Pantalla + 1 Circuit Board | 1 Laptop | 0.04/s | ~25s | $6.00 |
-| **PC Builder** | 1 Disco Duro + 1 GPU + 1 Metal | 1 Desktop PC | 0.03/s | ~33s | $6.00 |
-| **Data Center Assembly** | 2 Desktop PC + 4 Circuit Board | 1 Server Rack | 0.017/s | ~59s | $10.20 |
-| **Mining Rig Assembly** | 1 Desktop PC + 2 GPU + 2 Comp. Eléctrico | 1 Mining Rig | 0.018/s | ~56s | $9.00 |
+| **GPU Fab** | 2 Circuit Board + 1 Cobre + 1 Comp. Eléctrico | 1 GPU | 0.05/s | ~20s | $4.00 |
+| **Smartphone Factory** | 1 Pantalla + 1 GPU + 1 Circuit Board | 1 Smartphone | 0.045/s | ~22s | $13.50 |
+| **Laptop Workshop** | 1 Disco Duro + 1 Pantalla + 1 GPU + 1 Circuit Board | 1 Laptop | 0.035/s | ~28s | $21.00 |
+| **PC Builder** | 1 Disco Duro + 2 GPU + 2 Circuit Board + 1 Metal | 1 Desktop PC | 0.025/s | ~40s | $20.00 |
+| **Mining Rig Assembly** | 1 Desktop PC + 4 GPU + 2 Comp. Eléctrico | 1 Mining Rig | 0.018/s | ~56s | $39.60 |
+| **Data Center Assembly** | 2 Desktop PC + 2 GPU + 4 Circuit Board | 1 Server Rack | 0.017/s | ~59s | $51.00 |
 
 #### Validación de supply chain (speeds base, sin upgrades)
 
@@ -513,14 +624,14 @@ El juego completo está terminado cuando:
 |---|---|---|---|
 | Cobre | Smelter 0.33/s | PCB (0.17) + GPU Fab (0.05) + **E.Assembler (0.20)** = **0.42/s** | ⚠️ Déficit -0.09/s — E.Assembler ya consume 0.20 Cu/s en T3. Con GPU Fab activa, la Fundidora es el bottleneck. Requiere upgrade de Fundidora antes de activar GPU Fab. |
 | Componentes | Assembler 0.22/s | PCB (0.17) + **E.Assembler (0.20)** = **0.37/s** | ⚠️ Déficit -0.15/s — E.Assembler consume 0.20 Comp/s para producir Comp. Eléctricos; el PCB Printer compite directamente. Upgrade de Assembler necesario antes de activar PCB Printer. |
-| Circuit Board | PCB Printer 0.17/s | HDD (0.08) + Screen (0.07) + GPU (0.10) + Smartphone (0.07) + Laptop (0.04) + DataCenter (0.068) = **0.428/s** (cadena T4-T7 completa) | ⚠️ Déficit severo a plena cadena. Diseño en fases: activar HDD+Screen → upgrade PCB → activar GPU Fab → upgrade más antes de T7. Se necesitan ≥3 PCB Printers upgradeados para alimentar T6+T7 completo. |
-| Disco Duro | HDD 0.08/s | Laptop (0.04) + PC Builder (0.03) = 0.07/s | ✅ +0.01/s |
-| Pantalla | Screen 0.07/s | Smartphone (0.07) + Laptop (0.04) = 0.11/s | ⚠️ Déficit en base — jugador debe upgradear Screen Fabricator antes de activar Laptop Workshop (diseño intencional) |
-| GPU | GPU Fab 0.05/s | PC Builder (0.03) + Mining Rig (0.036) = 0.066/s | ⚠️ Déficit en base — GPU Fab debe estar upgradeado para soportar ambos (diseño intencional) |
-| Desktop PC | PC Builder 0.03/s | Data Center (0.034) + Mining Rig (0.018) = 0.052/s | ⚠️ Déficit en base — se necesitan upgrades o múltiples PC Builders (diseño intencional, son máquinas T7) |
-| Comp. Eléctrico | E.Assembler 0.20/s | Screen (0.07) + Mining Rig (0.036) = 0.106/s | ✅ +0.094/s |
+| Circuit Board | PCB Printer 0.17/s | HDD (0.08) + Screen (0.07) + GPU (0.10) + Smartphone (0.045) + Laptop (0.035) + PC Builder (0.05) + DataCenter (0.068) = **0.448/s** (cadena T4-T7 completa) | ⚠️ Déficit severo a plena cadena. Diseño en fases: activar HDD+Screen → upgrade PCB → activar GPU Fab → upgrade más antes de T7. Se necesitan ≥3 PCB Printers upgradeados para alimentar T6+T7 completo. |
+| Disco Duro | HDD 0.08/s | Laptop (0.035) + PC Builder (0.025) = 0.06/s | ✅ +0.02/s |
+| Pantalla | Screen 0.07/s | Smartphone (0.045) + Laptop (0.035) = 0.08/s | ⚠️ Déficit en base — jugador debe upgradear Screen Fabricator antes de activar Laptop Workshop (diseño intencional) |
+| GPU | GPU Fab 0.05/s | Smartphone (0.045) + Laptop (0.035) + PC Builder (0.05) + Mining Rig (0.072) + Data Center (0.034) = **0.236/s** | ⚠️ **Cuello de botella principal T6-T7** — GPU Fab es la máquina crítica del mid-game. El jugador decide constantemente entre vender GPUs ($80) o alimentar la cadena. Requiere upgrades masivos antes de activar T7. |
+| Desktop PC | PC Builder 0.025/s | Mining Rig (0.018) + Data Center (0.034) = 0.052/s | ⚠️ Déficit en base — se necesitan upgrades o múltiples PC Builders (diseño intencional, son máquinas T7) |
+| Comp. Eléctrico | E.Assembler 0.20/s | Screen (0.07) + GPU Fab (0.05) + Mining Rig (0.036) = 0.156/s | ✅ +0.044/s |
 | Plástico | Separator 0.50/s | Screen (0.07/s) | ✅ holgado |
-| Metal | Crusher 1.0 Metal/s | HDD (0.08) + PC Builder (0.03) = 0.11/s | ✅ muy holgado |
+| Metal | Crusher 1.0 Metal/s | HDD (0.08) + PC Builder (0.025) = 0.105/s | ✅ muy holgado |
 
 **Nota:** Los déficits marcados con ⚠️ son **intencionados**. Las máquinas T7 deben requerir que el jugador haya invertido en upgrades de las máquinas anteriores. Nunca debe ser posible activar Data Center Assembly sin haber upgradeado seriamente el PCB Printer y PC Builder.
 
@@ -536,18 +647,18 @@ El juego completo está terminado cuando:
 | Cobre | $3.0 | T2 |
 | Componentes | $3.0 | T3 |
 | Plástico Reciclado | $3.5 | T3 |
-| Comp. Eléctricos | $5.0 | T3 |
+| Comp. Eléctricos | $6.5 | T3 |
 | Circuit Board | $15 | T4 |
 | Disco Duro | $35 | T5 |
 | Pantalla | $40 | T5 |
 | GPU | $80 | T6 |
-| Smartphone | $70 | T6 |
-| Laptop | $150 | T6 |
-| Desktop PC | $200 | T6 |
-| Server Rack | $600 | T7 |
-| Mining Rig | $500 | T7 |
+| Smartphone | $300 | T6 |
+| Laptop | $600 | T6 |
+| Desktop PC | $800 | T6 |
+| Mining Rig | $2200 | T7 |
+| Server Rack | $3000 | T7 |
 
-Todos los recursos T4-T7 son vendibles en el mercado. El precio de la GPU es mayor que el Smartphone porque requiere más Circuit Boards y sigue siendo input de PC Builder y Mining Rig.
+Todos los recursos T4-T7 son vendibles en el mercado. La GPU ($80) es el componente pivote de la cadena T6-T7: aunque vendible directamente, su mayor valor está como input de Smartphone, Laptop, PC Builder, Mining Rig y Data Center — el jugador decide constantemente si vende o reinvierte.
 
 ---
 
@@ -571,11 +682,11 @@ Se usa el mismo sistema que las máquinas actuales: `base_cost × COST_MULTIPLIE
 | **HDD Assembler** | **UPG_MACH_010** | **650** |
 | **Screen Fabricator** | **UPG_MACH_011** | **700** |
 | **GPU Fab** | **UPG_MACH_012** | **850** |
-| **Smartphone Factory** | **UPG_MACH_013** | **800** |
-| **Laptop Workshop** | **UPG_MACH_014** | **900** |
-| **PC Builder** | **UPG_MACH_015** | **950** |
-| **Data Center Assembly** | **UPG_MACH_016** | **1200** |
-| **Mining Rig Assembly** | **UPG_MACH_017** | **1200** |
+| **Smartphone Factory** | **UPG_MACH_013** | **1200** |
+| **Laptop Workshop** | **UPG_MACH_014** | **1600** |
+| **PC Builder** | **UPG_MACH_015** | **2000** |
+| **Mining Rig Assembly** | **UPG_MACH_016** | **2500** |
+| **Data Center Assembly** | **UPG_MACH_017** | **3200** |
 
 ---
 
@@ -594,8 +705,8 @@ Usa el mismo sistema: `base_cost × STORAGE_MULTIPLIER^(level-1)` con `STORAGE_M
 | Smartphone | **UPG_STORE_012** | 4 | +2 | 200 |
 | Laptop | **UPG_STORE_013** | 3 | +2 | 250 |
 | Desktop PC | **UPG_STORE_014** | 3 | +2 | 250 |
-| Server Rack | **UPG_STORE_015** | 2 | +1 | 400 |
-| Mining Rig | **UPG_STORE_016** | 2 | +1 | 400 |
+| Mining Rig | **UPG_STORE_015** | 2 | +1 | 400 |
+| Server Rack | **UPG_STORE_016** | 2 | +1 | 400 |
 
 Todos los recursos son intermedios o finales con demanda upstream (Desktop PC alimenta T7), así que todos necesitan upgrades de almacenamiento para que el jugador pueda acumular stock antes de vender.
 
@@ -614,8 +725,8 @@ Mismo patrón que `MachineUnlockService` actual: unlock cuando la(s) máquina(s)
 | Smartphone Factory | Screen Fabricator nivel ≥ 3 |
 | Laptop Workshop | HDD Assembler nivel ≥ 3 **Y** Screen Fabricator nivel ≥ 3 |
 | PC Builder | GPU Fab nivel ≥ 2 **Y** HDD Assembler nivel ≥ 3 |
-| Data Center Assembly | PC Builder nivel ≥ 3 |
 | Mining Rig Assembly | GPU Fab nivel ≥ 3 **Y** PC Builder nivel ≥ 2 |
+| Data Center Assembly | PC Builder nivel ≥ 3 |
 
 **Progresión de unlock resultante:**
 ```
@@ -627,8 +738,8 @@ E.Assembler desbloqueada
       → [Screen Lv3] Smartphone Factory disponible
       → [HDD Lv3 + Screen Lv3] Laptop Workshop disponible
         → [GPU Lv2 + HDD Lv3] PC Builder disponible
-          → [PC Lv3] Data Center Assembly disponible
           → [GPU Lv3 + PC Lv2] Mining Rig Assembly disponible
+          → [PC Lv3] Data Center Assembly disponible
 ```
 
 El jugador nunca ve 3+ máquinas nuevas de golpe. Cada unlock es un momento individual con su notificación.
@@ -650,19 +761,104 @@ El jugador nunca ve 3+ máquinas nuevas de golpe. Cada unlock es un momento indi
 | Distribución LOCAL / CORPORATE / URGENT | 60% / 30% / 10% |
 | Primer contrato | Spawn forzado LOCAL cuando Assembler se desbloquea |
 
+> **Slot note:** Un contrato disponible (offer state, no aceptado) **ocupa slot**. El jugador puede tener hasta 3 contratos en cualquier combinación: disponible, activo-con-timer. No hay un cuarto estado 'expirado visible' — los contratos expirados se eliminan del array al detectar expiración en el tick.
+
 #### Parámetros por tipo
 
-| Tipo | Recursos elegibles | Cantidad (rango) | Timer (rango) | Reward | Penalización |
-|---|---|---|---|---|---|
-| LOCAL | Metal, Plástico, Cobre | 20 – 80 | 180s – 600s | cantidad × precio × 1.2 | Ninguna (expira silenciosamente) |
-| CORPORATE | Componentes, Comp. Eléctricos, Circuit Board | 5 – 25 | 600s – 1800s | cantidad × precio × 1.5 | Ninguna (expira silenciosamente) |
-| URGENT | Cualquier recurso desbloqueado | 10 – 40 | 120s – 300s | cantidad × precio × 3.0 | cantidad × precio × 1.0 (descuento de dinero) |
+Los multiplicadores de reward/penalty son fijos por tipo. Los rangos de cantidad y timer son orientativos — los valores exactos los definen los templates del pool (ver abajo).
+
+| Tipo | Recursos elegibles | Multiplier reward | Penalización |
+|---|---|---|---|
+| LOCAL | Materias primas (T1-T3): Metal, Plástico, Cobre | ×1.2 | Ninguna (expira silenciosamente) |
+| CORPORATE | Componentes manufacturados (T2-T7): Components → Server Rack | ×1.5 | Ninguna (expira silenciosamente) |
+| URGENT | Cualquier recurso desbloqueado | ×3.0 | qty × BASE_PRICE × 1.0 (descuento de dinero) |
+
+> **Durations note:** Los timers de URGENT varían según el recurso: 120s (materias primas) hasta 600s (Mining Rig). Los templates son la fuente de verdad — la tabla de tipos es orientativa.
 
 #### Condiciones de spawn por recurso
 
-Un contrato solo puede pedir un recurso que el jugador **ya puede producir** (la máquina que produce ese recurso está desbloqueada). Esta validación se hace en el spawn.
+Un contrato solo puede pedir un recurso que el jugador **ya puede producir** (la máquina que produce ese recurso está desbloqueada en `level >= 1`). El gating lo impone el campo `requiredMachine` de cada template (ver pool abajo) — no hay lógica de gating adicional.
 
-**Recursos excluidos del spawn pool (siempre):** `ResourceType.SCRAP`, `ResourceType.MONEY`. Aunque SCRAP tiene una máquina productora, no es un recurso acumulable por diseño. MONEY es la divisa, no un bien.
+**Recursos excluidos del spawn pool (siempre):** `ResourceType.SCRAP`, `ResourceType.MONEY`.
+
+---
+
+#### Pool de templates de contratos
+
+Los templates son el **single source of truth** para los contratos. El spawn no trabaja con rangos aleatorios — samplea un template, aplica las cantidades y calcula el reward en el momento.
+
+**Algoritmo de spawn:**
+1. Filtrar templates donde `machinesService.getMachine(template.requiredMachine)?.level >= 1`.
+2. Elegir tipo — LOCAL / CORPORATE / URGENT — con distribución 60 / 30 / 10 %.
+3. Filtrar templates del tipo elegido del set del paso 1.
+4. **Si el subset está vacío** (ninguna máquina del tipo elegido está desbloqueada): re-intentar paso 2 hasta 3 veces con re-roll del tipo. Si tras 3 intentos sigue vacío, elegir tipo que tenga templates disponibles (fallback al pool LOCAL, que siempre tiene al menos CRUSHER). Si el pool global del paso 1 está completamente vacío, no se spawnea ningún contrato en este ciclo.
+5. Elegir un template al azar del subset filtrado.
+6. Calcular al spawn: `rewardAmount = qty × BASE_PRICE[resource] × typeMultiplier`. `penaltyAmount = qty × BASE_PRICE[resource] × 1.0` (solo URGENT).
+
+Config en `src/app/config/contracts.config.ts`.
+
+```typescript
+interface ContractTemplate {
+  id: string;
+  type: 'LOCAL' | 'CORPORATE' | 'URGENT';
+  resourceId: ResourceType;
+  quantity: number;
+  durationSeconds: number;
+  requiredMachine: MachineType; // gate: requiere level >= 1
+}
+```
+
+**LOCAL — Compradores locales (materias primas T1-T3)**
+
+| ID | Recurso | Qty | Duración | Reward aprox. | Gate |
+|---|---|---|---|---|---|
+| `local_metal_sm` | Metal | 30 | 240s | $36 | CRUSHER |
+| `local_metal_md` | Metal | 60 | 450s | $72 | CRUSHER |
+| `local_plastic_sm` | Plástico | 25 | 240s | $36 | SEPARATOR |
+| `local_plastic_md` | Plástico | 50 | 420s | $72 | SEPARATOR |
+| `local_copper_sm` | Cobre | 20 | 300s | $72 | SMELTER |
+| `local_copper_md` | Cobre | 35 | 480s | $126 | SMELTER |
+
+*Reward aprox. = qty × BASE_PRICE × 1.2. Solo informativo — siempre se calcula al spawn.*
+
+**CORPORATE — Compradores B2B (componentes manufacturados, T2-T7)**
+
+| ID | Recurso | Qty | Duración | Reward aprox. | Gate |
+|---|---|---|---|---|---|
+| `corp_components_sm` | Componentes | 10 | 900s | $45 | ASSEMBLER |
+| `corp_components_md` | Componentes | 20 | 1500s | $90 | ASSEMBLER |
+| `corp_ec_sm` | Comp. Eléctricos | 8 | 900s | $78 | ELECTRIC_ASSEMBLER |
+| `corp_ec_md` | Comp. Eléctricos | 15 | 1500s | $146 | ELECTRIC_ASSEMBLER |
+| `corp_pcb_sm` | Circuit Board | 5 | 900s | $113 | PCB_PRINTER |
+| `corp_pcb_md` | Circuit Board | 12 | 1800s | $270 | PCB_PRINTER |
+| `corp_hdd_sm` | Hard Drive | 3 | 1200s | $158 | HDD_ASSEMBLER |
+| `corp_screen_sm` | Pantalla | 3 | 1200s | $180 | SCREEN_FABRICATOR |
+| `corp_gpu_sm` | GPU | 2 | 1200s | $240 | GPU_FAB |
+| `corp_smartphone_sm` | Smartphone | 3 | 1200s | $1 350 | SMARTPHONE_FACTORY |
+| `corp_laptop_sm` | Laptop | 1 | 1800s | $900 | LAPTOP_WORKSHOP |
+| `corp_pc_sm` | Desktop PC | 1 | 1800s | $1 200 | PC_BUILDER |
+| `corp_mining_rig` | Mining Rig | 1 | 1800s | $3 300 | MINING_RIG_ASSEMBLY |
+| `corp_server_rack` | Server Rack | 1 | 1800s | $4 500 | DATA_CENTER_ASSEMBLY |
+
+**URGENT — Pedido urgente (cualquier recurso desbloqueado, timer ajustado)**
+
+| ID | Recurso | Qty | Duración | Reward aprox. | Penalización aprox. | Gate |
+|---|---|---|---|---|---|---|
+| `urgent_metal` | Metal | 40 | 150s | $120 | $40 | CRUSHER |
+| `urgent_plastic` | Plástico | 30 | 120s | $108 | $36 | SEPARATOR |
+| `urgent_copper` | Cobre | 15 | 180s | $135 | $45 | SMELTER |
+| `urgent_components` | Componentes | 15 | 240s | $135 | $45 | ASSEMBLER |
+| `urgent_ec` | Comp. Eléctricos | 10 | 200s | $195 | $65 | ELECTRIC_ASSEMBLER |
+| `urgent_pcb` | Circuit Board | 8 | 300s | $360 | $120 | PCB_PRINTER |
+| `urgent_hdd` | Hard Drive | 4 | 300s | $420 | $140 | HDD_ASSEMBLER |
+| `urgent_screen` | Pantalla | 3 | 250s | $360 | $120 | SCREEN_FABRICATOR |
+| `urgent_gpu` | GPU | 3 | 400s | $720 | $240 | GPU_FAB |
+| `urgent_smartphone` | Smartphone | 2 | 300s | $1 800 | $600 | SMARTPHONE_FACTORY |
+| `urgent_mining_rig` | Mining Rig | 1 | 600s | $6 600 | $2 200 | MINING_RIG_ASSEMBLY |
+
+> **Progression note:** Al inicio (solo CRUSHER activo) el pool contiene únicamente `local_metal_sm` y `local_metal_md`. El pool crece automáticamente según el jugador desbloquea máquinas — no requiere código condicional adicional fuera del filtro `requiredMachine`.
+
+> **Nota CORPORATE / Circuit Board:** `corp_pcb_sm` y `corp_pcb_md` están listados en F1 como recursos elegibles, pero en la práctica no aparecerán hasta F2 (PCB_PRINTER desbloqueado). El mecanismo de gating por `requiredMachine` es la única guarda necesaria. Aunque SCRAP tiene una máquina productora, no es un recurso acumulable por diseño. MONEY es la divisa, no un bien.
 
 #### Definición TypeScript — interfaz Contract
 
@@ -695,6 +891,10 @@ lastContractSpawnCheck: number;      // timestamp absoluto ms del último spawn 
 firstContractSpawned: boolean;       // one-time flag: primer LOCAL forzado ya disparado
 ```
 
+> **`SavedContract` type:** `SavedContract` es el mismo type que `Contract`. Los contratos expirados **no se guardan** — se eliminan del array al expirar. Solo persisten contratos activos (timer corriendo) y disponibles (no aceptados aún). Para contratos no aceptados: `acceptedAt = 0`, `isAccepted = false`.
+
+> **Save versioning:** F1 **no incrementa SAVE_VERSION**. Los campos `contracts`, `lastContractSpawnCheck` y `firstContractSpawned` son pre-inicializados por la migración F0 v1→v2. Cuando F1 se implementa, los saves ya tienen esos campos en sus valores por defecto — no se necesita ninguna rama v2→v3 adicional en F1. `SAVE_VERSION 3` corresponde a F2 (primera vez que se añaden campos de recursos/máquinas T4-T7).
+
 **Spawn counter:** `lastContractSpawnCheck` es un timestamp absoluto, no un contador de ticks. Al cargar, los ciclos perdidos son `Math.floor((Date.now() - lastContractSpawnCheck) / 60000)`. Por diseño, **no se spawnean contratos retroactivos** — solo se actualiza el timestamp.
 
 **Reset:** En `resetToNewGame()`, limpiar: `contracts = []`, `lastContractSpawnCheck = Date.now()`, `firstContractSpawned = false`.
@@ -717,6 +917,8 @@ firstContractSpawned: boolean;       // one-time flag: primer LOCAL forzado ya d
 | Corporate Deal requiere | Data Center Assembly O Mining Rig Assembly desbloqueada |
 | Eventos se persisten en save | No (efímeros) |
 
+> **Cooldown entre sesiones:** En el constructor de `MarketEventService`, inicializar `secondsSinceLastEvent = 240` (runtime only, no persisted). Al cargar un save, no se restaura este valor — el constructor siempre parte en 240. El primer evento llega ~60s después de cargar. El cooldown no se persiste en el save.
+
 ---
 
 ### A.9 — Flavor Text / Milestones (F4)
@@ -724,11 +926,99 @@ firstContractSpawned: boolean;       // one-time flag: primer LOCAL forzado ya d
 | ID | Trigger | Texto ES | Texto EN |
 |---|---|---|---|
 | `first_circuit_board` | Producir 1 Circuit Board | "Primera placa ensamblada. Empieza lo bueno." | "First board assembled. Now it gets interesting." |
-| `first_laptop_sold` | Vender 1 Laptop | "Un laptop. Alguien va a pagar mucho por esto." | "One laptop. Someone's going to pay a lot for this." |
-| `first_desktop_sold` | Vender 1 Desktop PC | "Un PC completo. Esto es industria de verdad." | "A full PC. This is real industry." |
+| `first_laptop_produced` | Producir 1 Laptop por primera vez | "Un laptop. Alguien va a pagar mucho por esto." | "One laptop. Someone's going to pay a lot for this." |
+| `first_desktop_produced` | Producir 1 Desktop PC por primera vez | "Un PC completo. Esto es industria de verdad." | "A full PC. This is real industry." |
 | `first_server_rack` | Completar 1 Server Rack | "Un rack de servidores. El patio ya no parece un patio." | "A server rack. This place stopped looking like a junkyard." |
 | `first_contract` | Aceptar cualquier contrato | "Tu primer contrato. Que empiece el negocio." | "Your first contract. Let's do business." |
 | `first_urgent_done` | Completar un contrato URGENT | "Presión, velocidad, dinero. Bienvenido." | "Pressure, speed, money. Welcome." |
 | `first_boom_sell` | Vender durante un evento Boom | "¿Ves el timing? Eso se llama vender bien." | "See the timing? That's called selling smart." |
 
 Los milestones completados se guardan en `SaveState` como `completedMilestones: string[]`. Duración de la notificación: 5s (vs 2s estándar). Estilo: borde naranja, sin sonido bloqueante.
+
+---
+
+## Apéndice B — Convención i18n
+
+Patrón existente: `machines.crusher`, `resources.metal`, `upgrades.storage.scrap`, `tutorial.steps.X`. Todo lo nuevo sigue la misma convención.
+
+**Recursos T4-T7**
+```
+resources.circuit_board  resources.hdd          resources.screen
+resources.gpu            resources.smartphone   resources.laptop
+resources.desktop_pc     resources.server_rack  resources.mining_rig
+```
+
+**Máquinas T4-T7**
+```
+machines.pcb_printer         machines.hdd_assembler      machines.screen_fabricator
+machines.gpu_fab             machines.smartphone_factory machines.laptop_workshop
+machines.pc_builder          machines.data_center_assembly
+machines.mining_rig_assembly
+```
+
+**Upgrades** — patrón: `upgrades.storage.{resource_key}` / `upgrades.machine.{machine_key}`
+```
+upgrades.storage.circuit_board   upgrades.machine.pcb_printer
+(etc. — siguiendo el mismo patrón para los 18 nuevos upgrades de F2b)
+```
+
+**Contratos (F1)**
+```
+contracts.panel.title        → "Contratos"
+contracts.type.local         → "Local"
+contracts.type.corporate     → "Corporativo"
+contracts.type.urgent        → "¡URGENTE!"
+contracts.action.accept      → "Aceptar"
+contracts.action.deliver     → "Entregar"
+contracts.action.ignore      → "Ignorar"
+contracts.status.expired     → "Expirado"
+contracts.status.waiting     → "Esperando contrato..."
+contracts.reward             → "Recompensa:"
+contracts.penalty            → "Penalización:"
+```
+
+**Eventos de mercado (F3)**
+```
+events.banner.title          → "Evento de Mercado"
+events.type.boom_pcs         → "Boom de Demanda (PCs)"
+events.type.boom_components  → "Boom de Componentes"
+events.type.market_crash     → "Desplome de Mercado"
+events.type.corporate_deal   → "Oferta Corporativa"
+events.ends_in               → "Termina en:"
+```
+
+**Milestones (F4)** — las claves siguen el `ID` de A.9:
+```
+milestones.first_circuit_board   milestones.first_laptop_produced
+milestones.first_desktop_produced  milestones.first_server_rack
+milestones.first_contract        milestones.first_urgent_done
+milestones.first_boom_sell
+```
+
+---
+
+## Apéndice C — Spec de Audio
+
+Métodos existentes en `AudioService`: `playGameMusicLoop`, `playUiClick`, `playUpgradeStarted`, `playUpgradeCompleted`, `playMaxLevelReached`, `playMachineUnlocked`, `playMachineComplete`, `playResourceSold`, `playScrapGenerated`, `playProductionTick`, `playError`.
+
+**No se requieren SFX nuevos para F1, F3 ni F4.** Reutilización de métodos existentes.
+
+**F1 — Contratos**
+
+| Evento | SFX | Justificación |
+|---|---|---|
+| Aceptar contrato | `playUiClick()` | Acción de UI confirmada |
+| Completar contrato | `playUpgradeCompleted()` | Satisfacción, misma sensación que upgrade |
+| Contrato URGENT expirado | `playError()` | Consecuencia negativa clara |
+| Nuevo contrato spawneado | — | Aparece pasivamente, no interrumpir |
+
+**F3 — Eventos de mercado**
+
+| Evento | SFX | Justificación |
+|---|---|---|
+| Inicio de Boom | `playMachineUnlocked()` | Fanfare existente, evento positivo |
+| Market Crash | — | El silencio es el drama |
+| Corporate Deal | `playMaxLevelReached()` | SFX más épico disponible |
+| Fin de evento | — | Sin audio |
+
+**F4 — Milestones:** Sin SFX. La notificación visual con borde naranja es suficiente.

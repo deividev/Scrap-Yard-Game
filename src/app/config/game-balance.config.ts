@@ -63,7 +63,9 @@ export const MARKET_CONFIG = {
     METAL: 1,
     PLASTIC: 1.2,
     COMPONENTS: 3,
-    COPPER: 3.0, // Precio definitivo: >= Componentes ($3), Cobre se desbloquea después de Componentes
+    COPPER: 3.0,             // Precio definitivo: >= Componentes ($3), Cobre se desbloquea después de Componentes
+    RECYCLED_PLASTIC: 3.5,  // PRD A.3: recurso T3 vendible
+    ELECTRIC_COMPONENTS: 6.5, // PRD A.3: recurso T3 vendible
   },
   BATCH_BONUSES: {
     MEDIUM: {
@@ -83,7 +85,7 @@ export const MARKET_CONFIG = {
 
 export const MACHINE_UPGRADE_CONFIG = {
   MAX_LEVEL: 50,
-  COST_MULTIPLIER: 1.2,
+  COST_MULTIPLIER: 1.26, // PRD A.4 CC-05: multiplicador de máquinas es 1.26 (storage usa 1.20)
   COMPONENTS_START_LEVEL: 4,
   // Per-machine override: Crusher must reach lv13 to unlock Packager,
   // but Components don't exist until Assembler is unlocked (requires Crusher lv9).

@@ -76,7 +76,7 @@ Chatarra ──► Trituradora ──► Metal ──► Ensambladora ──► 
 |---|---|---|---|---|---|
 | `crusher` | Trituradora | 1 Chatarra | 2 Metal | 0.50/s | 1 (desbloqueada) |
 | `separator` | Separador | 1 Chatarra | 1 Plástico | 0.50/s | 0 (bloqueada) |
-| `smelter` | Fundidora | 4 Metal | 2 Cobre | 0.25/s | 0 (bloqueada) |
+| `smelter` | Fundidora | 2 Scrap | 1 Cobre | 0.33/s | 0 (bloqueada) |
 | `assembler` | Ensambladora | 1 Metal + 1 Plástico | 1 Componente | 0.22/s | 0 (bloqueada) |
 | `packager` | Empaquetadora | 4 Componentes | (venta) | 0.10/s | 0 (bloqueada) |
 | `electric_packager` | Empaquetadora Eléctrica | Componentes Eléctricos | (venta) | 0.10/s | 0 (bloqueada) |

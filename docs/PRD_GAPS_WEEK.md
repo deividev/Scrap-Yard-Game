@@ -168,7 +168,7 @@ Estado encontrado: el tutorial menciona "procesar metal" y la "trituradora". La 
 
 ---
 
-### D2-1 — F0: Precio de Cobre → ✅ CERRADO ($3.0)
+### ✅ D2-1 — F0: Precio de Cobre → CERRADO ($3.0)
 
 **Resolución:** Precio definitivo **$3.0** (ni $2.0 del PRD original ni $2.8 actual).
 
@@ -178,7 +178,7 @@ Estado encontrado: el tutorial menciona "procesar metal" y la "trituradora". La 
 
 ---
 
-### D2-2 — F0: Revisar criterio de aceptación de Scrap con números reales
+### ✅ D2-2 — F0: Revisar criterio de aceptación de Scrap con números reales
 
 **Cálculo con datos reales:**
 - `AUTO_GENERATION_RATES[3]` = **0.32 Scrap/s** (nivel 3 de UPG_SCRAP_002)
@@ -194,7 +194,7 @@ Conclusión: con las tres activas y solo auto-generación nivel 3, el Scrap se a
 
 ---
 
-### D2-3 — F0: Eliminar requisito 6 del tutorial → ✅ CERRADO (resultado de D1-9)
+### ✅ D2-3 — F0: Eliminar requisito 6 del tutorial → CERRADO (resultado de D1-9)
 
 D1-9 confirmó que el tutorial **no menciona Fundidora en ningún punto** (ni en es.json ni en en.json).
 
@@ -202,7 +202,7 @@ D1-9 confirmó que el tutorial **no menciona Fundidora en ningún punto** (ni en
 
 ---
 
-### D2-4 — F2a: Añadir Apéndice A.0 con todos los enum values nuevos
+### ✅ D2-4 — F2a: Añadir Apéndice A.0 con todos los enum values nuevos
 
 **Acción en el PRD:** Añadir sección **A.0 — Enum values nuevos** antes de A.1, con los valores exactos:
 
@@ -237,8 +237,8 @@ UPG_MACH_012  = 'UPG_MACH_012'   // GPU Fab speed
 UPG_MACH_013  = 'UPG_MACH_013'   // Smartphone Factory speed
 UPG_MACH_014  = 'UPG_MACH_014'   // Laptop Workshop speed
 UPG_MACH_015  = 'UPG_MACH_015'   // PC Builder speed
-UPG_MACH_016  = 'UPG_MACH_016'   // Data Center Assembly speed
-UPG_MACH_017  = 'UPG_MACH_017'   // Mining Rig Assembly speed
+UPG_MACH_016  = 'UPG_MACH_016'   // Mining Rig Assembly speed
+UPG_MACH_017  = 'UPG_MACH_017'   // Data Center Assembly speed
 UPG_STORE_008 = 'UPG_STORE_008'  // Circuit Board storage
 UPG_STORE_009 = 'UPG_STORE_009'  // HDD storage
 UPG_STORE_010 = 'UPG_STORE_010'  // Screen storage
@@ -246,13 +246,13 @@ UPG_STORE_011 = 'UPG_STORE_011'  // GPU storage
 UPG_STORE_012 = 'UPG_STORE_012'  // Smartphone storage
 UPG_STORE_013 = 'UPG_STORE_013'  // Laptop storage
 UPG_STORE_014 = 'UPG_STORE_014'  // Desktop PC storage
-UPG_STORE_015 = 'UPG_STORE_015'  // Server Rack storage
-UPG_STORE_016 = 'UPG_STORE_016'  // Mining Rig storage
+UPG_STORE_015 = 'UPG_STORE_015'  // Mining Rig storage
+UPG_STORE_016 = 'UPG_STORE_016'  // Server Rack storage
 ```
 
 ---
 
-### D2-5 — F2a: Documentar visibilidad de máquinas T4-T7 en F2a
+### ✅ D2-5 — F2a: Documentar visibilidad de máquinas T4-T7 en F2a
 
 **Hecho clave:** El sistema de visibilidad ya existe. Máquinas con `level: 0` en `INITIAL_MACHINES` se muestran como tarjetas bloqueadas (`isLocked = machine.level === 0` en `machine-card-v2`). `MachineUnlockService` las desbloquea al cumplir condiciones.
 
@@ -263,7 +263,7 @@ UPG_STORE_016 = 'UPG_STORE_016'  // Mining Rig storage
 
 ---
 
-### D2-6 — F2a: Documentar refactor de `MarketService.getPrice()` con patrón exacto
+### ✅ D2-6 — F2a: Documentar refactor de `MarketService.getPrice()` con patrón exacto
 
 **Código actual (`market.service.ts`):**
 ```typescript
@@ -305,7 +305,7 @@ getPrice(resourceId: ResourceType): number {
 
 ---
 
-### D2-7 — F2a: Confirmar recursos T4-T7 en save migration
+### ✅ D2-7 — F2a: Confirmar recursos T4-T7 en save migration
 
 **Acción en el PRD:** Añadir en la spec de migración de F0, punto 6b:
 > "Los 9 recursos T4-T7 se inicializan en `save.resources` con `amount: 0` y `capacity` según A.5 si no existen ya en el save. Si `restoreState()` ya hace merge con `INITIAL_RESOURCES`, este paso puede ser implícito — verificar en F2a."
@@ -316,7 +316,7 @@ getPrice(resourceId: ResourceType): number {
 
 ---
 
-### D3-1 — F2b: Documentar sell buttons con patrón concreto
+### ✅ D3-1 — F2b: Documentar sell buttons con patrón concreto
 
 **Hecho confirmado (D1-8):** `<app-sell-resource-button [resourceId]="ResourceType.X">` ya funciona genéricamente. No se crean nuevos componentes.
 
@@ -334,7 +334,7 @@ getPrice(resourceId: ResourceType): number {
 
 ---
 
-### D3-2 — F2b: Decidir condición de unlock de storage upgrades T4-T7
+### ✅ D3-2 — F2b: Decidir condición de unlock de storage upgrades T4-T7
 
 **Hecho confirmado (D1-7):** `storageUpgrades()` en `upgrades-panel.component.ts` es una lista estática hardcodeada (patrón `{id, resourceId, nameKey}`). El modelo `UpgradeDefinition` no tiene `unlockCondition`. El filtro de visibilidad se hace en el computed del panel.
 
@@ -354,7 +354,7 @@ isLocked: !this.machinesService.isUnlocked(entry.unlockedBy)
 
 ---
 
-### D3-3 — F2b: Documentar layout del panel de upgrades con 33 upgrades
+### ✅ D3-3 — F2b: Documentar layout del panel de upgrades con 33 upgrades
 
 **Estado actual:** 15 upgrades (7 storage + 8 machine speed). Con F2: **33 upgrades** (16 storage + 17 machine speed).
 
@@ -376,7 +376,7 @@ Los bloqueados aparecen al final de cada sección con estilo gris (`[class.locke
 
 ---
 
-### D3-4 — F1: Corregir "Out of scope" de F1 desactualizado
+### ✅ D3-4 — F1: Corregir "Out of scope" de F1 desactualizado
 
 **Problema:** F1 dice "Contratos para recursos T4-T7 (esos llegan en F2)". Con el nuevo orden de fases (F2 antes que F1), cuando se implemente F1 los recursos T4-T7 ya existen.
 
@@ -389,7 +389,7 @@ Los bloqueados aparecen al final de cada sección con estilo gris (`[class.locke
 
 ---
 
-### D4-1 — F1: Definir comportamiento exacto de "Ignorar" contrato
+### ✅ D4-1 — F1: Definir comportamiento exacto de "Ignorar" contrato
 
 **Decisión:** Ignorar un contrato lo **elimina del slot inmediatamente** sin penalización.
 - El slot queda libre para el próximo check de spawn (hasta 60s después).
@@ -406,7 +406,7 @@ Los bloqueados aparecen al final de cada sección con estilo gris (`[class.locke
 
 ---
 
-### D4-2 — F1: Definir `SavedContract` type
+### ✅ D4-2 — F1: Definir `SavedContract` type
 
 **Decisión:** `SavedContract = Contract` completo. No se necesita un tipo separado. Campos relevantes para serialización:
 - `id`, `type`, `resourceId`, `quantity`, `rewardAmount`, `penaltyAmount` → siempre presentes
@@ -419,7 +419,7 @@ Los bloqueados aparecen al final de cada sección con estilo gris (`[class.locke
 
 ---
 
-### D4-3 — F1: Definir posición del panel de contratos
+### ✅ D4-3 — F1: Definir posición del panel de contratos
 
 **Decisión:** El panel de contratos se implementa como una nueva **tab en el panel de upgrades existente** ("Contratos"). Reutiliza el sistema de tabs y el colapsado sin añadir un segundo panel al layout.
 
@@ -430,7 +430,7 @@ Si en QA el panel de upgrades queda demasiado cargado, se evalúa extraerlo.
 
 ---
 
-### D4-4 — F1: Documentar patrón de integración para primer contrato forzado
+### ✅ D4-4 — F1: Documentar patrón de integración para primer contrato forzado
 
 **Hecho (D1-5):** `MachineUnlockService` no tiene ningún signal observable. Cero cambios en él.
 
@@ -451,7 +451,7 @@ Zero cambios en `MachineUnlockService`. El `effect()` se re-evalúa cada vez que
 
 ---
 
-### D4-5 — F1: Aclarar que contrato disponible ocupa slot
+### ✅ D4-5 — F1: Aclarar que contrato disponible ocupa slot
 
 **Decisión:** Sí, **un contrato disponible (no aceptado) ocupa slot**. Los 3 slots pueden estar todos con contratos disponibles sin que el jugador haya aceptado ninguno.
 
@@ -464,7 +464,7 @@ Zero cambios en `MachineUnlockService`. El `effect()` se re-evalúa cada vez que
 
 ---
 
-### D5-1 — F3: Documentar mecanismo de spawn de eventos
+### ✅ D5-1 — F3: Documentar mecanismo de spawn de eventos
 
 **Decisión:** `GameLoopService` llama `marketEventService.tick()` cada tick (1s). El servicio:
 1. Si hay evento activo: decrementa timer. Cuando llega a 0, termina el evento y resetea `activeEventMultipliers` a `{}`.
@@ -477,7 +477,7 @@ Zero cambios en `MachineUnlockService`. El `effect()` se re-evalúa cada vez que
 
 ---
 
-### D5-2 — F3: Definir comportamiento del cooldown entre sesiones
+### ✅ D5-2 — F3: Definir comportamiento del cooldown entre sesiones
 
 **Decisión:** El cooldown **no persiste entre sesiones**. Al cargar, `secondsSinceLastEvent` se inicializa a `cooldown - 60` (= 240s), de modo que el primer evento llega ~60s después de cargar.
 
@@ -488,14 +488,14 @@ Esto evita un evento inmediato al cargar (que sorprendería) y no obliga a esper
 
 ---
 
-### D5-3 — F3: Documentar nombres de servicio y componente
+### ✅ D5-3 — F3: Documentar nombres de servicio y componente
 
 **Acción en el PRD:** Añadir en Requisitos funcionales de F3, punto 1c:
 > "Nuevo servicio: `MarketEventService` en `src/app/services/market-event.service.ts`.<br>Nuevo componente: `EventBannerComponent` en `src/app/components/event-banner/event-banner.component.ts`.<br>El banner se inserta en `app.html` al mismo nivel que `notification-container`."
 
 ---
 
-### D5-4 — F4: Unificar semántica de triggers a "producir"
+### ✅ D5-4 — F4: Unificar semántica de triggers a "producir"
 
 **Problema:** `first_laptop_sold` dice "Vender"; `first_server_rack` dice "Completar". Inconsistente.
 
@@ -512,7 +512,7 @@ first_server_rack   → (sin cambio — ya dice "Completar 1 Server Rack")
 
 ---
 
-### D5-5 — F4: Definir `MilestoneService` y sus dependencias
+### ✅ D5-5 — F4: Definir `MilestoneService` y sus dependencias
 
 **Decisión:** Nuevo `MilestoneService` en `src/app/services/milestone.service.ts`.
 
@@ -528,14 +528,14 @@ first_server_rack   → (sin cambio — ya dice "Completar 1 Server Rack")
 
 ---
 
-### D5-6 — F4: Añadir `resetToNewGame()` para milestones
+### ✅ D5-6 — F4: Añadir `resetToNewGame()` para milestones
 
 **Acción en el PRD:** Añadir en Requisitos funcionales de F4, punto 6b:
 > "`resetToNewGame()` en `save.service.ts` incluye `milestoneService.reset()` que limpia `completedMilestones = []`. Mismo patrón que el reset de contratos."
 
 ---
 
-### D5-7 — F4: Spec exacta del tipo `'milestone'` en `NotificationService`
+### ✅ D5-7 — F4: Spec exacta del tipo `'milestone'` en `NotificationService`
 
 **Estado actual:**
 ```typescript
@@ -555,7 +555,7 @@ DURATIONS = { success: 3000, info: 3500, unlock: 5000 };
 
 ---
 
-### D5-8 — Transversal: Convención de i18n keys
+### ✅ D5-8 — Transversal: Convención de i18n keys
 
 **Patrón existente:** `machines.crusher`, `resources.metal`, `upgrades.storage.scrap`, `tutorial.steps.X`.
 
@@ -603,7 +603,7 @@ milestones.first_circuit_board, milestones.first_laptop_sold, ...
 
 ---
 
-### D5-9 — Transversal: Spec de audio para F1, F3 y F4
+### ✅ D5-9 — Transversal: Spec de audio para F1, F3 y F4
 
 **Métodos existentes en `AudioService`:**
 `playGameMusicLoop`, `playUiClick`, `playUpgradeStarted`, `playUpgradeCompleted`,
