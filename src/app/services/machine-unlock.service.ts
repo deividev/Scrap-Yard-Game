@@ -69,6 +69,15 @@ export class MachineUnlockService {
       MachineType.RECYCLER,
       MachineType.ELECTRIC_ASSEMBLER,
       MachineType.ELECTRIC_PACKAGER,
+      MachineType.PCB_PRINTER,
+      MachineType.HDD_ASSEMBLER,
+      MachineType.SCREEN_FABRICATOR,
+      MachineType.GPU_FAB,
+      MachineType.SMARTPHONE_FACTORY,
+      MachineType.LAPTOP_WORKSHOP,
+      MachineType.PC_BUILDER,
+      MachineType.MINING_RIG_ASSEMBLY,
+      MachineType.DATA_CENTER_ASSEMBLY,
     ];
     unlockable
       .forEach((machineType) => this.checkUnlock(machineType));
@@ -110,7 +119,7 @@ export class MachineUnlockService {
   getUnlockInfo(machineType: MachineType): MachineUnlockInfo {
     const machine = this.machinesService.getMachine(machineType);
 
-    if (!machine || (machine?.level as any) > 0) {
+    if (!machine || machine.level > 0) {
       return { isUnlocked: true, requirements: [] };
     }
 
@@ -137,6 +146,33 @@ export class MachineUnlockService {
         break;
       case MachineType.ELECTRIC_PACKAGER:
         requirements = this.getElectricPackagerRequirements();
+        break;
+      case MachineType.PCB_PRINTER:
+        requirements = this.getPcbPrinterRequirements();
+        break;
+      case MachineType.HDD_ASSEMBLER:
+        requirements = this.getHddAssemblerRequirements();
+        break;
+      case MachineType.SCREEN_FABRICATOR:
+        requirements = this.getScreenFabricatorRequirements();
+        break;
+      case MachineType.GPU_FAB:
+        requirements = this.getGpuFabRequirements();
+        break;
+      case MachineType.SMARTPHONE_FACTORY:
+        requirements = this.getSmartphoneFactoryRequirements();
+        break;
+      case MachineType.LAPTOP_WORKSHOP:
+        requirements = this.getLaptopWorkshopRequirements();
+        break;
+      case MachineType.PC_BUILDER:
+        requirements = this.getPcBuilderRequirements();
+        break;
+      case MachineType.MINING_RIG_ASSEMBLY:
+        requirements = this.getMiningRigAssemblyRequirements();
+        break;
+      case MachineType.DATA_CENTER_ASSEMBLY:
+        requirements = this.getDataCenterAssemblyRequirements();
         break;
       default:
         requirements = [];
@@ -261,6 +297,142 @@ export class MachineUnlockService {
         requiredLevel: 8,
         currentLevel: packagerLevel,
         isMet: packagerLevel >= 8,
+      },
+    ];
+  }
+
+  private getPcbPrinterRequirements(): UnlockRequirement[] {
+    const electricAssemblerLevel = this.getMachineLevel(MachineType.ELECTRIC_ASSEMBLER);
+    return [
+      {
+        machineType: MachineType.ELECTRIC_ASSEMBLER,
+        requiredLevel: 4,
+        currentLevel: electricAssemblerLevel,
+        isMet: electricAssemblerLevel >= 4,
+      },
+    ];
+  }
+
+  private getHddAssemblerRequirements(): UnlockRequirement[] {
+    const pcbPrinterLevel = this.getMachineLevel(MachineType.PCB_PRINTER);
+    return [
+      {
+        machineType: MachineType.PCB_PRINTER,
+        requiredLevel: 3,
+        currentLevel: pcbPrinterLevel,
+        isMet: pcbPrinterLevel >= 3,
+      },
+    ];
+  }
+
+  private getScreenFabricatorRequirements(): UnlockRequirement[] {
+    const pcbPrinterLevel = this.getMachineLevel(MachineType.PCB_PRINTER);
+    return [
+      {
+        machineType: MachineType.PCB_PRINTER,
+        requiredLevel: 5,
+        currentLevel: pcbPrinterLevel,
+        isMet: pcbPrinterLevel >= 5,
+      },
+    ];
+  }
+
+  private getGpuFabRequirements(): UnlockRequirement[] {
+    const hddAssemblerLevel = this.getMachineLevel(MachineType.HDD_ASSEMBLER);
+    const screenFabricatorLevel = this.getMachineLevel(MachineType.SCREEN_FABRICATOR);
+    return [
+      {
+        machineType: MachineType.HDD_ASSEMBLER,
+        requiredLevel: 2,
+        currentLevel: hddAssemblerLevel,
+        isMet: hddAssemblerLevel >= 2,
+      },
+      {
+        machineType: MachineType.SCREEN_FABRICATOR,
+        requiredLevel: 2,
+        currentLevel: screenFabricatorLevel,
+        isMet: screenFabricatorLevel >= 2,
+      },
+    ];
+  }
+
+  private getSmartphoneFactoryRequirements(): UnlockRequirement[] {
+    const screenFabricatorLevel = this.getMachineLevel(MachineType.SCREEN_FABRICATOR);
+    return [
+      {
+        machineType: MachineType.SCREEN_FABRICATOR,
+        requiredLevel: 3,
+        currentLevel: screenFabricatorLevel,
+        isMet: screenFabricatorLevel >= 3,
+      },
+    ];
+  }
+
+  private getLaptopWorkshopRequirements(): UnlockRequirement[] {
+    const hddLevel = this.getMachineLevel(MachineType.HDD_ASSEMBLER);
+    const screenFabricatorLevel = this.getMachineLevel(MachineType.SCREEN_FABRICATOR);
+    return [
+      {
+        machineType: MachineType.HDD_ASSEMBLER,
+        requiredLevel: 4,
+        currentLevel: hddLevel,
+        isMet: hddLevel >= 4,
+      },
+      {
+        machineType: MachineType.SCREEN_FABRICATOR,
+        requiredLevel: 3,
+        currentLevel: screenFabricatorLevel,
+        isMet: screenFabricatorLevel >= 3,
+      },
+    ];
+  }
+
+  private getPcBuilderRequirements(): UnlockRequirement[] {
+    const gpuFabLevel = this.getMachineLevel(MachineType.GPU_FAB);
+    const hddLevel = this.getMachineLevel(MachineType.HDD_ASSEMBLER);
+    return [
+      {
+        machineType: MachineType.GPU_FAB,
+        requiredLevel: 2,
+        currentLevel: gpuFabLevel,
+        isMet: gpuFabLevel >= 2,
+      },
+      {
+        machineType: MachineType.HDD_ASSEMBLER,
+        requiredLevel: 3,
+        currentLevel: hddLevel,
+        isMet: hddLevel >= 3,
+      },
+    ];
+  }
+
+  private getMiningRigAssemblyRequirements(): UnlockRequirement[] {
+    const gpuFabLevel = this.getMachineLevel(MachineType.GPU_FAB);
+    const pcBuilderLevel = this.getMachineLevel(MachineType.PC_BUILDER);
+    return [
+      {
+        machineType: MachineType.GPU_FAB,
+        requiredLevel: 3,
+        currentLevel: gpuFabLevel,
+        isMet: gpuFabLevel >= 3,
+      },
+      {
+        machineType: MachineType.PC_BUILDER,
+        requiredLevel: 2,
+        currentLevel: pcBuilderLevel,
+        isMet: pcBuilderLevel >= 2,
+      },
+    ];
+  }
+
+  private getDataCenterAssemblyRequirements(): UnlockRequirement[] {
+    const pcBuilderLevel = this.getMachineLevel(MachineType.PC_BUILDER);
+    return [
+      {
+        machineType: MachineType.PC_BUILDER,
+        requiredLevel: 3,
+        currentLevel: pcBuilderLevel,
+        isMet: pcBuilderLevel >= 3,
       },
     ];
   }

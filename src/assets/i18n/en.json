@@ -42,7 +42,18 @@
     "money": "Money",
     "copper": "Copper",
     "recycled_plastic": "Recycled Plastic",
-    "electric_components": "Electric Components"
+    "electric_components": "Electric Components",
+    "circuit_board": "Circuit Board",
+    "hdd": "Hard Drive",
+    "screen": "Screen",
+    "gpu": "GPU",
+    "smartphone": "Smartphone",
+    "laptop": "Laptop",
+    "desktop_pc": "Desktop PC",
+    "mining_rig": "Mining Rig",
+    "server_rack": "Server Rack",
+    "section_basic": "Basic Resources",
+    "section_advanced": "Advanced Resources"
   },
   "machines": {
     "crusher": "Crusher",
@@ -52,7 +63,16 @@
     "packager": "Packager",
     "electric_packager": "Electric Packager",
     "recycler": "Recycler",
-    "electric_assembler": "Electric Assembler"
+    "electric_assembler": "Electric Assembler",
+    "pcb_printer": "PCB Printer",
+    "hdd_assembler": "HDD Assembler",
+    "screen_fabricator": "Screen Fabricator",
+    "gpu_fab": "GPU Fab",
+    "smartphone_factory": "Smartphone Factory",
+    "laptop_workshop": "Laptop Workshop",
+    "pc_builder": "PC Builder",
+    "mining_rig_assembly": "Mining Rig Assembly",
+    "data_center_assembly": "Data Center Assembly"
   },
   "status": {
     "parada": "Offline",
@@ -168,7 +188,17 @@
       "components": "Expand Components Rack",
       "copper": "Expand Copper Depot",
       "recycled_plastic": "Expand Recycled Plastic Silo",
-      "electric_components": "Expand Electric Parts Rack"
+      "electric_components": "Expand Electric Parts Rack",
+      "circuit_board": "Expand Circuit Board Storage",
+      "hdd": "Expand HDD Storage",
+      "screen": "Expand Screen Storage",
+      "gpu": "Expand GPU Storage",
+      "smartphone": "Expand Smartphone Storage",
+      "laptop": "Expand Laptop Storage",
+      "desktop_pc": "Expand Desktop PC Storage",
+      "mining_rig": "Expand Mining Rig Storage",
+      "server_rack": "Expand Server Rack Storage",
+      "locked_hint": "Unlock the required machine to access this storage"
     },
     "capacity_label": "Capacity:",
     "machine_tab": {

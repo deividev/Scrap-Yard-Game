@@ -57,6 +57,24 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
   [MachineType.RECYCLER]: 'assets/cards/recycler_card_new_slot.png',
   [MachineType.ELECTRIC_ASSEMBLER]: 'assets/cards/electric_assembler_card_new_slot.png',
   [MachineType.ELECTRIC_PACKAGER]: 'assets/cards/electric_packager_card_new_slot.png',
+  // T4
+  [MachineType.PCB_PRINTER]: 'assets/cards/pcb_printer_card_new_slot.png',
+  // T5
+  [MachineType.HDD_ASSEMBLER]: 'assets/cards/hdd_assembler_card_new_slot.png',
+  // T6
+  [MachineType.SCREEN_FABRICATOR]: 'assets/cards/screen_fabricator_card_new_slot.png',
+  // T7
+  [MachineType.GPU_FAB]: 'assets/cards/gpu_fab_card_new_slot.png',
+  // T8
+  [MachineType.SMARTPHONE_FACTORY]: 'assets/cards/smartphone_factory_card_new_slot.png',
+  // T9
+  [MachineType.LAPTOP_WORKSHOP]: 'assets/cards/laptop_workshop_card_new_slot.png',
+  // T10
+  [MachineType.PC_BUILDER]: 'assets/cards/pc_builder_card_new_slot.png',
+  // T11
+  [MachineType.MINING_RIG_ASSEMBLY]: 'assets/cards/mining_rig_assembly_card_new_slot.png',
+  // T12
+  [MachineType.DATA_CENTER_ASSEMBLY]: 'assets/cards/data_center_assembly_card_new_slot.png',
 };
 
 @Component({
@@ -102,17 +120,6 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         [style.width.%]="cardSlots().canvas.bar.w * 100"
         [style.height.%]="cardSlots().canvas.bar.h * 100"
       ></div>
-
-      <!-- SLOT 5: nombre máquina -->
-      <div
-        class="mc-v2__s5"
-        [style.top]="cardSlots().overlay.name.top"
-        [style.left]="cardSlots().overlay.name.left"
-        [style.width]="cardSlots().overlay.name.width"
-        [style.height]="cardSlots().overlay.name.height"
-      >
-        <span class="mc-v2__mname">{{ translatedMachineName() }}</span>
-      </div>
 
       @if (!isLocked()) {
         <!-- SLOT 2: LED toggle button -->

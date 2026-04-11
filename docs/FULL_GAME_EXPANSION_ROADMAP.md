@@ -117,7 +117,7 @@ Tier 4  →  Circuit Board          (Cobre + Componentes)          [PCB Printer 
            ↳ pivote de todo T5-T7. Todos los productos de alta gama lo requieren.
 
 Tier 5  →  Disco Duro             (Circuit Board + Metal)        [HDD Assembler ← nueva]
-           Pantalla               (Circuit Board + Comp. Eléctricos + Plástico) [Screen Fabricator ← nueva]
+           Pantalla               (Circuit Board + Comp. Eléctricos + Plástico Reciclado) [Screen Fabricator ← nueva]
            ↳ dos máquinas, dos productos que se venden bien solos o se usan en T6.
            ↳ Plástico entra aquí → el Separador sigue siendo relevante en late game.
 
@@ -173,7 +173,7 @@ Máquinas para procesar los recursos de los tiers 4-7.
 |---|---|---|---|---|
 | PCB Printer | Cobre + Componentes | Circuit Board | 4 | Pivote de todo T5-T7. Primera unlock post-demo. |
 | HDD Assembler | Circuit Board + Metal | Disco Duro | 5 | Storage para Laptop y Desktop PC. |
-| Screen Fabricator | Circuit Board + Comp. Eléctricos + Plástico | Pantalla | 5 | Display para Smartphone y Laptop. Plástico relevante en late game. |
+| Screen Fabricator | Circuit Board + Comp. Eléctricos + Plástico Reciclado | Pantalla | 5 | Display para Smartphone y Laptop. Plástico Reciclado crea dependencia valiosa de Recicladora en late game. |
 | GPU Fab | Circuit Board x2 + Cobre | GPU | 6 | Primer unlock de T6. Habilita Desktop PC y Mining Rig. |
 | Smartphone Factory | Pantalla + Circuit Board | Smartphone | 6 | Producto de consumo medio. Sin redundancia de ingredientes. |
 | Laptop Workshop | Disco Duro + Pantalla + Circuit Board | Laptop | 6 | Producto de consumo alto. |

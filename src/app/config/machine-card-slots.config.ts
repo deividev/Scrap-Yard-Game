@@ -325,6 +325,279 @@ export const ELECTRIC_PACKAGER_CARD_SLOTS: MachineCardSlots = {
 // ────────────────────────────────────────────────────────────────────────────────
 // Registry — add new machines here
 // ────────────────────────────────────────────────────────────────────────────────
+// PCB_PRINTER  (pcb_printer_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const PCB_PRINTER_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.843, cy: 0.433, r: 0.099, ry: 0.078 },
+    bar: { x: 0.159, y: 0.867, w: 0.685, h: 0.031, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '16%',   left: '3.9%',   width: '70%',   height: '11%' },
+    level:  { top: '28.3%',  left: '22.8%',  width: '55%' },
+    led:    { top: '43.2%', left: '84.1%', width: '16%', height: '14%' },
+    recipe: { bottom: '15.1%', left: '11.7%', width: '60%', height: '10%' },
+  },
+  effects: {
+    particles: {
+      type:         'steam',
+      zone:         { xMin: 0.245, xMax: 0.745, yMin: 0.478, yMax: 0.678 },
+      maxCount:     10,
+      spawnRate:    0.1,
+      speedScale:   0.5,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#ff4242',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+export const HDD_ASSEMBLER_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.834, cy: 0.216, r: 0.094, ry: 0.078 },
+    bar: { x: 0.152, y: 0.872, w: 0.696, h: 0.034, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '4.2%',   left: '22%',   width: '70.7%',   height: '9.2%' },
+    level:  { top: '15.9%',  left: '20.5%',  width: '55%' },
+    led:    { top: '21.4%', left: '84.3%', width: '16%', height: '14%' },
+    recipe: { bottom: '19.2%', left: '12.2%', width: '60%', height: '10%' },
+  },
+  effects: {
+    particles: {
+      type:         'steam',
+      zone:         { xMin: 0.254, xMax: 0.754, yMin: 0.351, yMax: 0.551 },
+      maxCount:     10,
+      spawnRate:    0.1,
+      speedScale:   0.5,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// SCREEN_FABRICATOR  (screen_fabricator_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const SCREEN_FABRICATOR_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.839, cy: 0.27, r: 0.089, ry: 0.071 },
+    bar: { x: 0.143, y: 0.865, w: 0.712, h: 0.033, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '10.1%',   left: '12.9%',   width: '70%',   height: '11%' },
+    level:  { top: '21.3%',  left: '19.4%',  width: '55%' },
+    led:    { top: '27.5%', left: '83.7%', width: '14.9%', height: '10.6%' },
+    recipe: { bottom: '16.4%', left: '8.5%', width: '65.9%', height: '15.9%' },
+  },
+  effects: {
+    particles: {
+      type:         'sparks',
+      zone:         { xMin: 0.267, xMax: 0.719, yMin: 0.428, yMax: 0.562 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.5,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#42d4ff',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// GPU_FAB  (gpu_fab_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const GPU_FAB_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.798, cy: 0.265, r: 0.077, ry: 0.062 },
+    bar: { x: 0.177, y: 0.884, w: 0.646, h: 0.031, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '11.2%',   left: '34.1%',   width: '70%',   height: '11%' },
+    level:  { top: '20.8%',  left: '21.4%',  width: '50.7%' },
+    led:    { top: '26.6%', left: '79.6%', width: '12.2%', height: '9.2%' },
+    recipe: { bottom: '13.4%', left: '12.1%', width: '65.9%', height: '15.9%' },
+  },
+  effects: {
+    particles: {
+      type:         'electricity',
+      zone:         { xMin: 0.4, xMax: 0.593, yMin: 0.396, yMax: 0.537 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.15,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#00eaff',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// SMARTPHONE_FACTORY  (smartphone_factory_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const SMARTPHONE_FACTORY_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.743, cy: 0.078, r: 0.063, ry: 0.049 },
+    bar: { x: 0.241, y: 0.875, w: 0.52, h: 0.024, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '-3.5%',   left: '25.1%',   width: '70%',   height: '11%' },
+    level:  { top: '2%',  left: '25.9%',  width: '40.1%' },
+    led:    { top: '8.1%', left: '74%', width: '13.1%', height: '9.9%' },
+    recipe: { bottom: '16.6%', left: '17.7%', width: '62%', height: '8.2%' },
+  },
+  effects: {
+    particles: {
+      type:         'plasma',
+      zone:         { xMin: 0.249, xMax: 0.72, yMin: 0.229, yMax: 0.482 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.3,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#7c3aed',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// LAPTOP_WORKSHOP  (laptop_workshop_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const LAPTOP_WORKSHOP_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.79, cy: 0.145, r: 0.057, ry: 0.045 },
+    bar: { x: 0.183, y: 0.952, w: 0.618, h: 0.026, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '1%',   left: '24%',   width: '70%',   height: '11%' },
+    level:  { top: '9.3%',  left: '25.1%',  width: '45.3%' },
+    led:    { top: '15.1%', left: '79.7%', width: '14.5%', height: '10.8%' },
+    recipe: { bottom: '8%', left: '19.4%', width: '62%', height: '8.2%' },
+  },
+  effects: {
+    particles: {
+      type:         'plasma',
+      zone:         { xMin: 0.27, xMax: 0.718, yMin: 0.365, yMax: 0.557 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.3,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#38bdf8',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// PC_BUILDER  (pc_builder_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const PC_BUILDER_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.817, cy: 0.154, r: 0.057, ry: 0.045 },
+    bar: { x: 0.185, y: 0.809, w: 0.618, h: 0.026, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '1.7%',   left: '24.5%',   width: '70%',   height: '11%' },
+    level:  { top: '10.4%',  left: '22.6%',  width: '45.3%' },
+    led:    { top: '15.8%', left: '82%', width: '14.5%', height: '10.8%' },
+    recipe: { bottom: '20.4%', left: '19.2%', width: '62%', height: '8.2%' },
+  },
+  effects: {
+    particles: {
+      type:         'plasma',
+      zone:         { xMin: 0.27, xMax: 0.718, yMin: 0.365, yMax: 0.557 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.3,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#60a5fa',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// MINING_RIG_ASSEMBLY  (mining_rig_assembly_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const MINING_RIG_ASSEMBLY_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.826, cy: 0.177, r: 0.059, ry: 0.045 },
+    bar: { x: 0.164, y: 0.843, w: 0.663, h: 0.028, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '4.4%',   left: '22%',   width: '70%',   height: '11%' },
+    level:  { top: '12.2%',  left: '24.5%',  width: '45.3%' },
+    led:    { top: '17.9%', left: '82.6%', width: '14.5%', height: '10.8%' },
+    recipe: { bottom: '18.4%', left: '19.6%', width: '61.1%', height: '6.4%' },
+  },
+  effects: {
+    particles: {
+      type:         'plasma',
+      zone:         { xMin: 0.281, xMax: 0.713, yMin: 0.365, yMax: 0.625 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.3,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#fbbf24',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
+// ────────────────────────────────────────────────────────────────────────────────
+// DATA_CENTER_ASSEMBLY  (data_center_assembly_card_new_slot.png  420x500)
+// NOTE: All slot values are initial estimates — calibrate with the ⚙ tool.
+// ────────────────────────────────────────────────────────────────────────────────
+export const DATA_CENTER_ASSEMBLY_CARD_SLOTS: MachineCardSlots = {
+  aspectRatio: '420 / 500',
+  canvas: {
+    led: { cx: 0.748, cy: 0.023, r: 0.049, ry: 0.038 },
+    bar: { x: 0.241, y: 0.866, w: 0.51, h: 0.021, fullFactor: 1 },
+  },
+  overlay: {
+    name:   { top: '1.7%',   left: '23.5%',   width: '70%',   height: '11%' },
+    level:  { top: '-3.2%',  left: '24.4%',  width: '45.3%' },
+    led:    { top: '2.5%', left: '74.6%', width: '7%', height: '5%' },
+    recipe: { bottom: '34.2%', left: '19.6%', width: '59.1%', height: '5.7%' },
+  },
+  effects: {
+    particles: {
+      type:         'plasma',
+      zone:         { xMin: 0.315, xMax: 0.718, yMin: 0.297, yMax: 0.561 },
+      maxCount:     8,
+      spawnRate:    0.1,
+      speedScale:   0.3,
+      opacityRange: [0.5, 0.9],
+      sizeRange:    [0.012, 0.028],
+      color:        '#22d3ee',
+    },
+    shake: { enabled: true, intensityPx: 0.3, speedMs: 120 },
+  },
+};
+
 export const MACHINE_CARD_SLOTS: Partial<Record<string, MachineCardSlots>> = {
   [MachineType.CRUSHER]: CRUSHER_CARD_SLOTS,
   [MachineType.SEPARATOR]: SEPARATOR_CARD_SLOTS,
@@ -334,6 +607,24 @@ export const MACHINE_CARD_SLOTS: Partial<Record<string, MachineCardSlots>> = {
   [MachineType.RECYCLER]: RECYCLER_CARD_SLOTS,
   [MachineType.ELECTRIC_ASSEMBLER]: ELECTRIC_ASSEMBLER_CARD_SLOTS,
   [MachineType.ELECTRIC_PACKAGER]: ELECTRIC_PACKAGER_CARD_SLOTS,
+  // T4
+  [MachineType.PCB_PRINTER]: PCB_PRINTER_CARD_SLOTS,
+  // T5
+  [MachineType.HDD_ASSEMBLER]: HDD_ASSEMBLER_CARD_SLOTS,
+  // T6
+  [MachineType.SCREEN_FABRICATOR]: SCREEN_FABRICATOR_CARD_SLOTS,
+  // T7
+  [MachineType.GPU_FAB]: GPU_FAB_CARD_SLOTS,
+  // T8
+  [MachineType.SMARTPHONE_FACTORY]: SMARTPHONE_FACTORY_CARD_SLOTS,
+  // T9
+  [MachineType.LAPTOP_WORKSHOP]: LAPTOP_WORKSHOP_CARD_SLOTS,
+  // T10
+  [MachineType.PC_BUILDER]: PC_BUILDER_CARD_SLOTS,
+  // T11
+  [MachineType.MINING_RIG_ASSEMBLY]: MINING_RIG_ASSEMBLY_CARD_SLOTS,
+  // T12
+  [MachineType.DATA_CENTER_ASSEMBLY]: DATA_CENTER_ASSEMBLY_CARD_SLOTS,
 };
 
 export const DEFAULT_CARD_SLOTS = CRUSHER_CARD_SLOTS;

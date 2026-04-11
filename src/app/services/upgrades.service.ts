@@ -226,6 +226,15 @@ export class UpgradesService {
       { upgradeId: UpgradeId.UPG_STORE_005, resourceId: ResourceType.RECYCLED_PLASTIC },
       { upgradeId: UpgradeId.UPG_STORE_006, resourceId: ResourceType.ELECTRIC_COMPONENTS },
       { upgradeId: UpgradeId.UPG_STORE_007, resourceId: ResourceType.COPPER },
+      { upgradeId: UpgradeId.UPG_STORE_008, resourceId: ResourceType.CIRCUIT_BOARD },
+      { upgradeId: UpgradeId.UPG_STORE_009, resourceId: ResourceType.HDD },
+      { upgradeId: UpgradeId.UPG_STORE_010, resourceId: ResourceType.SCREEN },
+      { upgradeId: UpgradeId.UPG_STORE_011, resourceId: ResourceType.GPU },
+      { upgradeId: UpgradeId.UPG_STORE_012, resourceId: ResourceType.SMARTPHONE },
+      { upgradeId: UpgradeId.UPG_STORE_013, resourceId: ResourceType.LAPTOP },
+      { upgradeId: UpgradeId.UPG_STORE_014, resourceId: ResourceType.DESKTOP_PC },
+      { upgradeId: UpgradeId.UPG_STORE_015, resourceId: ResourceType.MINING_RIG },
+      { upgradeId: UpgradeId.UPG_STORE_016, resourceId: ResourceType.SERVER_RACK },
     ];
 
     for (const { upgradeId, resourceId } of storageUpgrades) {
@@ -267,11 +276,38 @@ export class UpgradesService {
       case UpgradeId.UPG_STORE_007: // Copper
         increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.COPPER;
         break;
+      case UpgradeId.UPG_STORE_008: // Circuit Board
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.CIRCUIT_BOARD;
+        break;
+      case UpgradeId.UPG_STORE_009: // HDD
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.HDD;
+        break;
+      case UpgradeId.UPG_STORE_010: // Screen
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.SCREEN;
+        break;
+      case UpgradeId.UPG_STORE_011: // GPU
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.GPU;
+        break;
+      case UpgradeId.UPG_STORE_012: // Smartphone
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.SMARTPHONE;
+        break;
+      case UpgradeId.UPG_STORE_013: // Laptop
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.LAPTOP;
+        break;
+      case UpgradeId.UPG_STORE_014: // Desktop PC
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.DESKTOP_PC;
+        break;
+      case UpgradeId.UPG_STORE_015: // Mining Rig
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.MINING_RIG;
+        break;
+      case UpgradeId.UPG_STORE_016: // Server Rack
+        increment = STORAGE_UPGRADE_CONFIG.INCREMENTS.SERVER_RACK;
+        break;
       default:
         return baseCapacity;
     }
 
-    return baseCapacity + increment * (level - 1);
+    return Math.max(baseCapacity, baseCapacity + increment * (level - 1));
   }
 
   getMachineUpgradeIdByMachineType(machineType: string): UpgradeId | null {
@@ -284,6 +320,15 @@ export class UpgradesService {
       recycler: UpgradeId.UPG_MACH_006,
       electric_assembler: UpgradeId.UPG_MACH_007,
       electric_packager: UpgradeId.UPG_MACH_008,
+      pcb_printer: UpgradeId.UPG_MACH_009,
+      hdd_assembler: UpgradeId.UPG_MACH_010,
+      screen_fabricator: UpgradeId.UPG_MACH_011,
+      gpu_fab: UpgradeId.UPG_MACH_012,
+      smartphone_factory: UpgradeId.UPG_MACH_013,
+      laptop_workshop: UpgradeId.UPG_MACH_014,
+      pc_builder: UpgradeId.UPG_MACH_015,
+      mining_rig_assembly: UpgradeId.UPG_MACH_016,
+      data_center_assembly: UpgradeId.UPG_MACH_017,
     };
     return mapping[machineType] || null;
   }
@@ -333,7 +378,13 @@ export class UpgradesService {
   }
 
   setState(upgrades: UpgradeState[]): void {
-    this.upgrades.set(upgrades.map((u) => ({ ...u })));
+    // Save migration: merge saved upgrades with initial state so new upgrade IDs
+    // added after a save was created start at level 1 instead of missing (level 0).
+    const savedMap = new Map(upgrades.map((u) => [u.id, u]));
+    const merged = this.initializeUpgrades().map((initial) =>
+      savedMap.has(initial.id) ? { ...savedMap.get(initial.id)! } : initial
+    );
+    this.upgrades.set(merged);
   }
 
   setSaveService(saveService: SaveMarker): void {

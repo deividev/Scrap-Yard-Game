@@ -105,9 +105,26 @@ export class MachineListComponent {
     MachineType.RECYCLER, // Requiere Separator Nv 4
     MachineType.ELECTRIC_ASSEMBLER, // Requiere Smelter Nv 3 + Recycler Nv 3
     MachineType.ELECTRIC_PACKAGER, // Requiere Electric Assembler Nv 3 + Packager Nv 5
+    // T4
+    MachineType.PCB_PRINTER, // Requiere Electric Assembler Nv 1
+    // T5
+    MachineType.HDD_ASSEMBLER, // Requiere PCB Printer Nv 3
+    // T6
+    MachineType.SCREEN_FABRICATOR, // Requiere PCB Printer Nv 5
+    // T7
+    MachineType.GPU_FAB, // Requiere Screen Fabricator Nv 3
+    // T8
+    MachineType.SMARTPHONE_FACTORY, // Requiere Screen Fabricator Nv 3
+    MachineType.LAPTOP_WORKSHOP, // Requiere HDD Assembler Nv 4 + Screen Fabricator Nv 3
+    // T10
+    MachineType.PC_BUILDER, // Requiere GPU Fab Nv 2 + HDD Assembler Nv 3
+    // T11
+    MachineType.MINING_RIG_ASSEMBLY, // Requiere GPU Fab Nv 3 + PC Builder Nv 2
+    // T12
+    MachineType.DATA_CENTER_ASSEMBLY, // Requiere PC Builder Nv 3
   ];
 
-  readonly tallMachines = new Set([MachineType.PACKAGER, MachineType.ELECTRIC_PACKAGER]);
+  readonly tallMachines = new Set([MachineType.PACKAGER, MachineType.ELECTRIC_PACKAGER, MachineType.SMARTPHONE_FACTORY, MachineType.DATA_CENTER_ASSEMBLY]);
 
   isTallMachine(id: string): boolean {
     return this.tallMachines.has(id as MachineType);

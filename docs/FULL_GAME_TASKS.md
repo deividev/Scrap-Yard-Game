@@ -283,7 +283,7 @@ Claves a añadir:
 ```
 T4: PCB Printer        → Circuit Board       (Cobre + Componentes)
 T5: HDD Assembler      → Disco Duro          (Circuit Board + Metal)
-    Screen Fabricator  → Pantalla            (Circuit Board + Comp. Eléctricos + Plástico)
+    Screen Fabricator  → Pantalla            (Circuit Board + Comp. Eléctricos + Plástico Reciclado)
 T6: GPU Fab            → GPU                 (Circuit Board x2 + Cobre)
     Smartphone Factory → Smartphone          (Pantalla + Circuit Board)
     Laptop Workshop    → Laptop              (Disco Duro + Pantalla + Circuit Board)

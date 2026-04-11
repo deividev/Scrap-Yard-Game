@@ -1,5 +1,4 @@
 import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ResourcesService } from '../../services/resources.service';
 import { ResourceType } from '../../models/resource.model';
 import { ScrapButtonComponent } from '../scrap-button/scrap-button.component';
@@ -14,12 +13,13 @@ import { ScrapGenerationService } from '../../services/scrap-generation.service'
 import { SaveService } from '../../services/save.service';
 import { AudioService } from '../../services/audio.service';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
+import { MachinesService } from '../../services/machines.service';
+import { MachineType } from '../../models/machine.model';
 
 @Component({
   selector: 'app-resources-header',
   standalone: true,
   imports: [
-    CommonModule,
     ScrapButtonComponent,
     SellResourceButtonComponent,
     ProgressionHintComponent,
@@ -31,6 +31,26 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
     <header class="resources-header">
       <!-- Barra superior: hint centrado + nav derecha -->
       <div class="header-topbar">
+        <!-- Dinero: siempre visible arriba a la izquierda -->
+        <div
+          class="resource-item money topbar-money"
+          [class.feedback-up]="isFeedback(moneyResource().id, 'up')"
+          [class.feedback-down]="isFeedback(moneyResource().id, 'down')"
+        >
+          <app-tooltip
+            [text]="translationService.t('resources.money')"
+            [inline]="true"
+            [position]="'bottom'"
+          >
+            <img
+              [src]="moneyResource().icon"
+              class="resource-icon"
+              [attr.alt]="translationService.t('resources.money')"
+            />
+          </app-tooltip>
+          <span class="resource-amount">{{ moneyResource().amount | formatNumber }}</span>
+        </div>
+
         <div class="topbar-hint">
           <app-progression-hint></app-progression-hint>
         </div>
@@ -50,27 +70,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         </div>
       </div>
 
-      <!-- Fila de recursos: iconos + sell buttons debajo de cada uno -->
-      <div class="resources-row">
-        <div
-          class="resource-item money"
-          [class.feedback-up]="isFeedback(moneyResource().id, 'up')"
-          [class.feedback-down]="isFeedback(moneyResource().id, 'down')"
-        >
-          <app-tooltip
-            [text]="translationService.t('resources.money')"
-            [inline]="true"
-            [position]="'bottom'"
-          >
-            <img
-              [src]="moneyResource().icon"
-              class="resource-icon"
-              [attr.alt]="translationService.t('resources.money')"
-            />
-          </app-tooltip>
-          <span class="resource-amount">{{ moneyResource().amount }}</span>
-        </div>
-
+      <!-- Filas de recursos: básicos (fila 1) y avanzados T4+ (fila 2) -->
+      <div class="resources-rows">
+        <div class="resources-section">
+          <span class="section-label">{{ translationService.t('resources.section_basic') }}</span>
+          <div class="resources-row">
         <div class="resources-container">
           <!-- Chatarra -->
           <div class="resource-column">
@@ -138,10 +142,12 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
               >
               <span class="resource-capacity">/ {{ metalResource().capacity | formatNumber }}</span>
             </div>
-            <app-sell-resource-button
-              [resourceId]="ResourceType.METAL"
-              [tutorialId]="'sell-metal-button'"
-            ></app-sell-resource-button>
+            @if (machinesService.isUnlocked(MachineType.CRUSHER)) {
+              <app-sell-resource-button
+                [resourceId]="ResourceType.METAL"
+                [tutorialId]="'sell-metal-button'"
+              ></app-sell-resource-button>
+            }
           </div>
 
           <!-- Plástico -->
@@ -174,9 +180,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ plasticResource().capacity | formatNumber }}</span
               >
             </div>
-            <app-sell-resource-button
-              [resourceId]="ResourceType.PLASTIC"
-            ></app-sell-resource-button>
+            @if (machinesService.isUnlocked(MachineType.SEPARATOR)) {
+              <app-sell-resource-button
+                [resourceId]="ResourceType.PLASTIC"
+              ></app-sell-resource-button>
+            }
           </div>
 
           <!-- Componentes -->
@@ -209,9 +217,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ componentsResource().capacity | formatNumber }}</span
               >
             </div>
-            <app-sell-resource-button
-              [resourceId]="ResourceType.COMPONENTS"
-            ></app-sell-resource-button>
+            @if (machinesService.isUnlocked(MachineType.ASSEMBLER)) {
+              <app-sell-resource-button
+                [resourceId]="ResourceType.COMPONENTS"
+              ></app-sell-resource-button>
+            }
           </div>
 
           <!-- Cobre -->
@@ -244,7 +254,9 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ copperResource().capacity | formatNumber }}</span
               >
             </div>
-            <app-sell-resource-button [resourceId]="ResourceType.COPPER"></app-sell-resource-button>
+            @if (machinesService.isUnlocked(MachineType.SMELTER)) {
+              <app-sell-resource-button [resourceId]="ResourceType.COPPER"></app-sell-resource-button>
+            }
           </div>
 
           <!-- Plástico Reciclado -->
@@ -279,6 +291,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ recycledPlasticResource().capacity | formatNumber }}</span
               >
             </div>
+            @if (machinesService.isUnlocked(MachineType.RECYCLER)) {
+              <app-sell-resource-button
+                [resourceId]="ResourceType.RECYCLED_PLASTIC"
+              ></app-sell-resource-button>
+            }
           </div>
 
           <!-- Componentes Eléctricos -->
@@ -313,6 +330,339 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
                 >/ {{ electricComponentsResource().capacity | formatNumber }}</span
               >
             </div>
+            @if (machinesService.isUnlocked(MachineType.ELECTRIC_ASSEMBLER)) {
+              <app-sell-resource-button
+                [resourceId]="ResourceType.ELECTRIC_COMPONENTS"
+              ></app-sell-resource-button>
+            }
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <!-- Fila 2: recursos manufacturados T4+ -->
+        <div class="resources-section">
+          <span class="section-label section-label--advanced">{{ translationService.t('resources.section_advanced') }}</span>
+          <div class="resources-row">
+        <div class="resources-container">
+
+          <!-- Circuit Board -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(circuitBoardResource().id, 'up')"
+              [class.feedback-down]="isFeedback(circuitBoardResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(circuitBoardResource().id)"
+              [class.storage-full]="isStorageFull(circuitBoardResource().id)"
+              [class.near-capacity]="isNearCapacity(circuitBoardResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.circuit_board')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="circuitBoardResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.circuit_board')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="
+                  circuitBoardResource().amount >= circuitBoardResource().capacity
+                "
+                >{{ circuitBoardResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ circuitBoardResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.PCB_PRINTER)) {
+              <app-sell-resource-button [resourceId]="ResourceType.CIRCUIT_BOARD"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- HDD -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(hddResource().id, 'up')"
+              [class.feedback-down]="isFeedback(hddResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(hddResource().id)"
+              [class.storage-full]="isStorageFull(hddResource().id)"
+              [class.near-capacity]="isNearCapacity(hddResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.hdd')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="hddResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.hdd')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="hddResource().amount >= hddResource().capacity"
+                >{{ hddResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ hddResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.HDD_ASSEMBLER)) {
+              <app-sell-resource-button [resourceId]="ResourceType.HDD"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Screen -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(screenResource().id, 'up')"
+              [class.feedback-down]="isFeedback(screenResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(screenResource().id)"
+              [class.storage-full]="isStorageFull(screenResource().id)"
+              [class.near-capacity]="isNearCapacity(screenResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.screen')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="screenResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.screen')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="screenResource().amount >= screenResource().capacity"
+                >{{ screenResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ screenResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.SCREEN_FABRICATOR)) {
+              <app-sell-resource-button [resourceId]="ResourceType.SCREEN"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- GPU -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(gpuResource().id, 'up')"
+              [class.feedback-down]="isFeedback(gpuResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(gpuResource().id)"
+              [class.storage-full]="isStorageFull(gpuResource().id)"
+              [class.near-capacity]="isNearCapacity(gpuResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.gpu')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="gpuResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.gpu')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="gpuResource().amount >= gpuResource().capacity"
+                >{{ gpuResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ gpuResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.GPU_FAB)) {
+              <app-sell-resource-button [resourceId]="ResourceType.GPU"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Smartphone -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(smartphoneResource().id, 'up')"
+              [class.feedback-down]="isFeedback(smartphoneResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(smartphoneResource().id)"
+              [class.storage-full]="isStorageFull(smartphoneResource().id)"
+              [class.near-capacity]="isNearCapacity(smartphoneResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.smartphone')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="smartphoneResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.smartphone')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="smartphoneResource().amount >= smartphoneResource().capacity"
+                >{{ smartphoneResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ smartphoneResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.SMARTPHONE_FACTORY)) {
+              <app-sell-resource-button [resourceId]="ResourceType.SMARTPHONE"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Laptop -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(laptopResource().id, 'up')"
+              [class.feedback-down]="isFeedback(laptopResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(laptopResource().id)"
+              [class.storage-full]="isStorageFull(laptopResource().id)"
+              [class.near-capacity]="isNearCapacity(laptopResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.laptop')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="laptopResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.laptop')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="laptopResource().amount >= laptopResource().capacity"
+                >{{ laptopResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ laptopResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.LAPTOP_WORKSHOP)) {
+              <app-sell-resource-button [resourceId]="ResourceType.LAPTOP"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Desktop PC -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(desktopPcResource().id, 'up')"
+              [class.feedback-down]="isFeedback(desktopPcResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(desktopPcResource().id)"
+              [class.storage-full]="isStorageFull(desktopPcResource().id)"
+              [class.near-capacity]="isNearCapacity(desktopPcResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.desktop_pc')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="desktopPcResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.desktop_pc')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="desktopPcResource().amount >= desktopPcResource().capacity"
+                >{{ desktopPcResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ desktopPcResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.PC_BUILDER)) {
+              <app-sell-resource-button [resourceId]="ResourceType.DESKTOP_PC"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Mining Rig -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(miningRigResource().id, 'up')"
+              [class.feedback-down]="isFeedback(miningRigResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(miningRigResource().id)"
+              [class.storage-full]="isStorageFull(miningRigResource().id)"
+              [class.near-capacity]="isNearCapacity(miningRigResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.mining_rig')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="miningRigResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.mining_rig')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="miningRigResource().amount >= miningRigResource().capacity"
+                >{{ miningRigResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ miningRigResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.MINING_RIG_ASSEMBLY)) {
+              <app-sell-resource-button [resourceId]="ResourceType.MINING_RIG"></app-sell-resource-button>
+            }
+          </div>
+
+          <!-- Server Rack -->
+          <div class="resource-column">
+            <div
+              class="resource-item"
+              [class.feedback-up]="isFeedback(serverRackResource().id, 'up')"
+              [class.feedback-down]="isFeedback(serverRackResource().id, 'down')"
+              [class.capacity-pop]="isCapacityPop(serverRackResource().id)"
+              [class.storage-full]="isStorageFull(serverRackResource().id)"
+              [class.near-capacity]="isNearCapacity(serverRackResource().id)"
+            >
+              <app-tooltip
+                [text]="translationService.t('resources.server_rack')"
+                [inline]="true"
+                [position]="'bottom'"
+              >
+                <img
+                  [src]="serverRackResource().icon"
+                  class="resource-icon"
+                  [attr.alt]="translationService.t('resources.server_rack')"
+                />
+              </app-tooltip>
+              <span
+                class="resource-amount"
+                [class.full]="serverRackResource().amount >= serverRackResource().capacity"
+                >{{ serverRackResource().amount | formatNumber }}</span
+              >
+              <span class="resource-capacity"
+                >/ {{ serverRackResource().capacity | formatNumber }}</span
+              >
+            </div>
+            @if (machinesService.isUnlocked(MachineType.DATA_CENTER_ASSEMBLY)) {
+              <app-sell-resource-button [resourceId]="ResourceType.SERVER_RACK"></app-sell-resource-button>
+            }
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -338,14 +688,71 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
       .header-topbar {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
+        gap: var(--space-3);
         min-height: 28px;
+      }
+
+      .topbar-money {
+        flex-shrink: 0;
+        padding-right: var(--space-4);
+        border-right: 1px solid var(--color-border);
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--color-accent-main);
+        white-space: nowrap;
+        border-top: none;
+        border-bottom: none;
+        border-left: none;
+        background: none;
+      }
+
+      @media (max-width: 1400px) {
+        .topbar-money { font-size: 16px; }
+      }
+
+      @media (max-width: 1100px) {
+        .topbar-money { font-size: 14px; }
       }
 
       .topbar-hint {
         flex: 1;
         display: flex;
         justify-content: center;
+      }
+
+      .resources-rows {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .resources-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        overflow: visible;
+        min-width: 0;
+      }
+
+      .resources-section + .resources-section {
+        padding-top: var(--space-2);
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .section-label {
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        opacity: 0.55;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        padding-left: 2px;
+      }
+
+      .section-label--advanced {
+        color: var(--color-accent-main);
+        opacity: 0.5;
       }
 
       .resources-row {
@@ -373,16 +780,16 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 
       .resource-item.money {
         font-size: 20px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--color-accent-main);
-        padding-right: var(--space-4);
-        border-right: 1px solid var(--color-border);
         white-space: nowrap;
         flex-shrink: 0;
+        border-color: transparent;
       }
 
       .resources-container {
         display: flex;
+        flex-wrap: nowrap;
         gap: var(--space-4);
         flex: 1;
         overflow: visible;
@@ -411,13 +818,11 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         transition: transform 0.2s ease;
       }
 
+      /* ── 1400px: iconos más chicos, gaps comprimidos ── */
       @media (max-width: 1400px) {
         .resource-icon {
           width: 36px;
           height: 36px;
-        }
-        .resource-item.money {
-          font-size: 16px;
         }
         .resources-row {
           gap: var(--space-2);
@@ -430,22 +835,43 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
         }
       }
 
-      @media (max-width: 1100px) {
-        .resource-icon {
-          width: 28px;
-          height: 28px;
-        }
-        .resource-item.money {
-          font-size: 14px;
-        }
-        .resources-row {
-          gap: var(--space-1);
-        }
+      /* ── 1200px: pasa a grid de 4 columnas por fila ── */
+      @media (max-width: 1200px) {
         .resources-container {
+          display: grid;
+          grid-template-columns: repeat(4, auto);
+          gap: var(--space-2) var(--space-3);
+          flex: unset;
+        }
+
+        .resource-column {
           gap: var(--space-1);
         }
-        .resource-column {
-          gap: 6px;
+
+        .resource-icon {
+          width: 30px;
+          height: 30px;
+        }
+
+        .resource-capacity {
+          display: none;
+        }
+      }
+
+      /* ── 900px: iconos aún más chicos ── */
+      @media (max-width: 900px) {
+        .resources-container {
+          grid-template-columns: repeat(4, auto);
+          gap: var(--space-1) var(--space-2);
+        }
+
+        .resource-icon {
+          width: 24px;
+          height: 24px;
+        }
+
+        .topbar-money {
+          font-size: 14px;
         }
       }
 
@@ -664,12 +1090,14 @@ import { AppButtonComponent } from '../ui/app-button/app-button.component';
 })
 export class ResourcesHeaderComponent implements OnDestroy {
   readonly ResourceType = ResourceType;
+  readonly MachineType = MachineType;
 
   private resourcesService = inject(ResourcesService);
   private gameStateService = inject(GameStateService);
   private saveService = inject(SaveService);
   private audioService = inject(AudioService);
   public translationService = inject(TranslationService);
+  readonly machinesService = inject(MachinesService);
   private scrapGenerationService = inject(ScrapGenerationService);
   private feedbackState = signal<Record<string, 'idle' | 'up' | 'down'>>({});
   private capacityPopState = signal<Record<string, boolean>>({});
@@ -919,6 +1347,132 @@ export class ResourcesHeaderComponent implements OnDestroy {
         amount: 0,
         capacity: 0,
         icon: this.getResourceIcon(ResourceType.ELECTRIC_COMPONENTS),
+      }
+    );
+  });
+
+  circuitBoardResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.CIRCUIT_BOARD);
+    return (
+      resource || {
+        id: ResourceType.CIRCUIT_BOARD,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.CIRCUIT_BOARD),
+      }
+    );
+  });
+
+  hddResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.HDD);
+    return (
+      resource || {
+        id: ResourceType.HDD,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.HDD),
+      }
+    );
+  });
+
+  screenResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.SCREEN);
+    return (
+      resource || {
+        id: ResourceType.SCREEN,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.SCREEN),
+      }
+    );
+  });
+
+  gpuResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.GPU);
+    return (
+      resource || {
+        id: ResourceType.GPU,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.GPU),
+      }
+    );
+  });
+
+  smartphoneResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.SMARTPHONE);
+    return (
+      resource || {
+        id: ResourceType.SMARTPHONE,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.SMARTPHONE),
+      }
+    );
+  });
+
+  laptopResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.LAPTOP);
+    return (
+      resource || {
+        id: ResourceType.LAPTOP,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.LAPTOP),
+      }
+    );
+  });
+
+  desktopPcResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.DESKTOP_PC);
+    return (
+      resource || {
+        id: ResourceType.DESKTOP_PC,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.DESKTOP_PC),
+      }
+    );
+  });
+
+  miningRigResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.MINING_RIG);
+    return (
+      resource || {
+        id: ResourceType.MINING_RIG,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.MINING_RIG),
+      }
+    );
+  });
+
+  serverRackResource = computed(() => {
+    const all = this.resourcesService.getAll();
+    const resource = all.find((r) => r.id === ResourceType.SERVER_RACK);
+    return (
+      resource || {
+        id: ResourceType.SERVER_RACK,
+        name: '',
+        amount: 0,
+        capacity: 0,
+        icon: this.getResourceIcon(ResourceType.SERVER_RACK),
       }
     );
   });

@@ -42,7 +42,18 @@
     "money": "Dinero",
     "copper": "Cobre",
     "recycled_plastic": "Plástico reciclado",
-    "electric_components": "Componentes eléctricos"
+    "electric_components": "Componentes eléctricos",
+    "circuit_board": "Placa de Circuito",
+    "hdd": "Disco Duro",
+    "screen": "Pantalla",
+    "gpu": "GPU",
+    "smartphone": "Smartphone",
+    "laptop": "Laptop",
+    "desktop_pc": "PC de Escritorio",
+    "mining_rig": "Mining Rig",
+    "server_rack": "Servidor Rack",
+    "section_basic": "Recursos Básicos",
+    "section_advanced": "Recursos Avanzados"
   },
   "machines": {
     "crusher": "Trituradora",
@@ -52,7 +63,16 @@
     "packager": "Empaquetadora",
     "electric_packager": "Empaquetadora eléctrica",
     "recycler": "Recicladora",
-    "electric_assembler": "Ensambladora eléctrica"
+    "electric_assembler": "Ensambladora eléctrica",
+    "pcb_printer": "Impresora PCB",
+    "hdd_assembler": "Ensamblador de HDD",
+    "screen_fabricator": "Fabricadora de Pantallas",
+    "gpu_fab": "GPU Fab",
+    "smartphone_factory": "Smartphone Factory",
+    "laptop_workshop": "Laptop Workshop",
+    "pc_builder": "PC Builder",
+    "mining_rig_assembly": "Mining Rig Assembly",
+    "data_center_assembly": "Data Center Assembly"
   },
   "status": {
     "parada": "Apagada",
@@ -168,7 +188,17 @@
       "components": "Ampliar Estantería de Componentes",
       "copper": "Ampliar Depósito de Cobre",
       "recycled_plastic": "Ampliar Silo de Plástico Reciclado",
-      "electric_components": "Ampliar Rack Eléctrico"
+      "electric_components": "Ampliar Rack Eléctrico",
+      "circuit_board": "Ampliar Almacén de Placas",
+      "hdd": "Ampliar Almacén de Discos Duros",
+      "screen": "Ampliar Almacén de Pantallas",
+      "gpu": "Ampliar Almacén de GPUs",
+      "smartphone": "Ampliar Almacén de Smartphones",
+      "laptop": "Ampliar Almacén de Laptops",
+      "desktop_pc": "Ampliar Almacén de PCs",
+      "mining_rig": "Ampliar Almacén de Mining Rigs",
+      "server_rack": "Ampliar Almacén de Server Racks",
+      "locked_hint": "Desbloquea la máquina requerida para acceder a este almacén"
     },
     "capacity_label": "Capacidad:",
     "machine_tab": {

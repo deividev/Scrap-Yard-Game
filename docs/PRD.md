@@ -118,7 +118,7 @@ Este proyecto sigue un modelo de desarrollo estrictamente secuencial e increment
 
 ---
 
-## FASE 0 — Rebalanceo Tier 3
+## FASE 0 — Rebalanceo Tier 3 ✅ COMPLETADA
 
 ### Objetivo
 Corregir el problema de diseño de la Fundidora antes de construir nada encima. La Fundidora actualmente consume Metal, lo que la pone en competencia directa con la Ensambladora. Esto crea un dilema de asignación que no es interesante — el jugador simplemente detiene la Fundidora.
@@ -158,9 +158,9 @@ Fundidora:   Scrap → Cobre     (fundición térmica)
 
 ### Criterios de aceptación
 
-- [ ] La Fundidora activa no reduce el suministro de Metal a la Ensambladora en ningún escenario.
-- [ ] Con Fundidora activa y auto-generación nivel 3, la cadena es sostenible con Scrap manual moderado (~5-10 clicks/min). Las pausas en producción son intencionales — no se requiere que las tres cadenas T2 corran simultáneamente sin intervención del jugador.
-- [ ] El Cobre mantiene utilidad como recurso vendible (precio > Metal) y como input de la Ensambladora Eléctrica.
+- [x] La Fundidora activa no reduce el suministro de Metal a la Ensambladora en ningún escenario. (F0: consume Scrap, no Metal.)
+- [x] Con Fundidora activa y auto-generación nivel 3, la cadena es sostenible con Scrap manual moderado (~5-10 clicks/min). (0.33/s = 1 Cobre cada 3s; E.Assembler demanda 1 Cobre cada 5s — excedente garantizado.)
+- [x] El Cobre mantiene utilidad como recurso vendible (precio > Metal) y como input de la Ensambladora Eléctrica. (BASE_PRICES.COPPER = $3.0 > METAL $1.0; E.Assembler sigue consumiendo Cobre.)
 - [x] El tutorial first-run no menciona la Fundidora en ningún paso — no requiere cambios. (Confirmado D1-9: ni es.json ni en.json hacen referencia al Smelter en la sección `tutorial`.)
 
 ### Out of scope para esta fase
@@ -280,10 +280,10 @@ Implementar el contenido principal del juego completo: 9 máquinas nuevas, 9 rec
 T1: Scrap
 T2: Metal · Plástico · Cobre
 T3: Componentes · Plástico Reciclado · Comp. Eléctricos
-T4: Circuit Board          ← PCB Printer [Cobre + Componentes]
+T4: Circuit Board          ← PCB Printer [Cobre + Comp. Eléctricos]
 T5: Disco Duro             ← HDD Assembler [Circuit Board + Metal]
-    Pantalla               ← Screen Fabricator [Circuit Board + CE + Plástico]
-T6: GPU                    ← GPU Fab [Circuit Board x2 + Cobre + CE]
+    Pantalla               ← Screen Fabricator [Circuit Board + CE + Plástico Reciclado]
+T6: GPU                    ← GPU Fab [Circuit Board + Disco Duro + Cobre]
     Smartphone             ← Smartphone Factory [Pantalla + GPU + Circuit Board]
     Laptop                 ← Laptop Workshop [HDD + Pantalla + GPU + Circuit Board]
     Desktop PC             ← PC Builder [HDD + GPU x2 + Circuit Board x2 + Metal]
@@ -293,7 +293,8 @@ T7: Mining Rig             ← Mining Rig Assembly [Desktop PC + GPU x4 + CE x2]
 
 ### Principios de diseño del árbol
 
-- **Ningún recurso T2-T3 queda obsoleto:** Metal entra en HDD (T5) y Desktop PC (T6). Plástico entra en Pantalla (T5). Cobre entra en Circuit Board (T4) y GPU (T6). Comp. Eléctricos entra en Pantalla (T5), GPU Fab (T6) y Mining Rig (T7).
+- **Ningún recurso T2-T3 queda obsoleto:** Metal entra en HDD (T5) y Desktop PC (T6). Plástico entra en Pantalla (T5). Cobre entra en Circuit Board (T4) y GPU Fab (T6). Comp. Eléctricos entra en Pantalla (T5) y Mining Rig (T7).
+- **Ningún recurso T5 queda sin uso inmediato:** Disco Duro entra en GPU Fab (T6), Laptop Workshop (T6) y PC Builder (T6) — el jugador ve destino visible desde el primer ciclo del HDD Assembler.
 - **Sin recetas variables** — cada producto es exactamente una máquina. Sin ambigüedad.
 - **Todos los productos intermedios son vendibles** — el jugador nunca está forzado a seguir la cadena.
 - **El PCB Printer (T4) es el pivot** — desbloquear el T4 abre todo lo demás. Es el momento wow del mid-game.
@@ -332,7 +333,7 @@ T7: Mining Rig             ← Mining Rig Assembly [Desktop PC + GPU x4 + CE x2]
    >   [ResourceType.CIRCUIT_BOARD]:       15,
    >   [ResourceType.HDD]:                 35,
    >   [ResourceType.SCREEN]:              40,
-   >   [ResourceType.GPU]:                 80,
+   >   [ResourceType.GPU]:                 100,
    >   [ResourceType.SMARTPHONE]:          300,
    >   [ResourceType.LAPTOP]:              600,
    >   [ResourceType.DESKTOP_PC]:          800,
@@ -362,7 +363,7 @@ T7: Mining Rig             ← Mining Rig Assembly [Desktop PC + GPU x4 + CE x2]
 | Circuit Board | 15 | ~6s | 2.55 |
 | Disco Duro | 35 | ~12s | 2.80 |
 | Pantalla | 40 | ~14s | 2.80 |
-| GPU | 80 | ~20s | 4.0 |
+| GPU | 100 | ~20s | 5.0 |
 | Smartphone | 300 | ~22s | 13.5 |
 | Laptop | 600 | ~28s | 21.0 |
 | Desktop PC | 800 | ~40s | 20.0 |
@@ -377,10 +378,30 @@ Nota: estos números se ajustan en QA (T-15). Son targets de diseño, no valores
 - [ ] El PCB Printer no starvea de inputs con cadena T3 activa al nivel de unlock.
 - [ ] Los recursos intermedios (HDD, Screen, GPU) no se acumulan indefinidamente sin posibilidad de venta.
 - [ ] La diferencia de dinero entre vender en T3 vs T7 es al menos ×10 en $/s sostenido.
-- [ ] El layout de machine-list es jugable con las 17 máquinas activas (sin overflow visible, scroll si es necesario).
-- [ ] Saves de v1 cargan correctamente en v2 (los nuevos recursos aparecen en 0, no hay crash).
-- [ ] Todos los assets son visibles (no broken images).
-- [ ] Todos los strings están en es y en sin claves faltantes.
+- [x] El layout de machine-list es jugable con las 17 máquinas activas (sin overflow visible, scroll si es necesario).
+- [x] Saves antiguos cargan correctamente — migración v2→v3 explícita en `migrateSave()` inicializa recursos y máquinas T4-T7.
+- [ ] Todos los assets son visibles (no broken images) — pendiente confirmar iconos: `desktop_pc_resource.png`, `mining_rig_resource.png`, `server_rack_resource.png`.
+- [x] Todos los strings están en es y en sin claves faltantes.
+- [x] Sell buttons aparecen/desaparecen correctamente según máquina upstream desbloqueada (guard `@if(machinesService.isUnlocked(...))`).
+
+### Estado de implementación F2 (actualizado)
+
+**✅ Completado — todos los requisitos funcionales:**
+- Req 1–4: 9 recursos + 9 máquinas + unlock conditions + orden progresivo
+- Req 5: Sell buttons T4-T7 en `resources-header` con `@if(machinesService.isUnlocked(MachineType.X))`. T1-T3 también uniformizados con el mismo patrón.
+- Req 6: Upgrades de velocidad UPG_MACH_009–017 (todas las máquinas)
+- Req 7: Upgrades de almacenamiento UPG_STORE_008–016 (todos los recursos T4-T7) con `isLocked` vía `unlockedBy`
+- Req 8: `SAVE_VERSION = 3`, rama `v2 → v3` en `migrateSave()` inicializa explícitamente los 9 recursos y 9 máquinas T4-T7, llama `isDirty.set(true)`
+- Req 9: `getPrice()` refactorizado a `return MARKET_CONFIG.BASE_PRICES[resourceId as ResourceType] ?? 0`. `BASE_PRICES` cubre los 15 recursos vendibles con precios exactos del PRD A.3
+- Req 10: Enums `ResourceType`, `MachineType`, `UpgradeId` extendidos. `getMachineUpgradeIdByMachineType()` mapea las 17 máquinas
+- Req 11: Assets presentes (verificación visual pendiente QA)
+- Req 12: i18n completo (es + en)
+
+**⏳ Pendiente QA (criterios de aceptación — requieren sesión de juego):**
+- Jugar cadena completa Scrap → Server Rack
+- Verificar balance PCB Printer (no starvation)
+- Verificar diferencia ×10 en $/s T3 vs T7
+- Confirmar assets sin broken images (desktop_pc, mining_rig, server_rack)
 
 ### Out of scope para esta fase
 - Animaciones de producción por máquina.
@@ -502,7 +523,7 @@ Esta fase hace que el juego se sienta vivo con el mínimo de trabajo.
 
 El juego completo está terminado cuando:
 
-- [ ] F0 — Fundidora recibe Scrap directo y el balance T3 está validado en QA.
+- [x] F0 — Fundidora recibe Scrap directo y el balance T3 está validado en QA.
 - [ ] F1 — El jugador puede completar, ignorar y que expiren contratos en una sesión de 30 min sin bugs.
 - [ ] F2 — El jugador puede llegar de Scrap a Server Rack en una sesión sin softlocks ni crashes.
 - [ ] F3 — Los 4 tipos de evento aparecen con las frecuencias correctas y los precios cambian en tiempo real.
@@ -608,10 +629,10 @@ UPG_STORE_016 = 'UPG_STORE_016',  // Server Rack storage
 
 | Máquina | Inputs / ciclo | Output / ciclo | baseSpeed | Ciclo | $/s efectivo |
 |---|---|---|---|---|---|
-| **PCB Printer** | 1 Cobre + 1 Componente | 1 Circuit Board | 0.17/s | ~6s | $2.55 |
-| **HDD Assembler** | 1 Circuit Board + 1 Metal | 1 Disco Duro | 0.08/s | ~12s | $2.80 |
-| **Screen Fabricator** | 1 Circuit Board + 1 Comp. Eléctrico + 1 Plástico | 1 Pantalla | 0.07/s | ~14s | $2.80 |
-| **GPU Fab** | 2 Circuit Board + 1 Cobre + 1 Comp. Eléctrico | 1 GPU | 0.05/s | ~20s | $4.00 |
+| **PCB Printer** | 1 Cobre + 2 Comp. Eléctrico | 1 Circuit Board | 0.17/s | ~6s | $2.55 |
+| **HDD Assembler** | 1 Circuit Board + 2 Metal | 1 Disco Duro | 0.08/s | ~12s | $2.80 |
+| **Screen Fabricator** | 1 Circuit Board + 1 Comp. Eléctrico + 1 Plástico Reciclado | 1 Pantalla | 0.07/s | ~14s | $2.80 |
+| **GPU Fab** | 1 Circuit Board + 1 Disco Duro + 1 Cobre | 1 GPU | 0.05/s | ~20s | $5.00 |
 | **Smartphone Factory** | 1 Pantalla + 1 GPU + 1 Circuit Board | 1 Smartphone | 0.045/s | ~22s | $13.50 |
 | **Laptop Workshop** | 1 Disco Duro + 1 Pantalla + 1 GPU + 1 Circuit Board | 1 Laptop | 0.035/s | ~28s | $21.00 |
 | **PC Builder** | 1 Disco Duro + 2 GPU + 2 Circuit Board + 1 Metal | 1 Desktop PC | 0.025/s | ~40s | $20.00 |
@@ -623,15 +644,16 @@ UPG_STORE_016 = 'UPG_STORE_016',  // Server Rack storage
 | Recurso | Producción upstream | Demanda acumulada | Margen |
 |---|---|---|---|
 | Cobre | Smelter 0.33/s | PCB (0.17) + GPU Fab (0.05) + **E.Assembler (0.20)** = **0.42/s** | ⚠️ Déficit -0.09/s — E.Assembler ya consume 0.20 Cu/s en T3. Con GPU Fab activa, la Fundidora es el bottleneck. Requiere upgrade de Fundidora antes de activar GPU Fab. |
-| Componentes | Assembler 0.22/s | PCB (0.17) + **E.Assembler (0.20)** = **0.37/s** | ⚠️ Déficit -0.15/s — E.Assembler consume 0.20 Comp/s para producir Comp. Eléctricos; el PCB Printer compite directamente. Upgrade de Assembler necesario antes de activar PCB Printer. |
-| Circuit Board | PCB Printer 0.17/s | HDD (0.08) + Screen (0.07) + GPU (0.10) + Smartphone (0.045) + Laptop (0.035) + PC Builder (0.05) + DataCenter (0.068) = **0.448/s** (cadena T4-T7 completa) | ⚠️ Déficit severo a plena cadena. Diseño en fases: activar HDD+Screen → upgrade PCB → activar GPU Fab → upgrade más antes de T7. Se necesitan ≥3 PCB Printers upgradeados para alimentar T6+T7 completo. |
-| Disco Duro | HDD 0.08/s | Laptop (0.035) + PC Builder (0.025) = 0.06/s | ✅ +0.02/s |
+| Componentes | Assembler 0.22/s | **E.Assembler (0.20)** = **0.20/s** | ✅ +0.02/s — PCB Printer no consume Componentes (solo Comp. Eléctrico); solo E.Assembler los consume. |
+| Circuit Board | PCB Printer 0.17/s | HDD (0.08) + Screen (0.07) + GPU (0.05) + Smartphone (0.045) + Laptop (0.035) + PC Builder (0.05) + DataCenter (0.068) = **0.398/s** (cadena T4-T7 completa) | ⚠️ Déficit severo a plena cadena, pero menor que antes (GPU Fab ya solo consume 0.05 CB/s vs 0.10 anterior). Diseño en fases: activar HDD+Screen → upgrade PCB → activar GPU Fab → upgrade más antes de T7. Se necesitan ≥3 PCB Printers upgradeados para alimentar T6+T7 completo. |
+| Disco Duro | HDD 0.08/s | **GPU Fab (0.05)** + Laptop (0.035) + PC Builder (0.025) = **0.11/s** | ⚠️ Déficit leve con GPU Fab activa — diseño intencional. HDD Assembler es el primer bottleneck del jugador en T6. Upgrade de HDD Assembler necesario antes de activar Laptop Workshop. |
 | Pantalla | Screen 0.07/s | Smartphone (0.045) + Laptop (0.035) = 0.08/s | ⚠️ Déficit en base — jugador debe upgradear Screen Fabricator antes de activar Laptop Workshop (diseño intencional) |
 | GPU | GPU Fab 0.05/s | Smartphone (0.045) + Laptop (0.035) + PC Builder (0.05) + Mining Rig (0.072) + Data Center (0.034) = **0.236/s** | ⚠️ **Cuello de botella principal T6-T7** — GPU Fab es la máquina crítica del mid-game. El jugador decide constantemente entre vender GPUs ($80) o alimentar la cadena. Requiere upgrades masivos antes de activar T7. |
 | Desktop PC | PC Builder 0.025/s | Mining Rig (0.018) + Data Center (0.034) = 0.052/s | ⚠️ Déficit en base — se necesitan upgrades o múltiples PC Builders (diseño intencional, son máquinas T7) |
-| Comp. Eléctrico | E.Assembler 0.20/s | Screen (0.07) + GPU Fab (0.05) + Mining Rig (0.036) = 0.156/s | ✅ +0.044/s |
-| Plástico | Separator 0.50/s | Screen (0.07/s) | ✅ holgado |
-| Metal | Crusher 1.0 Metal/s | HDD (0.08) + PC Builder (0.025) = 0.105/s | ✅ muy holgado |
+| Comp. Eléctrico | E.Assembler 0.20/s | PCB (0.34) + Screen (0.07) + Mining Rig (0.036) = **0.446/s** | ⚠️ Déficit -0.246/s — PCB Printer consume 2 CE/ciclo (0.34 CE/s). Upgrade de E.Assembler obligatorio antes de activar el PCB Printer. GPU Fab ya no consume CE. |
+| Plástico Reciclado | Recycler 0.50/s | E.Assembler (0.20) + Screen (0.07) = 0.27/s | ✅ holgado — Recycler tiene capacidad suficiente para ambos consumidores |
+| Plástico | Separator 0.50/s | — (Screen Fabricator ya no lo consume) | ✅ sin competencia |
+| Metal | Crusher 1.0 Metal/s | HDD (0.16) + PC Builder (0.025) = 0.185/s | ✅ holgado — HDD Assembler consume 2 Metal/ciclo (0.16 Metal/s). Crusher sigue siendo suficiente. |
 
 **Nota:** Los déficits marcados con ⚠️ son **intencionados**. Las máquinas T7 deben requerir que el jugador haya invertido en upgrades de las máquinas anteriores. Nunca debe ser posible activar Data Center Assembly sin haber upgradeado seriamente el PCB Printer y PC Builder.
 
@@ -651,14 +673,14 @@ UPG_STORE_016 = 'UPG_STORE_016',  // Server Rack storage
 | Circuit Board | $15 | T4 |
 | Disco Duro | $35 | T5 |
 | Pantalla | $40 | T5 |
-| GPU | $80 | T6 |
+| GPU | $100 | T6 |
 | Smartphone | $300 | T6 |
 | Laptop | $600 | T6 |
 | Desktop PC | $800 | T6 |
 | Mining Rig | $2200 | T7 |
 | Server Rack | $3000 | T7 |
 
-Todos los recursos T4-T7 son vendibles en el mercado. La GPU ($80) es el componente pivote de la cadena T6-T7: aunque vendible directamente, su mayor valor está como input de Smartphone, Laptop, PC Builder, Mining Rig y Data Center — el jugador decide constantemente si vende o reinvierte.
+Todos los recursos T4-T7 son vendibles en el mercado. La GPU ($100) es el componente pivote de la cadena T6-T7: procesar un HDD en GPU ya es estrictamente más rentable ($2.35/s) que vender el HDD directamente ($1.52/s), pero el mayor valor está como input de Smartphone, Laptop, PC Builder, Mining Rig y Data Center — el jugador decide constantemente si vende o reinvierte.
 
 ---
 
@@ -702,7 +724,7 @@ Usa el mismo sistema: `base_cost × STORAGE_MULTIPLIER^(level-1)` con `STORAGE_M
 | Disco Duro | **UPG_STORE_009** | 6 | +3 | 150 |
 | Pantalla | **UPG_STORE_010** | 6 | +3 | 150 |
 | GPU | **UPG_STORE_011** | 4 | +2 | 200 |
-| Smartphone | **UPG_STORE_012** | 4 | +2 | 200 |
+| Smartphone | **UPG_STORE_012** | 5 | +2 | 200 |
 | Laptop | **UPG_STORE_013** | 3 | +2 | 250 |
 | Desktop PC | **UPG_STORE_014** | 3 | +2 | 250 |
 | Mining Rig | **UPG_STORE_015** | 2 | +1 | 400 |
@@ -718,12 +740,12 @@ Mismo patrón que `MachineUnlockService` actual: unlock cuando la(s) máquina(s)
 
 | Máquina a desbloquear | Prerrequisito(s) |
 |---|---|
-| PCB Printer | Electric Assembler nivel ≥ 1 (recién desbloqueada) |
+| PCB Printer | Electric Assembler nivel ≥ 4 |
 | HDD Assembler | PCB Printer nivel ≥ 3 |
 | Screen Fabricator | PCB Printer nivel ≥ 5 |
 | GPU Fab | HDD Assembler nivel ≥ 2 **Y** Screen Fabricator nivel ≥ 2 |
 | Smartphone Factory | Screen Fabricator nivel ≥ 3 |
-| Laptop Workshop | HDD Assembler nivel ≥ 3 **Y** Screen Fabricator nivel ≥ 3 |
+| Laptop Workshop | HDD Assembler nivel ≥ 4 **Y** Screen Fabricator nivel ≥ 3 |
 | PC Builder | GPU Fab nivel ≥ 2 **Y** HDD Assembler nivel ≥ 3 |
 | Mining Rig Assembly | GPU Fab nivel ≥ 3 **Y** PC Builder nivel ≥ 2 |
 | Data Center Assembly | PC Builder nivel ≥ 3 |
@@ -731,12 +753,12 @@ Mismo patrón que `MachineUnlockService` actual: unlock cuando la(s) máquina(s)
 **Progresión de unlock resultante:**
 ```
 E.Assembler desbloqueada
-  → PCB Printer disponible
+  → PCB Printer disponible (E.Assembler Lv4)
     → [Lv3] HDD Assembler disponible
     → [Lv5] Screen Fabricator disponible
       → [HDD Lv2 + Screen Lv2] GPU Fab disponible
       → [Screen Lv3] Smartphone Factory disponible
-      → [HDD Lv3 + Screen Lv3] Laptop Workshop disponible
+      → [HDD Lv4 + Screen Lv3] Laptop Workshop disponible  ← escalonado 1 nivel tras Smartphone
         → [GPU Lv2 + HDD Lv3] PC Builder disponible
           → [GPU Lv3 + PC Lv2] Mining Rig Assembly disponible
           → [PC Lv3] Data Center Assembly disponible
@@ -1022,3 +1044,124 @@ Métodos existentes en `AudioService`: `playGameMusicLoop`, `playUiClick`, `play
 | Fin de evento | — | Sin audio |
 
 **F4 — Milestones:** Sin SFX. La notificación visual con borde naranja es suficiente.
+
+---
+
+## Apéndice D — Backlog Post-F2
+
+Tareas identificadas durante la implementación de F2 que no bloquean el gameplay pero deben resolverse antes del release.
+
+### D.1 — Refactor UI del Resources Header
+
+**Contexto:** Con 9+ recursos (T1-T7) el header se satura visualmente. Todos aparecen desde el inicio aunque el jugador aún no tenga acceso a ellos.
+
+**Objetivo:** Reorganizar el header para que escale bien conforme el jugador progresa, sin sobrecarga visual en el early game.
+
+**Opciones a evaluar:**
+
+| Opción | Pro | Contra |
+|---|---|---|
+| Ocultar recursos T4+ hasta desbloquear la máquina upstream | Limpio, progresivo, discovery natural | Puede confundir si el jugador no sabe que existen |
+| Dos filas: básicos arriba / avanzados abajo | Todo visible, bien organizado | Header más alto, ocupa más pantalla |
+| Scroll horizontal en la fila de recursos avanzados | Sin cambio de layout | UX poco obvia en desktop |
+| Panel colapsable "Recursos avanzados" con toggle | Compacto, el jugador elige ver | Un click extra, estado de UI a persistir |
+| **Sidebar izquierdo vertical con scroll** | Liberaría toda la altura de pantalla para las máquinas; natural en desktop; escala indefinidamente a más recursos | Requiere rediseño mayor del layout raíz (app.html); el dinero y las acciones (idioma, menú) necesitarían reubicarse |
+
+**Recomendación inicial:** ocultar con `@if(machinesService.isUnlocked(...))` — consistente con el patrón ya usado para los sell buttons (D3-1 en F2b). Los recursos aparecen naturalmente al desbloquear la máquina que los produce.
+
+**Pendiente:** Decidir opción, diseñar layout, implementar. Revisar también si el `resource-capacity` (`/ X`) es necesario mostrarlo siempre en el header o solo en tooltip.
+
+---
+
+**Estado tras implementación parcial (D1-impl):** Se implementaron dos filas (Básicos / Avanzados) con labels de sección y dinero movido al topbar. Resultado funcional, pero quedan dos problemas abiertos a resolver:
+
+**Problema 1 — Fila básica sigue densa:**
+Con 7 recursos + sus sell buttons en una sola fila horizontal la carga visual sigue siendo alta. En resoluciones medias los elementos se aprietan. Opciones:
+- Reducir tamaño de icono en la fila básica (32px en lugar de 44px)
+- Mostrar los sell buttons solo en hover del recurso (no siempre visibles)
+- Separar los recursos "raw" (Chatarra, Metal, Plástico) de los "procesados" (Cobre, Reciclado, Comp. Eléctricos) en sub-grupos visuales
+
+**Problema 2 — Sell buttons crean ruido visual excesivo:**
+Los botones de venta son de color naranja sólido con texto — el mismo color de acción principal del juego. En la fila de recursos compiten visualmente con los datos de cantidad/capacidad y rompen la jerarquía visual. Opciones a evaluar:
+- Reducir padding y tamaño de fuente de los sell buttons en el header
+- Cambiar a variante `ghost` o `outline` para el header (reservar el naranja sólido para acciones primarias del panel principal)
+- Mostrar solo el ícono de venta (💲) sin texto, con tooltip que explique acción
+- Ocultar sell buttons hasta hover del `resource-column`
+
+**Idea adicional — Progressive disclosure de la fila avanzada:**
+No mostrar la sección "RECURSOS AVANZADOS" hasta que el jugador desbloquee la PCB Printer (primera máquina que produce Circuit Board). Implementación: `@if(machinesService.isUnlocked(MachineType.PCB_PRINTER))` envolviendo todo el `.resources-section` avanzado. Beneficios: early game más limpio, la aparición de la segunda fila actúa como milestone visual de progresión. A evaluar junto con el resto del refactor.
+
+**Prioridad:** Baja — primero completar todas las máquinas e imágenes T4-T7, luego refactor visual del header.
+
+> **Idea (sidebar vertical):** Convertir el header de recursos en un panel lateral izquierdo fijo con scroll vertical. Los recursos se listarían en columna (icono + cantidad / capacidad), el dinero quedaría fijado en la parte superior del sidebar, y las acciones (idioma, menú) se moverían al topbar o al sidebar inferior. Beneficio principal: la lista de máquinas ganaría toda la altura disponible de la ventana. Requiere refactorizar `app.html` de `flex-column` a `flex-row` o CSS Grid con una columna fija izquierda. Evaluar junto al resto del rediseño de layout.
+
+---
+
+### D.2 — Navegación de Máquinas (tabs / filtros)
+
+**Contexto:** Con 9+ máquinas (T1-T7) el panel de máquinas crece verticalmente hasta requerir mucho scroll para encontrar una máquina específica. En el juego completo habrá ~11 máquinas.
+
+**Objetivo:** Dar al jugador una forma rápida de localizar y acceder a cualquier máquina sin scroll excesivo.
+
+**Opciones a evaluar:**
+
+| Opción | Pro | Contra |
+|---|---|---|
+| Tabs "Básicas / Avanzadas" | Simple, consistente con el header | Solo 2 grupos, puede no escalar |
+| Tabs por tier (T1-T3 / T4-T5 / T6-T7) | Más granular, escala bien | Más tabs, el jugador necesita saber los tiers |
+| Barra de filtro por estado (Activas / Bloqueadas / Todas) | Útil para gestión rápida | No ayuda a encontrar una máquina específica |
+| Mini-mapa / grid de iconos tipo "dock" | Visual, muy rápido | Más trabajo de UI |
+| Scroll con sticky header por grupo | Sin cambio de paradigma, natural | El scroll se mantiene |
+
+**Recomendación inicial:** Tabs "Básicas / Avanzadas" alineado con la misma división del header de recursos. Las tab labels pueden reutilizar las mismas claves i18n `resources.section_basic` / `resources.section_advanced`.
+
+**Prioridad:** Baja — después del refactor del header y con todas las máquinas integradas.
+
+---
+
+### D.3 — Balance del loop económico T4-T7 (post-QA)
+
+**Contexto:** Los recursos avanzados (Circuit Board, HDD, Screen, GPU, etc.) solo tienen dos salidas: venta manual a precio base o contratos. El gap entre ambas opciones crece a cada tier, y los contratos tienen frecuencia fija (cada 60s, 3 slots). Cuando el jugador llega a T5-T7 puede acabar con almacenamiento lleno y máquinas paradas esperando contratos — lo que en idle games se percibe como "el juego está roto" aunque sea intencional.
+
+**Tensiones identificadas:**
+- Venta manual = accesible pero poco rentable en tiers altos
+- Contratos = rentables pero con throughput limitado (frecuencia + slots)
+- Sin término medio entre ambas opciones
+- El problema empeora a cada tier porque el coste de producción sube pero los outlets no escalan
+
+**Ideas a evaluar en QA:**
+
+1. **Mining Rig y Data Center como money generators pasivos** — output directo en MONEY por tick mientras están activas, sin objeto a almacenar ni vender. Serían las únicas máquinas con output = MONEY. Payoff satisfactorio del T7: "tengo dinero pasivo sin depender de contratos ni ventas manuales."
+
+2. **Contratos escalables por progreso** — cuando el jugador desbloquea T5-T6, los contratos de T4 se vuelven más frecuentes porque ya son baratos de producir. La tasa de spawn de contratos por tier podría ajustarse dinámicamente según máquinas desbloqueadas.
+
+3. **Ajuste de precios de venta manual T4+** — subirlos moderadamente para que la venta manual siga siendo viable aunque subóptima respecto a contratos.
+
+**Cuándo revisarlo:** Primera sesión de QA con el juego completamente implementado según el PRD actual. Las cifras reales de throughput y acumulación de stock van a decir si es un problema real o percibido.
+
+---
+
+### D.4 — Rebalanceo de recetas T5-T7: reducir dependencia de Circuit Board
+
+**Contexto:** Durante la implementación de las máquinas T5-T7 se detectó un cuello de botella estructural: todas las máquinas avanzadas (GPU Fab, Smartphone Factory, Laptop Workshop y las futuras PC Builder, Mining Rig, Data Center) consumen Circuit Board como ingrediente. Esto hace que la PCB Printer sea el único punto crítico de toda la cadena alta — una bottleneck que no va a escalar bien.
+
+**Problema concreto:**
+- GPU Fab: CB×1 + HDD×1 + Copper×1
+- Smartphone Factory: CB×1 + Screen×1 + Components×1
+- Laptop Workshop: CB×1 + Screen×1 + GPU×1 + HDD×1
+- Las 3 máquinas T7 (PC Builder, Mining Rig, Data Center) probablemente también usarán CB
+
+Todas estas recetas compiten por el mismo output de la PCB Printer. A velocidades altas, la PCB Printer no puede abastecer a todas.
+
+**Opciones a evaluar:**
+
+| Opción | Pro | Contra |
+|--------|-----|--------|
+| Sustituir CB por componentes básicos en algunas recetas (Metal, Cobre, Comp. Eléctricos) | Diversifica la supply chain, reduce el cuello | Cambia recetas ya "fijadas", puede romper el narrative de la cadena |
+| Introducir un segundo tier de PCB (Advanced Board) producido por una máquina nueva | Crea un upgrade natural de la PCB Printer | Más máquinas, más complejidad |
+| Aumentar la velocidad de la PCB Printer vía upgrades extra | Sin cambio de recetas | El problema se pospone, no se resuelve |
+| Hacer que algunos recursos T5-T7 consuman recursos intermedios distintos (Reciclados, Plástico, etc.) | Activa recursos infrautilizados | Requiere rediseño narrativo de la cadena |
+
+**Recomendación:** Revisar las recetas de las 3 máquinas T7 (PC Builder, Mining Rig, Data Center) antes de implementarlas. Si alguna puede sustituir CB por Metal, Cobre o Comp. Eléctricos sin romper la narrativa del craft, hacerlo. Para GPU Fab, Smartphone y Laptop (ya implementadas), evaluar en QA si el cuello es real antes de cambiar recetas cod.
+
+**Cuándo revisarlo:** Antes de implementar las recetas de las máquinas T7 (PC Builder, Mining Rig, Data Center). Confirmar en QA si la PCB Printer es el bottleneck real o si los upgrades de velocidad lo absorben.

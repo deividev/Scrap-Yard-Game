@@ -82,6 +82,7 @@ Chatarra ──► Trituradora ──► Metal ──► Ensambladora ──► 
 | `electric_packager` | Empaquetadora Eléctrica | Componentes Eléctricos | (venta) | 0.10/s | 0 (bloqueada) |
 | `recycler` | Recicladora | 1 Metal + 1 Plástico | 1 Plástico Reciclado | variable | 0 (bloqueada) |
 | `electric_assembler` | Ensambladora Eléctrica | Componentes + Cobre | 1 Comp. Eléctrico | variable | 0 (bloqueada) |
+| `pcb_printer` | Impresora PCB | 1 Cobre + 1 Comp. Eléctrico | 1 Circuit Board | 0.20/s | 0 (bloqueada) |
 
 ### Estado de una máquina
 

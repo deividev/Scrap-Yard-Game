@@ -28,6 +28,18 @@ import { SCRAP_GENERATION_CONFIG } from '../../config/game-balance.config';
           [disabled]="!canGenerateScrap()"
         />
         <app-button
+          label="🔓 Unlock All"
+          variant="secondary"
+          size="sm"
+          (clicked)="unlockAllMachines()"
+        />
+        <app-button
+          label="🔓 Unlock All"
+          variant="secondary"
+          size="sm"
+          (clicked)="unlockAllMachines()"
+        />
+        <app-button
           [label]="'▶ ' + translationService.t('buttons.start')"
           variant="secondary"
           size="sm"
@@ -113,6 +125,33 @@ export class DebugControlsComponent {
 
   stopLoop(): void {
     this.gameLoopService.stop();
+  }
+
+  unlockAllMachines(): void {
+    const allMachines = [
+      MachineType.SEPARATOR,
+      MachineType.SMELTER,
+      MachineType.ASSEMBLER,
+      MachineType.PACKAGER,
+      MachineType.RECYCLER,
+      MachineType.ELECTRIC_ASSEMBLER,
+      MachineType.ELECTRIC_PACKAGER,
+      MachineType.PCB_PRINTER,
+      MachineType.HDD_ASSEMBLER,
+      MachineType.SCREEN_FABRICATOR,
+      MachineType.GPU_FAB,
+      MachineType.SMARTPHONE_FACTORY,
+      MachineType.LAPTOP_WORKSHOP,
+      MachineType.PC_BUILDER,
+      MachineType.MINING_RIG_ASSEMBLY,
+      MachineType.DATA_CENTER_ASSEMBLY,
+    ];
+    for (const machineType of allMachines) {
+      const machine = this.machinesService.getMachine(machineType);
+      if (machine && machine.level === 0) {
+        this.machinesService.upgradeLevel(machineType);
+      }
+    }
   }
 
   toggleLanguage(): void {

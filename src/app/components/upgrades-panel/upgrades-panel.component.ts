@@ -9,7 +9,6 @@ import {
   ElementRef,
   ViewEncapsulation,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { ProgressBarComponent } from '../ui/progress-bar/progress-bar.component';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
@@ -26,12 +25,13 @@ import { Machine, MachineType } from '../../models/machine.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
 import { FirstRunTutorialService } from '../../services/first-run-tutorial.service';
+import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
 
 @Component({
   selector: 'app-upgrades-panel',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, AppButtonComponent, ProgressBarComponent, FormatNumberPipe],
+  imports: [AppButtonComponent, ProgressBarComponent, FormatNumberPipe],
   template: `
     <div class="upgrades-panel" data-tutorial-id="upgrades-panel" [class.minimized]="isMinimized()">
       <div class="panel-header">
@@ -262,7 +262,7 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
             @if (activeTab() === 'storage') {
               <div class="storage-upgrades">
                 @for (upgrade of storageUpgrades(); track upgrade.upgradeId) {
-                  <div class="upgrade-item">
+                  <div class="upgrade-item" [class.upgrade-item--locked]="upgrade.isLocked">
                     <div class="machine-card-header">
                       <div class="machine-card-title-group">
                         <div class="machine-icon-badge">
@@ -270,9 +270,24 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                         </div>
                         <h4 class="machine-card-name">{{ upgrade.name }}</h4>
                       </div>
+                    @if (!upgrade.isLocked) {
                       <span class="machine-card-level">
                         {{ translationService.t('upgrades.nivel') }} {{ upgrade.level }}
                       </span>
+                    }
+                    @if (upgrade.isLocked) {
+                      <span class="machine-card-locked">
+                        <img
+                          src="assets/icons/lock_icon.png"
+                          class="machine-card-locked-icon"
+                          width="14"
+                          height="14"
+                          alt=""
+                          aria-hidden="true"
+                        />
+                        {{ translationService.t('status.bloqueada') }}
+                      </span>
+                    }
                     </div>
 
                     <div class="upgrade-capacity">
@@ -298,7 +313,7 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                       />
                     }
 
-                    @if (!upgrade.isMaxLevel) {
+                    @if (!upgrade.isMaxLevel && !upgrade.isLocked) {
                       <app-button
                         [label]="translationService.t('buttons.mejorar')"
                         variant="primary"
@@ -328,6 +343,12 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                     @if (upgrade.isMaxLevel) {
                       <p class="max-level">
                         {{ translationService.t('upgrades.max_level') }}
+                      </p>
+                    }
+
+                    @if (upgrade.isLocked) {
+                      <p class="upgrade-locked-hint">
+                        {{ translationService.t('upgrades.storage.locked_hint') }}
                       </p>
                     }
                   </div>
@@ -378,6 +399,17 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                           </span>
                         }
                       </div>
+
+                      @if (machineUpgrade.isLocked && machineUpgrade.unlockRequirements?.length) {
+                        <div class="machine-unlock-reqs">
+                          @for (req of machineUpgrade.unlockRequirements; track req.machineType) {
+                            <div class="unlock-req-line" [class.unlock-req-line--met]="req.isMet">
+                              <span class="unlock-req-icon">{{ req.isMet ? '✓' : '✗' }}</span>
+                              <span class="unlock-req-text">{{ translationService.t('machines.' + req.machineType) }} {{ translationService.t('common.level_short') }} {{ req.requiredLevel }} ({{ req.currentLevel }}/{{ req.requiredLevel }})</span>
+                            </div>
+                          }
+                        </div>
+                      }
 
                       @if (!machineUpgrade.isLocked) {
                         <div class="machine-card-body">
@@ -722,6 +754,37 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
         opacity: 0.6;
       }
 
+      .machine-unlock-reqs {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: var(--space-2) var(--space-3);
+        background: rgba(0,0,0,0.25);
+        border-radius: var(--border-radius-small);
+        font-size: 11px;
+        font-family: var(--font-mono);
+      }
+
+      .unlock-req-line {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--color-state-danger);
+      }
+
+      .unlock-req-line--met {
+        color: var(--color-accent-positive);
+      }
+
+      .unlock-req-icon {
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .unlock-req-text {
+        line-height: 1.4;
+      }
+
       .machine-card-header {
         display: flex;
         justify-content: space-between;
@@ -1029,10 +1092,20 @@ export class UpgradesPanelComponent {
     MachineType.RECYCLER,
     MachineType.ELECTRIC_ASSEMBLER,
     MachineType.ELECTRIC_PACKAGER,
+    MachineType.PCB_PRINTER,
+    MachineType.HDD_ASSEMBLER,
+    MachineType.SCREEN_FABRICATOR,
+    MachineType.GPU_FAB,
+    MachineType.SMARTPHONE_FACTORY,
+    MachineType.LAPTOP_WORKSHOP,
+    MachineType.PC_BUILDER,
+    MachineType.MINING_RIG_ASSEMBLY,
+    MachineType.DATA_CENTER_ASSEMBLY,
   ];
 
   private machineSelectionService = inject(MachineSelectionService);
   private machinesService = inject(MachinesService);
+  private machineUnlockService = inject(MachineUnlockService);
   private upgradesService = inject(UpgradesService);
   private upgradeProgressService = inject(UpgradeProgressService);
   private resourcesService = inject(ResourcesService);
@@ -1138,6 +1211,7 @@ export class UpgradesPanelComponent {
         };
       }
 
+      const unlockInfo = this.machineUnlockService.getUnlockInfo(machine.id as MachineType);
       const level = this.upgradesService.getLevel(upgradeId);
       const cost = this.upgradesService.getCostForNextLevel(upgradeId);
       const effectiveSpeed = this.upgradesService.calculateEffectiveSpeed(
@@ -1148,7 +1222,7 @@ export class UpgradesPanelComponent {
       const upgrades = level - 1;
       const isMaxMultiplier = productionMultiplier >= 5;
       const nextProductionMultiplier = isMaxMultiplier ? 5 : productionMultiplier + 1;
-      const speedBonus = level * 0.1;
+      const speedBonus = (level - 1) * 0.1;
       const isMaxLevel = level >= 50;
 
       const canAfford = cost
@@ -1163,6 +1237,7 @@ export class UpgradesPanelComponent {
         level,
         maxLevel: 50,
         isLocked: machine.level === 0,
+        unlockRequirements: unlockInfo.requirements,
         baseSpeed: machine.baseSpeed,
         effectiveSpeed,
         speedBonus,
@@ -1227,7 +1302,7 @@ export class UpgradesPanelComponent {
     const isMaxMultiplier = productionMultiplier >= 5;
     const nextProductionMultiplier = isMaxMultiplier ? 5 : productionMultiplier + 1;
 
-    const speedBonus = level * 0.1;
+    const speedBonus = (level - 1) * 0.1;
     const nextBonusAt = isMaxMultiplier ? 0 : 10 - (upgrades % 10);
 
     const canAfford = cost
@@ -1288,9 +1363,63 @@ export class UpgradesPanelComponent {
         resourceId: ResourceType.ELECTRIC_COMPONENTS,
         nameKey: 'upgrades.storage.electric_components',
       },
+      {
+        id: UpgradeId.UPG_STORE_008,
+        resourceId: ResourceType.CIRCUIT_BOARD,
+        nameKey: 'upgrades.storage.circuit_board',
+        unlockedBy: MachineType.PCB_PRINTER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_009,
+        resourceId: ResourceType.HDD,
+        nameKey: 'upgrades.storage.hdd',
+        unlockedBy: MachineType.HDD_ASSEMBLER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_010,
+        resourceId: ResourceType.SCREEN,
+        nameKey: 'upgrades.storage.screen',
+        unlockedBy: MachineType.SCREEN_FABRICATOR,
+      },
+      {
+        id: UpgradeId.UPG_STORE_011,
+        resourceId: ResourceType.GPU,
+        nameKey: 'upgrades.storage.gpu',
+        unlockedBy: MachineType.GPU_FAB,
+      },
+      {
+        id: UpgradeId.UPG_STORE_012,
+        resourceId: ResourceType.SMARTPHONE,
+        nameKey: 'upgrades.storage.smartphone',
+        unlockedBy: MachineType.SMARTPHONE_FACTORY,
+      },
+      {
+        id: UpgradeId.UPG_STORE_013,
+        resourceId: ResourceType.LAPTOP,
+        nameKey: 'upgrades.storage.laptop',
+        unlockedBy: MachineType.LAPTOP_WORKSHOP,
+      },
+      {
+        id: UpgradeId.UPG_STORE_014,
+        resourceId: ResourceType.DESKTOP_PC,
+        nameKey: 'upgrades.storage.desktop_pc',
+        unlockedBy: MachineType.PC_BUILDER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_015,
+        resourceId: ResourceType.MINING_RIG,
+        nameKey: 'upgrades.storage.mining_rig',
+        unlockedBy: MachineType.MINING_RIG_ASSEMBLY,
+      },
+      {
+        id: UpgradeId.UPG_STORE_016,
+        resourceId: ResourceType.SERVER_RACK,
+        nameKey: 'upgrades.storage.server_rack',
+        unlockedBy: MachineType.DATA_CENTER_ASSEMBLY,
+      },
     ];
 
-    return storageUpgradeIds.map(({ id, resourceId, nameKey }) => {
+    return storageUpgradeIds.map(({ id, resourceId, nameKey, unlockedBy }) => {
       const level = this.upgradesService.getLevel(id);
       const cost = this.upgradesService.getCostForNextLevel(id);
       const baseCapacity = this.resourcesService.getBaseCapacity(resourceId);
@@ -1311,6 +1440,7 @@ export class UpgradesPanelComponent {
         : false;
 
       const isMaxLevel = level >= STORAGE_UPGRADE_CONFIG.MAX_LEVEL;
+      const isLocked = unlockedBy ? !this.machinesService.isUnlocked(unlockedBy) : false;
 
       return {
         upgradeId: id,
@@ -1322,6 +1452,7 @@ export class UpgradesPanelComponent {
         cost: cost || { money: 0, components: 0 },
         canAfford: canAfford && !isMaxLevel,
         isMaxLevel,
+        isLocked,
       };
     });
   });
