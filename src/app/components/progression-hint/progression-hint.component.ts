@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MachinesService } from '../../services/machines.service';
-import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
+import { MachineUnlockService } from '../../services/machine-unlock.service';
 import { TranslationService } from '../../services/translation.service';
 import { MachineType } from '../../models/machine.model';
 
@@ -13,10 +13,20 @@ import { MachineType } from '../../models/machine.model';
     'data-tutorial-id': 'progression-hint',
   },
   template: `
-    @if (hintText()) {
+    @if (hintData()) {
       <div class="progression-hint">
         <img src="assets/icons/goal_icon.png" class="hint-icon" alt="" aria-hidden="true" />
-        <span class="hint-text">{{ hintText() }}</span>
+        <div class="hint-body">
+          <span class="hint-title">{{ translationService.t('progression.next_unlock_label') }} <strong>{{ hintData()!.machineName }}</strong></span>
+          <div class="hint-reqs">
+            @for (req of hintData()!.requirements; track $index) {
+              <div class="hint-req">
+                <span [class.hint-req-icon--met]="req.isMet" [class.hint-req-icon--unmet]="!req.isMet">{{ req.isMet ? '✓' : '✗' }}</span>
+                <span class="hint-req-label">{{ req.machineName }} {{ translationService.t('common.level_short') }} {{ req.requiredLevel }} ({{ req.currentLevel }}/{{ req.requiredLevel }})</span>
+              </div>
+            }
+          </div>
+        </div>
       </div>
     }
   `,
@@ -28,22 +38,66 @@ import { MachineType } from '../../models/machine.model';
         border-radius: var(--border-radius-small);
         padding: var(--space-2) var(--space-3);
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: var(--space-2);
-        font-size: 13px;
+        font-size: 11px;
         color: var(--color-text-secondary);
       }
 
       .hint-icon {
-        width: 54px;
-        height: 54px;
+        width: 28px;
+        height: 28px;
         object-fit: contain;
         flex-shrink: 0;
-        filter: drop-shadow(0 0 4px rgba(255, 152, 0, 0.6));
+        margin-top: 2px;
+        filter: drop-shadow(0 0 3px rgba(255, 152, 0, 0.6));
       }
 
-      .hint-text {
-        font-weight: 500;
+      .hint-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .hint-title {
+        font-size: 11px;
+        color: var(--color-text-secondary);
+        line-height: 1.3;
+      }
+
+      .hint-title strong {
+        color: var(--color-accent-main);
+        font-weight: 700;
+      }
+
+      .hint-reqs {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .hint-req {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-family: var(--font-mono);
+      }
+
+      .hint-req-icon--met {
+        color: #22c55e;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .hint-req-icon--unmet {
+        color: #ef4444;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .hint-req-label {
+        color: var(--color-text-secondary);
       }
     `,
   ],
@@ -51,11 +105,8 @@ import { MachineType } from '../../models/machine.model';
 export class ProgressionHintComponent {
   private machinesService = inject(MachinesService);
   private machineUnlockService = inject(MachineUnlockService);
-  private translationService = inject(TranslationService);
+  readonly translationService = inject(TranslationService);
 
-  /**
-   * Lista ordenada de máquinas según el árbol de progresión
-   */
   private progressionOrder: MachineType[] = [
     MachineType.SEPARATOR,
     MachineType.ASSEMBLER,
@@ -66,38 +117,21 @@ export class ProgressionHintComponent {
     MachineType.ELECTRIC_PACKAGER,
   ];
 
-  /**
-   * Encuentra el próximo objetivo de progresión
-   */
-  hintText = computed(() => {
-    // Buscar la primera máquina bloqueada en el orden de progresión
+  hintData = computed(() => {
     for (const machineType of this.progressionOrder) {
       const unlockInfo = this.machineUnlockService.getUnlockInfo(machineType);
-
       if (!unlockInfo.isUnlocked && unlockInfo.requirements.length > 0) {
-        const machineName = this.translationService.t(`machines.${machineType}`);
-
-        return this.translationService.tp('progression.next_unlock', {
-          machine: machineName,
-          requirements: this.formatRequirements(unlockInfo.requirements),
-        });
+        return {
+          machineName: this.translationService.t(`machines.${machineType}`),
+          requirements: unlockInfo.requirements.map((req) => ({
+            isMet: req.isMet,
+            machineName: this.translationService.t(`machines.${req.machineType}`),
+            requiredLevel: req.requiredLevel,
+            currentLevel: req.currentLevel,
+          })),
+        };
       }
     }
-
-    // Si todas las máquinas están desbloqueadas, ocultar el banner
     return null;
   });
-
-  private formatRequirements(requirements: UnlockRequirement[]): string {
-    const levelText = this.translationService.t('common.level_short');
-    const showStatusMarker = requirements.length > 1;
-
-    return requirements
-      .map((requirement) => {
-        const machineName = this.translationService.t(`machines.${requirement.machineType}`);
-        const status = requirement.isMet ? '✓ ' : '○ ';
-        return `${showStatusMarker ? status : ''}${machineName} ${levelText} ${requirement.requiredLevel} (${requirement.currentLevel}/${requirement.requiredLevel})`;
-      })
-      .join(' • ');
-  }
 }

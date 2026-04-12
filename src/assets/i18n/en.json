@@ -106,6 +106,7 @@
   },
   "progression": {
     "next_unlock": "Next unlock: {machine} · {requirements}",
+    "next_unlock_label": "Next unlock:",
     "all_unlocked": "🎉 All machines unlocked!"
   },
   "tutorial": {

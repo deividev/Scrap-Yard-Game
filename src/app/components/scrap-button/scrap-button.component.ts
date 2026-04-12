@@ -54,8 +54,8 @@ import { AudioService } from '../../services/audio.service';
     `
       :host {
         display: block;
-        width: 110px;
-        max-width: 110px;
+        width: 90px;
+        max-width: 90px;
         position: relative;
         overflow: visible;
       }
@@ -87,8 +87,8 @@ import { AudioService } from '../../services/audio.service';
       }
 
       .scrap-action {
-        width: 110px;
-        min-width: 110px;
+        width: 90px;
+        min-width: 90px;
         min-height: 40px;
         padding: 5px 10px;
         border: 1px solid rgba(255, 152, 0, 0.18);

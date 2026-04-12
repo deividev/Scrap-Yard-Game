@@ -30,14 +30,15 @@ import { NotificationService } from '../../../services/notification.service';
   styles: `
     .notification-container {
       position: fixed;
-      top: 80px;
-      right: var(--space-6, 24px);
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 2000;
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
       pointer-events: none;
-      align-items: flex-end;
+      align-items: center;
     }
 
     .notification {
@@ -58,7 +59,7 @@ import { NotificationService } from '../../../services/notification.service';
       min-width: 260px;
       max-width: 360px;
       animation:
-        slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+        slideInDown 0.28s cubic-bezier(0.16, 1, 0.3, 1),
         fadeOut 0.3s ease-in 2.2s forwards;
     }
 
@@ -116,25 +117,25 @@ import { NotificationService } from '../../../services/notification.service';
         0 0 0 1px rgba(255, 152, 0, 0.2);
     }
 
-    @keyframes slideInRight {
+    @keyframes slideInDown {
       from {
         opacity: 0;
-        transform: translateX(40px);
+        transform: translateY(-20px);
       }
       to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
       }
     }
 
     @keyframes fadeOut {
       from {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
       }
       to {
         opacity: 0;
-        transform: translateX(16px);
+        transform: translateY(-10px);
       }
     }
   `,
