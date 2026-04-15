@@ -33,7 +33,7 @@ import { FirstRunTutorialService } from './services/first-run-tutorial.service';
     StatisticsPanelComponent,
     BackgroundGridComponent,
     FirstRunTutorialOverlayComponent,
-    DebugControlsComponent,
+    // DebugControlsComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
