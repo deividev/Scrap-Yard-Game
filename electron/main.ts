@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 
@@ -167,6 +167,11 @@ ipcMain.handle('set-resolution', (event: Electron.IpcMainInvokeEvent, resolution
 
 ipcMain.handle('quit-app', () => {
   app.quit();
+});
+
+ipcMain.handle('open-external', (event, url: string) => {
+  if (typeof url !== 'string' || !url.startsWith('https://')) return;
+  shell.openExternal(url);
 });
 
 app.whenReady().then(createWindow);

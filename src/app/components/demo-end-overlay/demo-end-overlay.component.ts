@@ -192,8 +192,14 @@ export class DemoEndOverlayComponent {
   protected readonly translationService = inject(TranslationService);
   private readonly wishlistUrl = DEMO_CONFIG.STEAM_WISHLIST_URL;
 
+  private isElectron = typeof window !== 'undefined' && !!window.electronApi;
+
   protected openWishlist(): void {
-    window.open(this.wishlistUrl, '_blank', 'noopener,noreferrer');
+    if (this.isElectron && window.electronApi?.openExternal) {
+      window.electronApi.openExternal(this.wishlistUrl);
+    } else {
+      window.open(this.wishlistUrl, '_blank', 'noopener,noreferrer');
+    }
   }
 
   protected dismiss(): void {

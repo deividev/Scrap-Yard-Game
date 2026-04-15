@@ -6,6 +6,7 @@ export interface ElectronApi {
   clearSave: () => Promise<{ success: boolean; error?: string }>;
   getSavePath: () => Promise<{ success: boolean; path: string }>;
   quit?: () => void;
+  openExternal?: (url: string) => Promise<void>;
   setWindowMode?: (params: { mode: string; resolution: string }) => Promise<void>;
   setResolution?: (resolution: string) => Promise<void>;
 }

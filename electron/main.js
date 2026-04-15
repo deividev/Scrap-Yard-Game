@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -170,4 +170,9 @@ ipcMain.handle('set-resolution', (event, resolution) => {
 
 ipcMain.handle('quit-app', () => {
   app.quit();
+});
+
+ipcMain.handle('open-external', (event, url) => {
+  if (typeof url !== 'string' || !url.startsWith('https://')) return;
+  shell.openExternal(url);
 });
