@@ -151,5 +151,5 @@ export const INITIAL_CAPACITIES = {
 // ============================================
 
 export const DEMO_CONFIG = {
-  STEAM_WISHLIST_URL: 'https://store.steampowered.com/app/YOUR_APP_ID',
+  STEAM_WISHLIST_URL: 'https://store.steampowered.com/app/4581810/Scrap_Yard_Idle/',
 };
