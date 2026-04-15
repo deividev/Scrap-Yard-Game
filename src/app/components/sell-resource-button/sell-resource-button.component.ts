@@ -147,8 +147,8 @@ import { AudioService } from '../../services/audio.service';
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        width: 128px;
-        max-width: 128px;
+        width: 90px;
+        max-width: 90px;
       }
 
       .sell-inline {
