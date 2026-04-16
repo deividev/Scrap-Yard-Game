@@ -21,7 +21,21 @@ function cleanDistElectron() {
   });
 }
 
+const DEV_FLAGS_PATH = path.join(process.cwd(), 'src', 'app', 'config', 'dev-flags.config.ts');
+
+function setCalibrationFlag(value) {
+  let content = fs.readFileSync(DEV_FLAGS_PATH, 'utf8');
+  content = content.replace(
+    /export const DEV_CALIBRATION_ENABLED = (true|false);/,
+    `export const DEV_CALIBRATION_ENABLED = ${value};`
+  );
+  fs.writeFileSync(DEV_FLAGS_PATH, content, 'utf8');
+  console.log(`DEV_CALIBRATION_ENABLED set to ${value}`);
+}
+
 try {
+  setCalibrationFlag(false);
+
   console.log('Generating icons...');
   execSync('node scripts/generate-ico.js', { stdio: 'inherit' });
 
@@ -83,5 +97,8 @@ try {
   console.log('Packaging complete. Output:', outDir);
 } catch (e) {
   console.error('Packaging failed:', e && e.message ? e.message : e);
+  setCalibrationFlag(true);
   process.exit(1);
+} finally {
+  setCalibrationFlag(true);
 }
