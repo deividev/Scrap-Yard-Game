@@ -14,10 +14,14 @@
     <app-first-run-tutorial-overlay></app-first-run-tutorial-overlay>
 
     <div class="app-body">
-      <app-resources-header></app-resources-header>
+      <app-panel-frame class="frame-sidebar">
+        <app-resources-header></app-resources-header>
+      </app-panel-frame>
 
       <div class="column-center">
-        <app-statistics-panel></app-statistics-panel>
+        <app-panel-frame-h class="frame-stats">
+          <app-statistics-panel></app-statistics-panel>
+        </app-panel-frame-h>
 
         <div class="machines-scroll-area">
           <app-machine-list></app-machine-list>
@@ -25,7 +29,9 @@
       </div>
 
       <div class="column-right" [class.hidden]="isPanelMinimized">
-        <app-upgrades-panel (minimizedChange)="onPanelMinimizedChange($event)"></app-upgrades-panel>
+        <app-panel-frame class="frame-upgrades">
+          <app-upgrades-panel (minimizedChange)="onPanelMinimizedChange($event)"></app-upgrades-panel>
+        </app-panel-frame>
       </div>
     </div>
   </div>

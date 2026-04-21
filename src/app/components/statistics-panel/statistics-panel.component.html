@@ -31,6 +31,7 @@
         statisticsService.activeMachinesCount()
       }}</span>
     </div>
+
     <div class="stat-item">
       <span class="stat-label">{{ t.t('statistics.total_money') }}</span>
       <span class="stat-value" [class.flashing]="flashingStats().has('money')">{{

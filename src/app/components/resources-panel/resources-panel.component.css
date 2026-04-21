@@ -1,5 +1,10 @@
 .resources-panel {
-  background: var(--color-bg-section);
+  /* background-color: #1a1610; */
+  background-image:
+    linear-gradient(rgba(14, 11, 7, 0.84), rgba(14, 11, 7, 0.84)),
+    url('../../assets/image/factory_floor.png');
+  background-size: 240px 240px;
+  background-repeat: repeat;
   border: 1px solid var(--color-border);
   border-top: 2px solid var(--color-accent-main);
   border-radius: var(--border-radius-medium);

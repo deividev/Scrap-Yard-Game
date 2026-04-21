@@ -449,16 +449,21 @@ import { MachineType } from '../../models/machine.model';
       }
 
       .resources-sidebar {
+        margin: 28px;
         width: 320px;
         display: flex;
         flex-direction: column;
         height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
-        background: var(--color-bg-section);
-        border-right: 1px solid var(--color-border);
-        border-top: 2px solid var(--color-accent-main);
+        background-color: #1a1610;
+        background-image:
+          linear-gradient(rgba(14, 11, 7, 0.84), rgba(14, 11, 7, 0.84)),
+          url('/assets/image/factory_floor.png');
+        background-size: 240px 240px;
+        background-repeat: repeat;
         z-index: 100;
+        box-sizing: border-box;
       }
 
       /* ── Sidebar Header: money + nav ── */
@@ -471,6 +476,12 @@ import { MachineType } from '../../models/machine.model';
         border-bottom: 1px solid var(--color-border);
         background: var(--color-bg-panel);
         flex-shrink: 0;
+        background-color: #1a1610;
+        background-image:
+          linear-gradient(rgba(14, 11, 7, 0.84), rgba(14, 11, 7, 0.84)),
+          url('/assets/image/factory_floor.png');
+        background-size: 240px 240px;
+        background-repeat: repeat;
       }
 
       .money-display {

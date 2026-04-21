@@ -9,16 +9,24 @@ import { TranslationService } from '../../services/translation.service';
   selector: 'app-machine-list',
   standalone: true,
   imports: [CommonModule, MachineCardV2Component],
+  styleUrls: ['./machine-list.component.css'],
   template: `
     <div class="machine-list">
-      <h2 class="section-title">{{ translationService.t('sections.machines') }}</h2>
-      <div class="machines-container">
-        @for (machine of orderedMachines(); track machine.id) {
-          <div class="card-clip" [class.card-clip--tall]="isTallMachine(machine.id)">
-            <app-machine-card-v2 [machine]="machine" />
+      @for (tier of tieredMachines(); track tier.label) {
+        <div class="tier-section">
+          <div class="tier-header">
+            <span class="tier-label">{{ tier.label }}</span>
+            <div class="tier-line"></div>
           </div>
-        }
-      </div>
+          <div class="machines-container">
+            @for (machine of tier.machines; track machine.id) {
+              <div class="card-clip" [class.card-clip--tall]="isTallMachine(machine.id)">
+                <app-machine-card-v2 [machine]="machine" />
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   `,
 
@@ -28,27 +36,57 @@ import { TranslationService } from '../../services/translation.service';
         padding: var(--space-4);
         overflow-y: auto;
         height: 100%;
-        background: rgba(255, 255, 255, 0.02);
+
       }
 
-      .section-title {
-        margin: 0 0 var(--space-4) 0;
-        font-size: 12px;
+      .tier-section {
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+      }
+
+      .tier-section:not(:last-child)::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 50px;
+        background-size: 100% auto;
+        background-position: center;
+        background-repeat: no-repeat;
+        margin-top: 24px;
+        margin-bottom: 8px;
+        opacity: 0.9;        }
+
+      .tier-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 56px;
+        margin-bottom: var(--space-4);
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .tier-label {
+        font-size: 13px;
         font-weight: 700;
-        font-family: var(--font-ui);
-        color: var(--color-text-secondary);
+        font-family: var(--font-mono);
+        color: rgba(255, 220, 150, 0.95);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        border-left: 3px solid var(--color-accent-main);
-        padding-left: 10px;
-        padding-top: 2px;
-        padding-bottom: 2px;
+        letter-spacing: 0.25em;
+        white-space: nowrap;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+      }
+
+      .tier-line {
+        display: none;
       }
 
       .machines-container {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 30px 60px;
+        gap: 28px 48px;
         align-items: start;
       }
 
@@ -95,45 +133,35 @@ export class MachineListComponent {
   private machinesService = inject(MachinesService);
   readonly translationService = inject(TranslationService);
 
-  // Orden de desbloqueo según nuevo árbol de progresión
-  private machineOrder = [
-    MachineType.CRUSHER, // Inicial
-    MachineType.SEPARATOR, // Requiere Crusher Nv 4
-    MachineType.ASSEMBLER, // Requiere Separator Nv 3 + Crusher Nv 6
-    MachineType.PACKAGER, // Requiere Assembler Nv 3 + Crusher Nv 8
-    MachineType.SMELTER, // Requiere Packager Nv 3
-    MachineType.RECYCLER, // Requiere Separator Nv 4
-    MachineType.ELECTRIC_ASSEMBLER, // Requiere Smelter Nv 3 + Recycler Nv 3
-    MachineType.ELECTRIC_PACKAGER, // Requiere Electric Assembler Nv 3 + Packager Nv 5
-    // T4
-    MachineType.PCB_PRINTER, // Requiere Electric Assembler Nv 1
-    // T5
-    MachineType.HDD_ASSEMBLER, // Requiere PCB Printer Nv 3
-    // T6
-    MachineType.SCREEN_FABRICATOR, // Requiere PCB Printer Nv 5
-    // T7
-    MachineType.GPU_FAB, // Requiere Screen Fabricator Nv 3
-    // T8
-    MachineType.SMARTPHONE_FACTORY, // Requiere Screen Fabricator Nv 3
-    MachineType.LAPTOP_WORKSHOP, // Requiere HDD Assembler Nv 4 + Screen Fabricator Nv 3
-    // T10
-    MachineType.PC_BUILDER, // Requiere GPU Fab Nv 2 + HDD Assembler Nv 3
-    // T11
-    MachineType.MINING_RIG_ASSEMBLY, // Requiere GPU Fab Nv 3 + PC Builder Nv 2
-    // T12
-    MachineType.DATA_CENTER_ASSEMBLY, // Requiere PC Builder Nv 3
-  ];
-
   readonly tallMachines = new Set([MachineType.PACKAGER, MachineType.ELECTRIC_PACKAGER, MachineType.SMARTPHONE_FACTORY, MachineType.DATA_CENTER_ASSEMBLY]);
 
   isTallMachine(id: string): boolean {
     return this.tallMachines.has(id as MachineType);
   }
 
-  orderedMachines = computed(() => {
-    const machines = this.machinesService.getAll();
-    return this.machineOrder
-      .map((id) => machines.find((m) => m.id === id))
-      .filter((m) => m !== undefined);
+  private machineTiers = [
+    { label: 'LÍNEA BASE', types: [
+      MachineType.CRUSHER, MachineType.SEPARATOR, MachineType.ASSEMBLER,
+      MachineType.PACKAGER, MachineType.SMELTER, MachineType.RECYCLER,
+      MachineType.ELECTRIC_ASSEMBLER, MachineType.ELECTRIC_PACKAGER,
+    ]},
+    { label: 'ELECTRÓNICA', types: [
+      MachineType.PCB_PRINTER, MachineType.HDD_ASSEMBLER,
+      MachineType.SCREEN_FABRICATOR, MachineType.GPU_FAB,
+    ]},
+    { label: 'MANUFACTURA DIGITAL', types: [
+      MachineType.SMARTPHONE_FACTORY, MachineType.LAPTOP_WORKSHOP,
+      MachineType.PC_BUILDER, MachineType.MINING_RIG_ASSEMBLY, MachineType.DATA_CENTER_ASSEMBLY,
+    ]},
+  ];
+
+  tieredMachines = computed(() => {
+    const all = this.machinesService.getAll();
+    return this.machineTiers.map(tier => ({
+      label: tier.label,
+      machines: tier.types
+        .map(type => all.find(m => m.id === type))
+        .filter((m): m is NonNullable<typeof m> => m !== undefined),
+    }));
   });
 }

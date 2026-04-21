@@ -10,6 +10,8 @@ import { CommonModule } from '@angular/common';
 import { BackgroundGridComponent } from './components/ui/background-grid/background-grid.component';
 import { FirstRunTutorialOverlayComponent } from './components/first-run-tutorial-overlay/first-run-tutorial-overlay.component';
 import { DebugControlsComponent } from './components/debug-controls/debug-controls.component';
+import { PanelFrameComponent } from './components/ui/panel-frame/panel-frame.component';
+import { PanelFrameHComponent } from './components/ui/panel-frame-h/panel-frame-h.component';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
 import { MachinesService } from './services/machines.service';
@@ -33,6 +35,8 @@ import { FirstRunTutorialService } from './services/first-run-tutorial.service';
     StatisticsPanelComponent,
     BackgroundGridComponent,
     FirstRunTutorialOverlayComponent,
+    PanelFrameComponent,
+    PanelFrameHComponent,
     // DebugControlsComponent,
   ],
   templateUrl: './app.html',

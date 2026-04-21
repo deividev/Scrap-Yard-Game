@@ -13,6 +13,27 @@
   overflow: hidden;
 }
 
+app-resources-header {
+  display: block;
+  height: 100%;
+}
+
+/* Panel frame wrappers */
+.frame-sidebar {
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.frame-stats {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.column-right app-panel-frame.frame-upgrades {
+  display: block;
+  height: 100%;
+}
+
 .column-center {
   flex: 1;
   display: flex;
@@ -24,12 +45,19 @@
 .machines-scroll-area {
   flex: 1;
   overflow-y: auto;
+  background-color: #0d0b08;
+  background-image:
+    linear-gradient(rgba(10, 8, 5, 0.82), rgba(10, 8, 5, 0.75)),
+    url('assets/image/factory_floor.png');
+  background-size: 320px 320px;
+  background-repeat: repeat;
 }
 
 .column-right {
-  overflow-y: auto;
+  overflow: hidden;
   position: relative;
   transition: width 0.3s ease;
+  height: 100%;
 }
 
 .column-right:not(.hidden) {
