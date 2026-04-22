@@ -12,6 +12,8 @@ import { ResourceType } from '../models/resource.model';
 import { AudioService } from './audio.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { DemoEndService } from './demo-end.service';
+import { IS_DEMO } from '../config/dev-flags.config';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +29,7 @@ export class GameLoopService implements OnDestroy {
   private audioService = inject(AudioService);
   private statisticsService = inject(StatisticsService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private demoEndService = inject(DemoEndService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   private resourcesService = inject(ResourcesService);
@@ -181,6 +184,10 @@ export class GameLoopService implements OnDestroy {
 
       if (updatedMachine.id === MachineType.CRUSHER) {
         this.firstRunTutorialService.recordEvent('crusher-cycle-completed');
+      }
+      if (IS_DEMO && updatedMachine.id === MachineType.PACKAGER && !this.demoEndService.seen()) {
+        this.demoEndService.triggerIfNeeded();
+        this.audioService.playMaxLevelReached();
       }
 
       if (updatedMachine.baseProduction.resourceId === ResourceType.MONEY) {

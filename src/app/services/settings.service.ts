@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   sfxVolume: 70,
   windowMode: 'windowed',
   resolution: '1920x1080',
-  language: 'es',
+  language: 'en',
 };
 
 @Injectable({

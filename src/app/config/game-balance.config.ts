@@ -187,3 +187,7 @@ export const INITIAL_CAPACITIES = {
   SERVER_RACK: 2,
 };
 
+export const DEMO_CONFIG = {
+  STEAM_WISHLIST_URL: 'steam://advertise/4582270',
+};
+

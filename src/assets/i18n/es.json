@@ -72,7 +72,12 @@
     "laptop_workshop": "Laptop Workshop",
     "pc_builder": "PC Builder",
     "mining_rig_assembly": "Mining Rig Assembly",
-    "data_center_assembly": "Data Center Assembly"
+    "data_center_assembly": "Data Center Assembly",
+    "tiers": {
+      "linea_base": "Línea Base",
+      "electronica": "Electrónica",
+      "manufactura_digital": "Manufactura Digital"
+    }
   },
   "status": {
     "parada": "Apagada",
@@ -262,5 +267,8 @@
   },
   "alerts": {
     "save_corrupted": "No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva."
+  },
+  "demo": {
+    "locked_in_demo": "Disponible en la versión completa"
   }
 }

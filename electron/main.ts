@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 
@@ -13,6 +13,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    fullscreen: true,
     icon: iconPath,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
@@ -39,6 +40,7 @@ function createWindow() {
   if (app.isPackaged) {
     mainWindow.webContents.on('before-input-event', (event, input) => {
       if (
+        input.key === 'Escape' ||
         input.key === 'F12' ||
         (input.control && input.shift && input.key === 'I') ||
         (input.control && input.shift && input.key === 'J') ||
@@ -46,6 +48,9 @@ function createWindow() {
       ) {
         event.preventDefault();
       }
+    });
+    mainWindow.on('leave-full-screen', () => {
+      mainWindow?.setFullScreen(true);
     });
     mainWindow.webContents.on('devtools-opened', () => {
       mainWindow?.webContents.closeDevTools();
@@ -167,6 +172,11 @@ ipcMain.handle('set-resolution', (event: Electron.IpcMainInvokeEvent, resolution
 
 ipcMain.handle('quit-app', () => {
   app.quit();
+});
+
+ipcMain.handle('open-external', (event, url: string) => {
+  if (typeof url !== 'string' || (!url.startsWith('https://') && !url.startsWith('steam://'))) return;
+  shell.openExternal(url);
 });
 
 app.whenReady().then(createWindow);

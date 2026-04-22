@@ -212,15 +212,22 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
             <img src="assets/icons/lock_icon.png" alt="" aria-hidden="true" />
           </div>
           <div class="mc-v2__lock-text">
-            @for (line of unlockRequirementLines(); track $index) {
+            @if (isDemoLocked()) {
               <div class="mc-v2__req">
-                <span
-                  [class.mc-v2__req-icon--met]="line.met"
-                  [class.mc-v2__req-icon--unmet]="!line.met"
-                  >{{ line.icon }}</span
-                >
-                <span class="mc-v2__req-label">{{ line.text }}</span>
+                <span>🔒</span>
+                <span class="mc-v2__req-label">{{ translationService.t('demo.locked_in_demo') }}</span>
               </div>
+            } @else {
+              @for (line of unlockRequirementLines(); track $index) {
+                <div class="mc-v2__req">
+                  <span
+                    [class.mc-v2__req-icon--met]="line.met"
+                    [class.mc-v2__req-icon--unmet]="!line.met"
+                    >{{ line.icon }}</span
+                  >
+                  <span class="mc-v2__req-label">{{ line.text }}</span>
+                </div>
+              }
             }
           </div>
           <div class="mc-v2__lock-badge">{{ translationService.t('status.bloqueada') }}</div>
@@ -702,6 +709,8 @@ export class MachineCardV2Component implements AfterViewInit, OnDestroy {
   unlockInfo = computed(() =>
     this.machineUnlockService.getUnlockInfo(this.machine.id as MachineType),
   );
+
+  isDemoLocked = computed(() => this.unlockInfo().isDemoLocked ?? false);
 
   unlockRequirementLines = computed(() => {
     const info = this.unlockInfo();

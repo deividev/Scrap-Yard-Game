@@ -9,6 +9,7 @@ import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { DemoEndService } from './demo-end.service';
 import { SaveState, SAVE_VERSION } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 import { MachineType } from '../models/machine.model';
@@ -31,6 +32,7 @@ export class SaveService {
   private translationService = inject(TranslationService);
   private statisticsService = inject(StatisticsService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private demoEndService = inject(DemoEndService);
 
   private isDirty = signal(false);
   private isSaving = false;
@@ -115,6 +117,7 @@ export class SaveService {
       gameStarted: this.gameStarted(),
       statistics: this.statisticsService.getState(),
       firstRunTutorial: this.firstRunTutorialService.serialize(),
+      demoEndSeen: this.demoEndService.getState(),
     };
 
     // Custom replacer to handle Infinity values
@@ -284,6 +287,9 @@ export class SaveService {
     }
 
     this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
+    if (saveState.demoEndSeen) {
+      this.demoEndService.loadState(true);
+    }
 
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
@@ -348,6 +354,7 @@ export class SaveService {
     this.isDirty.set(false);
     this.gameStarted.set(false);
     this.firstRunTutorialService.reset();
+    this.demoEndService.loadState(false);
   }
 
   async resetToNewGame(): Promise<void> {

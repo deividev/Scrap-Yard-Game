@@ -8,6 +8,7 @@ export interface ElectronApi {
   quit?: () => void;
   setWindowMode?: (params: { mode: string; resolution: string }) => Promise<void>;
   setResolution?: (resolution: string) => Promise<void>;
+  openExternal?: (url: string) => void;
 }
 
 declare global {

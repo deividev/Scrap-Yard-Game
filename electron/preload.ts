@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld('electronApi', {
     ipcRenderer.invoke('set-resolution', resolution),
 
   quit: (): Promise<void> => ipcRenderer.invoke('quit-app'),
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
 });

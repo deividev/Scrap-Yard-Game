@@ -32,6 +32,7 @@ export interface SaveState {
   gameStarted?: boolean; // Indica si el usuario ha iniciado el juego (true) o solo ha guardado configuraciones (false/undefined)
   statistics?: { totalScrapGenerated: number; playTimeSeconds: number };
   firstRunTutorial?: FirstRunTutorialState;
+  demoEndSeen?: boolean;
   // F1 fields (pre-initialized in v1→v2 migration)
   contracts?: SavedContract[]; // contratos activos/disponibles
   lastContractSpawnCheck?: number; // timestamp del último check de spawn

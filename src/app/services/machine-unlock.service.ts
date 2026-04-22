@@ -5,6 +5,7 @@ import { MachineType } from '../models/machine.model';
 import { NotificationService } from './notification.service';
 import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
+import { IS_DEMO, DEMO_MACHINE_CAP } from '../config/dev-flags.config';
 
 export interface UnlockRequirement {
   machineType: MachineType;
@@ -16,6 +17,7 @@ export interface UnlockRequirement {
 export interface MachineUnlockInfo {
   isUnlocked: boolean;
   requirements: UnlockRequirement[];
+  isDemoLocked?: boolean;
 }
 
 /**
@@ -80,6 +82,7 @@ export class MachineUnlockService {
       MachineType.DATA_CENTER_ASSEMBLY,
     ];
     unlockable
+      .filter((m) => !(IS_DEMO && DEMO_MACHINE_CAP.includes(m)))
       .forEach((machineType) => this.checkUnlock(machineType));
   }
 
@@ -121,6 +124,10 @@ export class MachineUnlockService {
 
     if (!machine || machine.level > 0) {
       return { isUnlocked: true, requirements: [] };
+    }
+
+    if (IS_DEMO && DEMO_MACHINE_CAP.includes(machineType)) {
+      return { isUnlocked: false, requirements: [], isDemoLocked: true };
     }
 
     let requirements: UnlockRequirement[] = [];

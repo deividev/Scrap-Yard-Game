@@ -125,13 +125,16 @@ export interface Translations {
     level_short: string;
     cycle_time: string;
   };
+  demo: {
+    locked_in_demo: string;
+  };
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class TranslationService {
-  private currentLanguage = signal<Language>('es');
+  private currentLanguage = signal<Language>('en');
   private readonly isDev = isDevMode();
   private translationsMap: Record<Language, Translations> = {
     es: esTranslations as Translations,
