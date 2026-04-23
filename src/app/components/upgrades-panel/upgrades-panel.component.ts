@@ -984,7 +984,7 @@ export class UpgradesPanelComponent {
           const btn = this._elRef.nativeElement.querySelector(
             '[data-tutorial-id="machine-upgrade-button-crusher"]',
           ) as HTMLElement | null;
-          btn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (btn) this.scrollCardIntoPanel(btn);
         });
       }, 100);
     }
@@ -999,11 +999,23 @@ export class UpgradesPanelComponent {
           const card = this._elRef.nativeElement.querySelector(
             `[data-machine-id="${selectedId}"]`,
           ) as HTMLElement | null;
-          card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (card) this.scrollCardIntoPanel(card);
         });
       }, 100);
     }
   });
+
+  /** Scroll a card into view within the upgrades panel container only.
+   * Uses scrollTop instead of scrollIntoView to avoid propagating scroll to the root window. */
+  private scrollCardIntoPanel(targetEl: HTMLElement): void {
+    const container = this._elRef.nativeElement.querySelector('.tab-content') as HTMLElement | null;
+    if (!container) return;
+    const targetTop = targetEl.offsetTop;
+    const targetHeight = targetEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+    const targetScrollTop = targetTop - containerHeight / 2 + targetHeight / 2;
+    container.scrollTop = Math.max(0, targetScrollTop);
+  }
 
   selectedMachine = computed(() => {
     const selectedId = this.machineSelectionService.getSelectedMachineId();

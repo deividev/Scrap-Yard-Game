@@ -10,12 +10,12 @@ function createWindow() {
   const preloadPath = path.join(app.getAppPath(), 'electron', 'preload.js');
 
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     title: 'Scrap Yard Idle',
-    frame: true,
+    frame: false,
     show: false,
-    fullscreen: true,
+    kiosk: true,
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -25,10 +25,10 @@ function createWindow() {
   // Remove the default application menu (File/Edit/View/Window/Help)
   Menu.setApplicationMenu(null);
 
-  // Escape only exits fullscreen, never closes the app
+  // Escape does nothing — never exits fullscreen, never minimizes
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'Escape' && mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
+    if (input.key === 'Escape') {
+      event.preventDefault();
     }
   });
 
@@ -39,6 +39,7 @@ function createWindow() {
     .loadFile(indexPath)
     .then(() => {
       mainWindow.show();
+      mainWindow.setKiosk(true);
     })
     .catch((err) => {
       console.error('[Electron] Failed to load file:', err);

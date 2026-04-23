@@ -72,7 +72,12 @@
     "laptop_workshop": "Laptop Workshop",
     "pc_builder": "PC Builder",
     "mining_rig_assembly": "Mining Rig Assembly",
-    "data_center_assembly": "Data Center Assembly"
+    "data_center_assembly": "Data Center Assembly",
+    "tiers": {
+      "linea_base": "Base Line",
+      "electronica": "Electronics",
+      "manufactura_digital": "Digital Manufacturing"
+    }
   },
   "status": {
     "parada": "Offline",
