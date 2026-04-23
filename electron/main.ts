@@ -11,9 +11,11 @@ function createWindow() {
     : join(__dirname, '../build', iconFile);
 
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1920,
+    height: 1080,
     fullscreen: true,
+    frame: false,
+    show: false,
     icon: iconPath,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
