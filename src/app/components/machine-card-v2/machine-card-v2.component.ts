@@ -171,7 +171,9 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
           [style.opacity]="isStopped() ? '0.35' : '1'"
         >
           @for (input of effectiveInputs(); track $index; let last = $last) {
-            <div class="mc-v2__ri" [style.opacity]="isInputBlocked() ? '0.3' : '1'">
+            <div class="mc-v2__ri" [style.opacity]="isInputBlocked() ? '0.3' : '1'"
+              (mouseenter)="hoveredRecipeItem.set(getResourceName(input.resourceId) + ' ×' + input.amount)"
+              (mouseleave)="hoveredRecipeItem.set(null)">
               <img class="mc-v2__ico" [src]="getResourceIcon(input.resourceId)" alt="" />
               <span class="mc-v2__qty">×{{ input.amount }}</span>
             </div>
@@ -180,7 +182,9 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
             }
           }
           <span class="mc-v2__rarr">→</span>
-          <div class="mc-v2__ri mc-v2__ri--out">
+          <div class="mc-v2__ri mc-v2__ri--out"
+            (mouseenter)="showRecipeTip($event, getResourceName(currentBaseProduction().resourceId) + ' ×' + effectiveOutput())"
+            (mouseleave)="hoveredRecipeItem.set(null)">
             <img
               class="mc-v2__ico"
               [src]="getResourceIcon(currentBaseProduction().resourceId)"
@@ -188,6 +192,9 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
             />
             <span class="mc-v2__qty">×{{ effectiveOutput() }}</span>
           </div>
+          @if (hoveredRecipeItem()) {
+            <div class="mc-v2__recipe-tip">{{ hoveredRecipeItem() }}</div>
+          }
         </div>
 
         @if (isOutputBlocked()) {
@@ -358,7 +365,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         font-family: var(--font-mono);
       }
       .mc-v2__s1-lv {
-        font-size: 2.6cqw;
+        font-size: 2.8cqw;
         font-weight: bold;
         color: #bf8c26;
         letter-spacing: 0.1em;
@@ -370,12 +377,14 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
           0 2px 4px rgba(0, 0, 0, 0.9);
       }
       .mc-v2__s1-sep {
-        font-size: 2.5cqw;
+        font-size: 2.6cqw;
+        font-weight: bold;
         color: rgba(120, 90, 30, 1);
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
       }
       .mc-v2__s1-cap {
-        font-size: 2.5cqw;
+        font-size: 2.6cqw;
+        font-weight: bold;
         color: rgba(160, 120, 45, 1);
         letter-spacing: 0.04em;
         text-shadow:
@@ -383,7 +392,8 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
           0 0 6px rgba(0, 0, 0, 0.8);
       }
       .mc-v2__s1-cycle {
-        font-size: 2.5cqw;
+        font-size: 2.6cqw;
+        font-weight: bold;
         color: rgba(80, 175, 110, 0.88);
         letter-spacing: 0.05em;
         margin-left: auto;
@@ -414,10 +424,11 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         justify-content: center;
         gap: 5px;
         pointer-events: none;
-        overflow: hidden;
+        overflow: visible;
         font-family: var(--font-mono);
       }
       .mc-v2__ri {
+        pointer-events: all;
         position: relative;
         display: inline-flex;
         align-items: center;
@@ -425,8 +436,8 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         flex-shrink: 0;
       }
       .mc-v2__ico {
-        width: 8cqw;
-        height: 8cqw;
+        width: 8.5cqw;
+        height: 8.5cqw;
         object-fit: contain;
         display: block;
         image-rendering: pixelated;
@@ -435,7 +446,7 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
         position: absolute;
         bottom: 0.75cqw;
         right: 0cqw;
-        font-size: 2cqw;
+        font-size: 2.6cqw;
         font-weight: bold;
         color: rgba(220, 240, 255, 0.95);
         /* line-height: 1; */
@@ -446,6 +457,26 @@ const CARD_IMAGES: Partial<Record<string, string>> = {
       }
       .mc-v2__ri--out .mc-v2__qty {
         color: rgba(140, 255, 160, 0.95);
+      }
+      .mc-v2__recipe-tip {
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        background: rgba(15, 10, 5, 0.96);
+        border: 1px solid var(--color-accent-main, #d4960a);
+        color: var(--color-text-primary, #e8d9b0);
+        font-family: var(--font-mono);
+        font-size: 3.2cqw;
+        font-weight: 700;
+        padding: 0.8cqw 1.5cqw;
+        border-radius: 0.6cqw;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 20;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        letter-spacing: 0.05em;
       }
       .mc-v2__output-full {
         position: absolute;
@@ -667,6 +698,7 @@ export class MachineCardV2Component implements AfterViewInit, OnDestroy {
   private machinesService = inject(MachinesService);
   private upgradesService = inject(UpgradesService);
   private machineSelectionService = inject(MachineSelectionService);
+  private el = inject(ElementRef);
 
   isSelected = computed(
     () => this.machineSelectionService.getSelectedMachineId() === this.machine.id,
@@ -843,9 +875,27 @@ export class MachineCardV2Component implements AfterViewInit, OnDestroy {
   });
 
   readonly maxMachineLevel = MACHINE_UPGRADE_CONFIG.MAX_LEVEL;
+  hoveredRecipeItem = signal<string | null>(null);
+  recipeTipPos = signal<{ top: number; left: number }>({ top: 50, left: 50 });
+
+  showRecipeTip(event: MouseEvent, label: string): void {
+    const target = event.currentTarget as HTMLElement;
+    const card = this.el.nativeElement.querySelector('.mc-v2') as HTMLElement;
+    if (!card) return;
+    const cardRect = card.getBoundingClientRect();
+    const iconRect = target.getBoundingClientRect();
+    const top = ((iconRect.top - cardRect.top) / cardRect.height) * 100;
+    const left = ((iconRect.left + iconRect.width / 2 - cardRect.left) / cardRect.width) * 100;
+    this.recipeTipPos.set({ top: Math.max(2, top - 8), left: Math.min(90, Math.max(10, left)) });
+    this.hoveredRecipeItem.set(label);
+  }
 
   getResourceIcon(resourceId: string): string {
     return INITIAL_RESOURCES.find((r) => r.id === resourceId)?.icon ?? '';
+  }
+
+  getResourceName(resourceId: string): string {
+    return this.translationService.t(`resources.${resourceId}`);
   }
 
   toggleMachine(): void {

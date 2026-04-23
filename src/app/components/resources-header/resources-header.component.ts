@@ -450,7 +450,7 @@ import { MachineType } from '../../models/machine.model';
 
       .resources-sidebar {
         margin: 28px;
-        width: 320px;
+        width: 240px;
         display: flex;
         flex-direction: column;
         height: 100%;
