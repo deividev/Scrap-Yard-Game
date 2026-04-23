@@ -37,7 +37,6 @@ import { DemoService } from '../../services/demo.service';
               <span class="zone-led" [class.zone-led--on]="tier.activeCount > 0"></span>
             </div>
             <div class="zone-btn__body">
-              <span class="zone-btn__id">Z-0{{ i + 1 }}</span>
               <span class="zone-btn__name">{{ translationService.t(tier.labelKey) }}</span>
               <div class="zone-btn__pips">
                 @for (m of tier.machines; track m.id) {
@@ -86,7 +85,7 @@ import { DemoService } from '../../services/demo.service';
     .zone-nav {
       display: flex;
       gap: 4px;
-      padding: 8px 8px 0;
+      padding: 6px 6px 0;
       flex-shrink: 0;
     }
 
@@ -96,7 +95,7 @@ import { DemoService } from '../../services/demo.service';
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 9px 12px 9px 10px;
+      padding: 5px 10px 5px 8px;
       background: linear-gradient(180deg, #111009 0%, #0a0805 100%);
       border: 1px solid rgba(70, 40, 8, 0.8);
       border-bottom: none;
@@ -235,7 +234,7 @@ import { DemoService } from '../../services/demo.service';
       display: flex;
       flex-wrap: wrap;
       gap: 3px;
-      margin-top: 4px;
+      margin-top: 2px;
       max-width: 96px;
     }
     .pip {
@@ -270,7 +269,7 @@ import { DemoService } from '../../services/demo.service';
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 14px 10px 16px;
+      padding: 4px 4px 4px;
       border-top: 2px solid rgba(70, 40, 8, 0.5);
       position: relative;
       animation: zone-in 0.2s ease-out both;
@@ -306,7 +305,9 @@ import { DemoService } from '../../services/demo.service';
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 12px 16px;
+      align-content: center;
+      gap: 4px 6px;
+      min-height: 100%;
     }
 
     .panel-overlay {
@@ -324,7 +325,7 @@ import { DemoService } from '../../services/demo.service';
     }
 
     .card-clip {
-      width: calc(25% - 12px);
+      width: calc(25% - 6px);
       aspect-ratio: 420 / 530;
       overflow: hidden;
       position: relative;
