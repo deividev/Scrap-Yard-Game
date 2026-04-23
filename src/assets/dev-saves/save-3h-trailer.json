@@ -1,0 +1,318 @@
+{
+  "version": 3,
+  "gameStarted": true,
+  "lastSaveTimestamp": 1745308800000,
+
+  "resources": [
+    { "id": "scrap",               "name": "Chatarra",               "amount": 175, "capacity": 200,         "icon": "assets/icons/scrap_resource.png" },
+    { "id": "metal",               "name": "Metal",                  "amount": 80,  "capacity": 95,          "icon": "assets/icons/metal_resource.png" },
+    { "id": "plastic",             "name": "Plástico",               "amount": 72,  "capacity": 90,          "icon": "assets/icons/plastic_resource.png" },
+    { "id": "components",          "name": "Componentes",            "amount": 28,  "capacity": 33,          "icon": "assets/icons/components_resource.png" },
+    { "id": "money",               "name": "Dinero",                 "amount": 8250,"capacity": 1e308,        "icon": "assets/icons/gold_resource_1.png" },
+    { "id": "copper",              "name": "Cobre",                  "amount": 62,  "capacity": 80,          "icon": "assets/icons/copper_resource.png" },
+    { "id": "recycled_plastic",    "name": "Plástico reciclado",     "amount": 52,  "capacity": 60,          "icon": "assets/icons/plastic_recycle_resource.png" },
+    { "id": "electric_components", "name": "Componentes eléctricos", "amount": 26,  "capacity": 30,          "icon": "assets/icons/electric_components_resource.png" },
+    { "id": "circuit_board",       "name": "Circuit Board",          "amount": 17,  "capacity": 20,          "icon": "assets/icons/circuit_board_resource.png" },
+    { "id": "hdd",                 "name": "Disco Duro",             "amount": 10,  "capacity": 12,          "icon": "assets/icons/hdd_resource.png" },
+    { "id": "screen",              "name": "Pantalla",               "amount": 10,  "capacity": 12,          "icon": "assets/icons/screen_resource.png" },
+    { "id": "gpu",                 "name": "GPU",                    "amount": 5,   "capacity": 6,           "icon": "assets/icons/gpu_resource.png" },
+    { "id": "smartphone",          "name": "Smartphone",             "amount": 0,   "capacity": 5,           "icon": "assets/icons/smartphone_resource.png" },
+    { "id": "laptop",              "name": "Laptop",                 "amount": 0,   "capacity": 3,           "icon": "assets/icons/laptop_resource.png" },
+    { "id": "desktop_pc",          "name": "Desktop PC",             "amount": 0,   "capacity": 3,           "icon": "assets/icons/desktop_pc_resource.png" },
+    { "id": "mining_rig",          "name": "Mining Rig",             "amount": 0,   "capacity": 2,           "icon": "assets/icons/mining_rig_resource.png" },
+    { "id": "server_rack",         "name": "Server Rack",            "amount": 0,   "capacity": 2,           "icon": "assets/icons/server_rack_resource.png" }
+  ],
+
+  "machines": [
+    {
+      "id": "crusher",
+      "name": "Trituradora",
+      "icon": "assets/cards/crusher_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.5,
+      "baseConsumption": [{ "resourceId": "scrap", "amount": 1 }],
+      "baseProduction": { "resourceId": "metal", "amount": 2 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "separator",
+      "name": "Separador",
+      "icon": "assets/cards/separator_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.5,
+      "baseConsumption": [{ "resourceId": "scrap", "amount": 1 }],
+      "baseProduction": { "resourceId": "plastic", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "smelter",
+      "name": "Fundidora",
+      "icon": "assets/cards/smelter_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.33,
+      "baseConsumption": [{ "resourceId": "scrap", "amount": 2 }],
+      "baseProduction": { "resourceId": "copper", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "assembler",
+      "name": "Ensambladora",
+      "icon": "assets/cards/assembler_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.22,
+      "baseConsumption": [
+        { "resourceId": "metal", "amount": 1 },
+        { "resourceId": "plastic", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "components", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "packager",
+      "name": "Empaquetadora",
+      "icon": "assets/cards/packager_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.1,
+      "baseConsumption": [{ "resourceId": "components", "amount": 4 }],
+      "baseProduction": { "resourceId": "money", "amount": 10 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "recycler",
+      "name": "Recicladora",
+      "icon": "assets/cards/recycler_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.5,
+      "baseConsumption": [{ "resourceId": "plastic", "amount": 1 }],
+      "baseProduction": { "resourceId": "recycled_plastic", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "electric_assembler",
+      "name": "Ensambladora eléctrica",
+      "icon": "assets/cards/electric_assembler_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.2,
+      "baseConsumption": [
+        { "resourceId": "copper", "amount": 1 },
+        { "resourceId": "components", "amount": 1 },
+        { "resourceId": "recycled_plastic", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "electric_components", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "electric_packager",
+      "name": "Empaquetadora eléctrica",
+      "icon": "assets/cards/electric_packager_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.1,
+      "baseConsumption": [{ "resourceId": "electric_components", "amount": 4 }],
+      "baseProduction": { "resourceId": "money", "amount": 60 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "pcb_printer",
+      "name": "PCB Printer",
+      "icon": "assets/cards/pcb_printer_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.17,
+      "baseConsumption": [
+        { "resourceId": "copper", "amount": 1 },
+        { "resourceId": "electric_components", "amount": 2 }
+      ],
+      "baseProduction": { "resourceId": "circuit_board", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "hdd_assembler",
+      "name": "HDD Assembler",
+      "icon": "assets/cards/hdd_assembler_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.08,
+      "baseConsumption": [
+        { "resourceId": "circuit_board", "amount": 1 },
+        { "resourceId": "metal", "amount": 2 }
+      ],
+      "baseProduction": { "resourceId": "hdd", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "screen_fabricator",
+      "name": "Screen Fabricator",
+      "icon": "assets/cards/screen_fabricator_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.07,
+      "baseConsumption": [
+        { "resourceId": "circuit_board", "amount": 1 },
+        { "resourceId": "electric_components", "amount": 1 },
+        { "resourceId": "recycled_plastic", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "screen", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "gpu_fab",
+      "name": "GPU Fab",
+      "icon": "assets/cards/gpu_fab_card_new_slot.png",
+      "level": 1,
+      "baseSpeed": 0.05,
+      "baseConsumption": [
+        { "resourceId": "circuit_board", "amount": 1 },
+        { "resourceId": "hdd", "amount": 1 },
+        { "resourceId": "copper", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "gpu", "amount": 1 },
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "id": "smartphone_factory",
+      "name": "Smartphone Factory",
+      "icon": "assets/cards/smartphone_factory_card_new_slot.png",
+      "level": 0,
+      "baseSpeed": 0.045,
+      "baseConsumption": [
+        { "resourceId": "screen", "amount": 1 },
+        { "resourceId": "gpu", "amount": 1 },
+        { "resourceId": "circuit_board", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "smartphone", "amount": 1 },
+      "isActive": false,
+      "progress": 0
+    },
+    {
+      "id": "laptop_workshop",
+      "name": "Laptop Workshop",
+      "icon": "assets/cards/laptop_workshop_card_new_slot.png",
+      "level": 0,
+      "baseSpeed": 0.035,
+      "baseConsumption": [
+        { "resourceId": "hdd", "amount": 1 },
+        { "resourceId": "screen", "amount": 1 },
+        { "resourceId": "gpu", "amount": 1 },
+        { "resourceId": "circuit_board", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "laptop", "amount": 1 },
+      "isActive": false,
+      "progress": 0
+    },
+    {
+      "id": "pc_builder",
+      "name": "PC Builder",
+      "icon": "assets/cards/pc_builder_card_new_slot.png",
+      "level": 0,
+      "baseSpeed": 0.025,
+      "baseConsumption": [
+        { "resourceId": "hdd", "amount": 1 },
+        { "resourceId": "gpu", "amount": 2 },
+        { "resourceId": "circuit_board", "amount": 2 },
+        { "resourceId": "metal", "amount": 1 }
+      ],
+      "baseProduction": { "resourceId": "desktop_pc", "amount": 1 },
+      "isActive": false,
+      "progress": 0
+    },
+    {
+      "id": "mining_rig_assembly",
+      "name": "Mining Rig Assembly",
+      "icon": "assets/cards/mining_rig_assembly_card_new_slot.png",
+      "level": 0,
+      "baseSpeed": 0.018,
+      "baseConsumption": [
+        { "resourceId": "desktop_pc", "amount": 1 },
+        { "resourceId": "gpu", "amount": 4 },
+        { "resourceId": "electric_components", "amount": 2 }
+      ],
+      "baseProduction": { "resourceId": "mining_rig", "amount": 1 },
+      "isActive": false,
+      "progress": 0
+    },
+    {
+      "id": "data_center_assembly",
+      "name": "Data Center Assembly",
+      "icon": "assets/cards/data_center_assembly_card_new_slot.png",
+      "level": 0,
+      "baseSpeed": 0.017,
+      "baseConsumption": [
+        { "resourceId": "desktop_pc", "amount": 2 },
+        { "resourceId": "gpu", "amount": 2 },
+        { "resourceId": "circuit_board", "amount": 4 }
+      ],
+      "baseProduction": { "resourceId": "server_rack", "amount": 1 },
+      "isActive": false,
+      "progress": 0
+    }
+  ],
+
+  "upgrades": [
+    { "id": "UPG_STORE_001", "level": 5 },
+    { "id": "UPG_STORE_002", "level": 5 },
+    { "id": "UPG_STORE_003", "level": 5 },
+    { "id": "UPG_STORE_004", "level": 5 },
+    { "id": "UPG_STORE_005", "level": 4 },
+    { "id": "UPG_STORE_006", "level": 4 },
+    { "id": "UPG_STORE_007", "level": 4 },
+    { "id": "UPG_STORE_008", "level": 3 },
+    { "id": "UPG_STORE_009", "level": 2 },
+    { "id": "UPG_STORE_010", "level": 2 },
+    { "id": "UPG_STORE_011", "level": 1 },
+    { "id": "UPG_STORE_012", "level": 0 },
+    { "id": "UPG_STORE_013", "level": 0 },
+    { "id": "UPG_STORE_014", "level": 0 },
+    { "id": "UPG_STORE_015", "level": 0 },
+    { "id": "UPG_STORE_016", "level": 0 },
+    { "id": "UPG_MACH_001",  "level": 20 },
+    { "id": "UPG_MACH_002",  "level": 12 },
+    { "id": "UPG_MACH_003",  "level": 15 },
+    { "id": "UPG_MACH_004",  "level": 12 },
+    { "id": "UPG_MACH_005",  "level": 10 },
+    { "id": "UPG_MACH_006",  "level": 10 },
+    { "id": "UPG_MACH_007",  "level": 8  },
+    { "id": "UPG_MACH_008",  "level": 6  },
+    { "id": "UPG_MACH_009",  "level": 5  },
+    { "id": "UPG_MACH_010",  "level": 3  },
+    { "id": "UPG_MACH_011",  "level": 2  },
+    { "id": "UPG_MACH_012",  "level": 1  },
+    { "id": "UPG_MACH_013",  "level": 0  },
+    { "id": "UPG_MACH_014",  "level": 0  },
+    { "id": "UPG_MACH_015",  "level": 0  },
+    { "id": "UPG_MACH_016",  "level": 0  },
+    { "id": "UPG_MACH_017",  "level": 0  },
+    { "id": "UPG_SCRAP_001", "level": 6  },
+    { "id": "UPG_SCRAP_002", "level": 5  }
+  ],
+
+  "scrapGenerationRate": 0.7,
+  "upgradeProgress": [],
+
+  "settings": {
+    "language": "en",
+    "musicVolume": 30,
+    "sfxVolume": 100,
+    "windowMode": "fullscreen",
+    "resolution": "1920x1080"
+  },
+
+  "statistics": {
+    "totalScrapGenerated": 52400,
+    "playTimeSeconds": 10800
+  },
+
+  "firstRunTutorial": null,
+  "contracts": [],
+  "lastContractSpawnCheck": 0,
+  "firstContractSpawned": false,
+  "completedMilestones": []
+}
