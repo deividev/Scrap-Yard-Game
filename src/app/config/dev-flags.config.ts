@@ -8,4 +8,4 @@
  * MUST be `false` in all Steam / production builds — the compiler will tree-shake
  * the entire calibrator component out when false.
  */
-export const DEV_CALIBRATION_ENABLED = false;
+export const DEV_CALIBRATION_ENABLED = true;
