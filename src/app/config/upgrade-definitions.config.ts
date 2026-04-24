@@ -14,7 +14,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_001,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Chatarra',
+    nameKey: 'upgrades.storage.scrap',
     baseCostMoney: 20,
     description: '+25 capacidad máxima de Chatarra por nivel',
     effectType: 'storage',
@@ -24,7 +24,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_002,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Metal',
+    nameKey: 'upgrades.storage.metal',
     baseCostMoney: 35,
     description: '+15 capacidad máxima de Metal por nivel',
     effectType: 'storage',
@@ -34,7 +34,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_003,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Plástico',
+    nameKey: 'upgrades.storage.plastic',
     baseCostMoney: 35,
     description: '+15 capacidad máxima de Plástico por nivel',
     effectType: 'storage',
@@ -44,7 +44,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_004,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Componentes',
+    nameKey: 'upgrades.storage.components',
     baseCostMoney: 35,
     extraCostComponents: 1,
     description: '+5 capacidad máxima de Componentes por nivel',
@@ -55,7 +55,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_005,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Plástico Reciclado',
+    nameKey: 'upgrades.storage.recycled_plastic',
     baseCostMoney: 50,
     description: '+10 capacidad máxima de Plástico Reciclado por nivel',
     effectType: 'storage',
@@ -65,7 +65,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_007,
     category: UpgradeCategory.STORAGE,
-    name: 'Depósito de Cobre',
+    nameKey: 'upgrades.storage.copper',
     baseCostMoney: 40,
     description: '+15 capacidad máxima de Cobre por nivel',
     effectType: 'storage',
@@ -75,7 +75,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_006,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Componentes Eléctricos',
+    nameKey: 'upgrades.storage.electric_components',
     baseCostMoney: 80,
     extraCostComponents: 1,
     description: '+5 capacidad máxima de Componentes Eléctricos por nivel',
@@ -86,7 +86,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_008,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Placas de Circuito',
+    nameKey: 'upgrades.storage.circuit_board',
     baseCostMoney: 100,
     description: '+4 capacidad máxima de Placas de Circuito por nivel',
     effectType: 'storage',
@@ -96,7 +96,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_009,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Discos Duros',
+    nameKey: 'upgrades.storage.hdd',
     baseCostMoney: 150,
     description: '+3 capacidad máxima de Discos Duros por nivel',
     effectType: 'storage',
@@ -106,7 +106,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_010,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Pantallas',
+    nameKey: 'upgrades.storage.screen',
     baseCostMoney: 150,
     description: '+3 capacidad máxima de Pantallas por nivel',
     effectType: 'storage',
@@ -116,7 +116,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_011,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de GPUs',
+    nameKey: 'upgrades.storage.gpu',
     baseCostMoney: 200,
     description: '+2 capacidad máxima de GPUs por nivel',
     effectType: 'storage',
@@ -126,7 +126,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_012,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Smartphones',
+    nameKey: 'upgrades.storage.smartphone',
     baseCostMoney: 200,
     description: '+2 capacidad máxima de Smartphones por nivel',
     effectType: 'storage',
@@ -136,7 +136,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_013,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Laptops',
+    nameKey: 'upgrades.storage.laptop',
     baseCostMoney: 250,
     description: '+2 capacidad máxima de Laptops por nivel',
     effectType: 'storage',
@@ -146,7 +146,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_014,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Desktop PCs',
+    nameKey: 'upgrades.storage.desktop_pc',
     baseCostMoney: 250,
     description: '+2 capacidad máxima de Desktop PCs por nivel',
     effectType: 'storage',
@@ -156,7 +156,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_015,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Mining Rigs',
+    nameKey: 'upgrades.storage.mining_rig',
     baseCostMoney: 400,
     description: '+1 capacidad máxima de Mining Rigs por nivel',
     effectType: 'storage',
@@ -166,7 +166,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_STORE_016,
     category: UpgradeCategory.STORAGE,
-    name: 'Almacén de Server Racks',
+    nameKey: 'upgrades.storage.server_rack',
     baseCostMoney: 400,
     description: '+1 capacidad máxima de Server Racks por nivel',
     effectType: 'storage',
@@ -179,7 +179,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_001,
     category: UpgradeCategory.MACHINE,
-    name: 'Trituradora: Velocidad',
+    nameKey: 'machines.crusher',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.CRUSHER,
     description: 'Aumenta velocidad de Trituradora',
     effectType: 'machine_speed',
@@ -189,7 +189,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_002,
     category: UpgradeCategory.MACHINE,
-    name: 'Fundidora: Velocidad',
+    nameKey: 'machines.smelter',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SMELTER,
     description: 'Aumenta velocidad de Fundidora',
     effectType: 'machine_speed',
@@ -199,7 +199,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_003,
     category: UpgradeCategory.MACHINE,
-    name: 'Separador: Velocidad',
+    nameKey: 'machines.separator',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SEPARATOR,
     description: 'Aumenta velocidad de Separador',
     effectType: 'machine_speed',
@@ -209,7 +209,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_004,
     category: UpgradeCategory.MACHINE,
-    name: 'Ensambladora: Velocidad',
+    nameKey: 'machines.assembler',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ASSEMBLER,
     description: 'Aumenta velocidad de Ensambladora',
     effectType: 'machine_speed',
@@ -219,7 +219,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_005,
     category: UpgradeCategory.MACHINE,
-    name: 'Empaquetadora: Velocidad',
+    nameKey: 'machines.packager',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.PACKAGER,
     description: 'Aumenta velocidad de Empaquetadora',
     effectType: 'machine_speed',
@@ -229,7 +229,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_006,
     category: UpgradeCategory.MACHINE,
-    name: 'Recicladora: Velocidad',
+    nameKey: 'machines.recycler',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.RECYCLER,
     description: 'Aumenta velocidad de Recicladora',
     effectType: 'machine_speed',
@@ -239,7 +239,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_007,
     category: UpgradeCategory.MACHINE,
-    name: 'Ensambladora Eléctrica: Velocidad',
+    nameKey: 'machines.electric_assembler',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ELECTRIC_ASSEMBLER,
     description: 'Aumenta velocidad de Ensambladora Eléctrica',
     effectType: 'machine_speed',
@@ -249,7 +249,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_008,
     category: UpgradeCategory.MACHINE,
-    name: 'Empaquetadora Eléctrica: Velocidad',
+    nameKey: 'machines.electric_packager',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.ELECTRIC_PACKAGER,
     description: 'Aumenta velocidad de Empaquetadora Eléctrica',
     effectType: 'machine_speed',
@@ -259,7 +259,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_009,
     category: UpgradeCategory.MACHINE,
-    name: 'PCB Printer: Velocidad',
+    nameKey: 'machines.pcb_printer',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.PCB_PRINTER,
     description: 'Aumenta velocidad del PCB Printer',
     effectType: 'machine_speed',
@@ -269,7 +269,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_010,
     category: UpgradeCategory.MACHINE,
-    name: 'HDD Assembler: Velocidad',
+    nameKey: 'machines.hdd_assembler',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.HDD_ASSEMBLER,
     description: 'Aumenta velocidad del HDD Assembler',
     effectType: 'machine_speed',
@@ -279,7 +279,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_011,
     category: UpgradeCategory.MACHINE,
-    name: 'Screen Fabricator: Velocidad',
+    nameKey: 'machines.screen_fabricator',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SCREEN_FABRICATOR,
     description: 'Aumenta velocidad del Screen Fabricator',
     effectType: 'machine_speed',
@@ -289,7 +289,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_012,
     category: UpgradeCategory.MACHINE,
-    name: 'GPU Fab: Velocidad',
+    nameKey: 'machines.gpu_fab',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.GPU_FAB,
     description: 'Aumenta velocidad del GPU Fab',
     effectType: 'machine_speed',
@@ -299,7 +299,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_013,
     category: UpgradeCategory.MACHINE,
-    name: 'Smartphone Factory: Velocidad',
+    nameKey: 'machines.smartphone_factory',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.SMARTPHONE_FACTORY,
     description: 'Aumenta velocidad de Smartphone Factory',
     effectType: 'machine_speed',
@@ -309,7 +309,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_014,
     category: UpgradeCategory.MACHINE,
-    name: 'Laptop Workshop: Velocidad',
+    nameKey: 'machines.laptop_workshop',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.LAPTOP_WORKSHOP,
     description: 'Aumenta velocidad del Laptop Workshop',
     effectType: 'machine_speed',
@@ -319,7 +319,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_015,
     category: UpgradeCategory.MACHINE,
-    name: 'PC Builder: Velocidad',
+    nameKey: 'machines.pc_builder',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.PC_BUILDER,
     description: 'Aumenta velocidad del PC Builder',
     effectType: 'machine_speed',
@@ -329,7 +329,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_016,
     category: UpgradeCategory.MACHINE,
-    name: 'Mining Rig Assembly: Velocidad',
+    nameKey: 'machines.mining_rig_assembly',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.MINING_RIG_ASSEMBLY,
     description: 'Aumenta velocidad del Mining Rig Assembly',
     effectType: 'machine_speed',
@@ -339,7 +339,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_MACH_017,
     category: UpgradeCategory.MACHINE,
-    name: 'Data Center Assembly: Velocidad',
+    nameKey: 'machines.data_center_assembly',
     baseCostMoney: MACHINE_UPGRADE_CONFIG.BASE_COSTS.DATA_CENTER_ASSEMBLY,
     description: 'Aumenta velocidad del Data Center Assembly',
     effectType: 'machine_speed',
@@ -351,7 +351,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_SCRAP_001,
     category: UpgradeCategory.SCRAP,
-    name: 'Descarga Manual Mejorada',
+    nameKey: 'upgrades.scrap_manual.name',
     baseCostMoney: 95,
     description: '+1 Chatarra adicional por acción manual por nivel',
     effectType: 'scrap_manual',
@@ -360,7 +360,7 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   {
     id: UpgradeId.UPG_SCRAP_002,
     category: UpgradeCategory.SCRAP,
-    name: 'Llegada Automática de Chatarra',
+    nameKey: 'upgrades.scrap_auto.name',
     baseCostMoney: 115,
     description: 'Genera Chatarra automáticamente por segundo',
     effectType: 'scrap_auto',

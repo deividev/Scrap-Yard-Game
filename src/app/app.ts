@@ -22,6 +22,7 @@ import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -112,4 +113,5 @@ export class App implements OnInit, OnDestroy {
   onPanelMinimizedChange(isMinimized: boolean): void {
     this.isPanelMinimized = isMinimized;
   }
+
 }

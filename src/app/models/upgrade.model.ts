@@ -56,7 +56,8 @@ export enum UpgradeId {
 export interface UpgradeDefinition {
   id: UpgradeId;
   category: UpgradeCategory;
-  name: string;
+  /** i18n key for the upgrade name, e.g. 'upgrades.storage.scrap' or 'machines.crusher' */
+  nameKey: string;
   baseCostMoney: number;
   extraCostComponents?: number; // Cost per level in components (if any)
   description: string;

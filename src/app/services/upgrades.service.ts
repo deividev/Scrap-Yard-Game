@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { UpgradeState, UpgradeId, UpgradeCost } from '../models/upgrade.model';
+import { UpgradeState, UpgradeId, UpgradeCost, UpgradeDefinition, UpgradeCategory } from '../models/upgrade.model';
 import { ResourceType } from '../models/resource.model';
 import { UPGRADE_DEFINITIONS } from '../config/upgrade-definitions.config';
 import {
@@ -185,7 +185,7 @@ export class UpgradesService {
 
     if (definition && newLevel > 0) {
       const message = this.translationService.tp('notifications.upgrade_completed', {
-        name: definition.name,
+        name: this.getUpgradeDisplayName(definition),
         level: newLevel.toString(),
       });
       this.notificationService.show(message, 'success', definition.icon);
@@ -194,6 +194,23 @@ export class UpgradesService {
     this.audioService.playUpgradeCompleted();
 
     this.saveService?.markDirty();
+  }
+
+  private getUpgradeDisplayName(definition: UpgradeDefinition): string {
+    const t = (key: string) => this.translationService.t(key);
+    if (definition.category === UpgradeCategory.MACHINE && definition.targetMachineId) {
+      return `${t(`machines.${definition.targetMachineId}`)}: ${t('upgrades.machine_tab.speed_label')}`;
+    }
+    if (definition.category === UpgradeCategory.STORAGE && definition.targetResourceId) {
+      return t(`upgrades.storage.${definition.targetResourceId}`);
+    }
+    if (definition.id === UpgradeId.UPG_SCRAP_001) {
+      return t('upgrades.scrap_manual.name');
+    }
+    if (definition.id === UpgradeId.UPG_SCRAP_002) {
+      return t('upgrades.scrap_auto.name');
+    }
+    return t(definition.nameKey);
   }
 
   /**
