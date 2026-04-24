@@ -23,6 +23,7 @@ import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 import { DemoEndService } from './services/demo-end.service';
+import { IS_DEMO } from './config/dev-flags.config';
 
 @Component({
   selector: 'app-root',
@@ -120,7 +121,7 @@ export class App implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
-    if (!isDevMode()) return;
+    if (!isDevMode() && !IS_DEMO) return;
     if (event.ctrlKey && event.shiftKey && event.altKey && event.key === 'D') {
       this.demoEndService.forceShow();
     }
