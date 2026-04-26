@@ -149,7 +149,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Ensambladora eléctrica',
     icon: 'assets/cards/electric_assembler_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.2, // Fix: was 0.12 (E.Packager 80% deficit at unlock)
+    baseSpeed: 0.32, // Balance pass: feeds E.Packager at full rate + leaves headroom for PCB Printer
     baseConsumption: [
       {
         resourceId: ResourceType.COPPER,
@@ -177,7 +177,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'PCB Printer',
     icon: 'assets/cards/pcb_printer_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.17, // PRD A.2 T4: 1 Cobre + 2 Comp.Eléctricos → 1 CB
+    baseSpeed: 0.30, // Balance pass: faster (0.17→0.30) to keep Circuit Boards flowing for T5-T7
     baseConsumption: [
       {
         resourceId: ResourceType.COPPER,
@@ -201,7 +201,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'HDD Assembler',
     icon: 'assets/cards/hdd_assembler_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.08, // PRD A.2 T5: 1 CB + 2 Metal → 1 HDD
+    baseSpeed: 0.08, // PRD A.2 T5: 1 CB + 3 Metal → 1 HDD
     baseConsumption: [
       {
         resourceId: ResourceType.CIRCUIT_BOARD,
@@ -209,7 +209,7 @@ export const INITIAL_MACHINES: Machine[] = [
       },
       {
         resourceId: ResourceType.METAL,
-        amount: 2,
+        amount: 5, // Balance pass: Metal×2→×5 to absorb Crusher excess mid-game
       },
     ],
     baseProduction: {
@@ -341,12 +341,12 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'PC Builder',
     icon: 'assets/cards/pc_builder_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.025, // PRD A.2: HDD×1 + GPU×2 + CB×2 + Metal×1 → Desktop PC
+    baseSpeed: 0.025, // PRD A.2: HDD×1 + GPU×2 + CB×2 + Metal×2 → Desktop PC
     baseConsumption: [
       { resourceId: ResourceType.HDD, amount: 1 },
       { resourceId: ResourceType.GPU, amount: 2 },
       { resourceId: ResourceType.CIRCUIT_BOARD, amount: 2 },
-      { resourceId: ResourceType.METAL, amount: 1 },
+      { resourceId: ResourceType.METAL, amount: 2 }, // Balance pass: Metal×1→×2, PC chassis uses more metal
     ],
     baseProduction: {
       resourceId: ResourceType.DESKTOP_PC,
@@ -361,10 +361,10 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Mining Rig Assembly',
     icon: 'assets/cards/mining_rig_assembly_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.018, // PRD A.2: DesktopPC×1 + GPU×4 + ElecComp×2 → Mining Rig
+    baseSpeed: 0.018, // PRD A.2: DesktopPC×1 + GPU×2 + ElecComp×2 → Mining Rig
     baseConsumption: [
       { resourceId: ResourceType.DESKTOP_PC, amount: 1 },
-      { resourceId: ResourceType.GPU, amount: 4 },
+      { resourceId: ResourceType.GPU, amount: 2 }, // Balance pass: GPU×4→×2 (GPU Fab can't supply 4/cycle at base speed)
       { resourceId: ResourceType.ELECTRIC_COMPONENTS, amount: 2 },
     ],
     baseProduction: {
@@ -380,10 +380,10 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Data Center Assembly',
     icon: 'assets/cards/data_center_assembly_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.017, // PRD A.2: DesktopPC×2 + GPU×2 + CB×4 → Server Rack
+    baseSpeed: 0.017, // PRD A.2: DesktopPC×2 + GPU×1 + CB×4 → Server Rack
     baseConsumption: [
       { resourceId: ResourceType.DESKTOP_PC, amount: 2 },
-      { resourceId: ResourceType.GPU, amount: 2 },
+      { resourceId: ResourceType.GPU, amount: 1 }, // Balance pass: GPU×2→×1 (same reason)
       { resourceId: ResourceType.CIRCUIT_BOARD, amount: 4 },
     ],
     baseProduction: {

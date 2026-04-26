@@ -48,11 +48,11 @@ export const STORAGE_UPGRADE_CONFIG = {
 export const SCRAP_GENERATION_CONFIG = {
   MANUAL_GENERATION: 6,
   MANUAL_COST: 1, // Coste en dinero por cada click manual de chatarra
-  MAX_LEVEL: 10,
+  MAX_LEVEL: 15,
   BASE_COST_MONEY: 200,
   COST_MULTIPLIER: 1.45,
   COMPONENTS_START_LEVEL: 6,
-  AUTO_GENERATION_RATES: [0.0, 0.12, 0.2, 0.32, 0.48, 0.7, 1.0, 1.45, 2.1, 3.0, 4.2],
+  AUTO_GENERATION_RATES: [0.0, 0.12, 0.2, 0.32, 0.48, 0.7, 1.0, 1.45, 2.1, 3.0, 4.2, 5.9, 8.3, 11.6, 16.2, 22.7],
 };
 
 // ============================================
@@ -67,7 +67,7 @@ export const MARKET_CONFIG = {
     [ResourceType.COMPONENTS]:          3,
     [ResourceType.COPPER]:              3.0,             // >= Componentes ($3), Cobre se desbloquea después
     [ResourceType.RECYCLED_PLASTIC]:    3.5,             // PRD A.3: recurso T3 vendible
-    [ResourceType.ELECTRIC_COMPONENTS]: 6.5,             // PRD A.3: recurso T3 vendible
+    [ResourceType.ELECTRIC_COMPONENTS]: 9.5,             // Balance pass: +46% — better mid-game emergency income
     // T4
     [ResourceType.CIRCUIT_BOARD]:       15,
     // T5
@@ -133,15 +133,15 @@ export const MACHINE_UPGRADE_CONFIG = {
     // T7
     GPU_FAB: 850,
     // T8
-    SMARTPHONE_FACTORY: 1200,
+    SMARTPHONE_FACTORY: 900,
     // T9
-    LAPTOP_WORKSHOP: 1600,
+    LAPTOP_WORKSHOP: 1200,
     // T10
-    PC_BUILDER: 2000,
+    PC_BUILDER: 1500,
     // T11
-    MINING_RIG_ASSEMBLY: 2500,
+    MINING_RIG_ASSEMBLY: 1900,
     // T12
-    DATA_CENTER_ASSEMBLY: 3200,
+    DATA_CENTER_ASSEMBLY: 2400,
   },
 };
 
