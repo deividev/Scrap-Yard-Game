@@ -13,6 +13,10 @@
     <!-- <app-debug-controls></app-debug-controls> -->
     <app-first-run-tutorial-overlay></app-first-run-tutorial-overlay>
 
+    @if (contractService.showContractIntro()) {
+      <app-contract-intro-modal (dismissed)="contractService.dismissContractIntro()"></app-contract-intro-modal>
+    }
+
     <div class="app-body">
       <app-panel-frame class="frame-sidebar">
         <app-resources-header></app-resources-header>

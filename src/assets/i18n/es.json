@@ -171,7 +171,8 @@
     "tabs": {
       "scrap": "Chatarra",
       "storage": "Almacenamiento",
-      "machine": "Máquina"
+      "machine": "Máquina",
+      "contracts": "Contratos"
     },
     "nivel": "Nivel",
     "max_level": "Nivel máximo alcanzado",
@@ -264,6 +265,36 @@
     "max": "MÁX",
     "stock_label": "Stock",
     "cycles_per_second": "c/s"
+  },
+  "contracts": {
+    "available_title": "Contratos disponibles",
+    "active_title": "Contratos activos",
+    "empty": "Sin contratos activos. Espera a que lleguen nuevos pedidos...",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "deliver": "Entregar",
+    "expires_in": "Expira en",
+    "type": {
+      "local": "Local",
+      "regional": "Regional",
+      "corporate": "Corporativo"
+    },
+    "urgency": {
+      "urgent": "Urgente"
+    },
+    "notifications": {
+      "delivered": "Contrato completado: +${reward}$ por {resource}",
+      "failed": "Contrato fallido: -{penalty}$",
+      "new": "Nuevo contrato disponible: {resource}",
+      "deadline_warning": "\u26a0\ufe0f Contrato de {resource} expira en 30 segundos!"
+    },
+    "intro": {
+      "title": "\ud83d\udcbc \u00a1Contratos disponibles!",
+      "body_1": "Los <strong>clientes</strong> te encargar\u00e1n pedidos de recursos. Revisa la pesta\u00f1a <strong>Contratos</strong> para verlos.",
+      "body_2": "\u2022 <strong>Acepta</strong> un contrato para comprometerte a entregarlo antes del plazo.\n\u2022 Si entregas a tiempo, cobras una <strong>recompensa</strong> mejor que el precio de mercado.\n\u2022 Si fallas el plazo, pagas una <strong>penalizaci\u00f3n</strong> en dinero.\n\u2022 <strong>Rechaza</strong> un contrato si no te interesa, sin coste.",
+      "body_3": "Puedes tener hasta <strong>2 contratos activos</strong> a la vez. \u00a1Organiza tu producci\u00f3n!",
+      "dismiss": "Entendido"
+    }
   },
   "alerts": {
     "save_corrupted": "No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva."

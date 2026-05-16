@@ -65,6 +65,7 @@ export interface Translations {
       scrap: string;
       storage: string;
       machine: string;
+      contracts: string;
     };
     nivel: string;
     max_level: string;
@@ -124,6 +125,19 @@ export interface Translations {
   common: {
     level_short: string;
     cycle_time: string;
+  };
+  contracts: {
+    available_title: string;
+    active_title: string;
+    empty: string;
+    accept: string;
+    reject: string;
+    deliver: string;
+    expires_in: string;
+    type: { local: string; regional: string; corporate: string };
+    urgency: { urgent: string };
+    notifications: { delivered: string; failed: string; new: string; deadline_warning: string };
+    intro: { title: string; body_1: string; body_2: string; body_3: string; dismiss: string };
   };
 }
 

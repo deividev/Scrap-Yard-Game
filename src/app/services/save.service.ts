@@ -9,6 +9,7 @@ import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { ContractService } from './contract.service';
 import { SaveState, SAVE_VERSION } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
 import { MachineType } from '../models/machine.model';
@@ -31,6 +32,7 @@ export class SaveService {
   private translationService = inject(TranslationService);
   private statisticsService = inject(StatisticsService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private contractService = inject(ContractService);
 
   private isDirty = signal(false);
   private isSaving = false;
@@ -115,6 +117,8 @@ export class SaveService {
       gameStarted: this.gameStarted(),
       statistics: this.statisticsService.getState(),
       firstRunTutorial: this.firstRunTutorialService.serialize(),
+      contracts: this.contractService.serialize(),
+      firstContractSpawned: this.contractService.hasSeenContractIntro(),
     };
 
     // Custom replacer to handle Infinity values
@@ -285,6 +289,9 @@ export class SaveService {
 
     this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
 
+    // Restaurar contratos
+    this.contractService.hydrate(saveState.contracts, saveState.firstContractSpawned ?? false);
+
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
 
@@ -359,6 +366,7 @@ export class SaveService {
     this.upgradeProgressService.reset();
     this.statisticsService.reset();
     this.firstRunTutorialService.reset();
+    this.contractService.reset();
   }
 
   async getSavePath(): Promise<string | null> {

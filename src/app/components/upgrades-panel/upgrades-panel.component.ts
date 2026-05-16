@@ -24,6 +24,8 @@ import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
 import { FirstRunTutorialService } from '../../services/first-run-tutorial.service';
 import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
+import { ContractService } from '../../services/contract.service';
+import { Contract } from '../../models/contract.model';
 
 @Component({
   selector: 'app-upgrades-panel',
@@ -341,6 +343,108 @@ import { MachineUnlockService, UnlockRequirement } from '../../services/machine-
                     </div>
                   }
                 </div>
+              </div>
+            }
+
+            @if (activeTab() === 'contracts') {
+              <div class="contracts-view">
+                <!-- Available contracts -->
+                @if (contractService.available().length > 0) {
+                  <div class="contracts-section-title">{{ translationService.t('contracts.available_title') }}</div>
+                  @for (contract of contractService.available(); track contract.id) {
+                    <div class="contract-card" [class.contract-card--urgent]="contract.urgency === 'urgent'">
+                      <div class="contract-card__header">
+                        <span class="contract-badge contract-badge--{{ contract.type }}">
+                          {{ translationService.t('contracts.type.' + contract.type) }}
+                        </span>
+                        @if (contract.urgency === 'urgent') {
+                          <span class="contract-badge contract-badge--urgent">
+                            ⚡ {{ translationService.t('contracts.urgency.urgent') }}
+                          </span>
+                        }
+                        <span class="contract-expires">
+                          {{ translationService.t('contracts.expires_in') }} {{ contractService.formatTimer(contractService.getAvailableSeconds(contract)) }}
+                        </span>
+                      </div>
+                      <div class="contract-card__body">
+                        <div class="contract-resource">
+                          <span class="contract-amount">{{ contract.amount }}×</span>
+                          <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
+                        </div>
+                        <div class="contract-reward">
+                          <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                          <span>{{ contract.reward }}</span>
+                        </div>
+                      </div>
+                      <div class="contract-card__footer">
+                        <span class="contract-duration">⏱ {{ contractService.formatTimer(contract.durationSeconds) }}</span>
+                        <div class="contract-actions">
+                          <app-button
+                            [label]="translationService.t('contracts.reject')"
+                            variant="secondary"
+                            size="sm"
+                            (clicked)="contractService.reject(contract.id)"
+                          />
+                          <app-button
+                            [label]="translationService.t('contracts.accept')"
+                            variant="primary"
+                            size="sm"
+                            [disabled]="contractService.active().length >= 2"
+                            (clicked)="contractService.accept(contract.id)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+
+                <!-- Active contracts -->
+                @if (contractService.active().length > 0) {
+                  <div class="contracts-section-title">{{ translationService.t('contracts.active_title') }}</div>
+                  @for (contract of contractService.active(); track contract.id) {
+                    <div class="contract-card contract-card--active" [class.contract-card--urgent]="contract.urgency === 'urgent'">
+                      <div class="contract-card__header">
+                        <span class="contract-badge contract-badge--{{ contract.type }}">
+                          {{ translationService.t('contracts.type.' + contract.type) }}
+                        </span>
+                        @if (contract.urgency === 'urgent') {
+                          <span class="contract-badge contract-badge--urgent">
+                            ⚡ {{ translationService.t('contracts.urgency.urgent') }}
+                          </span>
+                        }
+                        <span class="contract-deadline" [class.contract-deadline--low]="contractService.getRemainingSeconds(contract) < 30">
+                          ⏱ {{ contractService.formatTimer(contractService.getRemainingSeconds(contract)) }}
+                        </span>
+                      </div>
+                      <div class="contract-card__body">
+                        <div class="contract-resource">
+                          <span class="contract-amount">{{ contract.amount }}×</span>
+                          <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
+                        </div>
+                        <div class="contract-reward">
+                          <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                          <span>{{ contract.reward }}</span>
+                        </div>
+                      </div>
+                      <div class="contract-card__footer">
+                        <app-button
+                          [label]="translationService.t('contracts.deliver')"
+                          variant="primary"
+                          size="sm"
+                          [disabled]="!contractService.canDeliver(contract)"
+                          (clicked)="contractService.deliver(contract.id)"
+                        />
+                      </div>
+                    </div>
+                  }
+                }
+
+                <!-- Empty state -->
+                @if (contractService.available().length === 0 && contractService.active().length === 0) {
+                  <div class="contracts-empty">
+                    <p>{{ translationService.t('contracts.empty') }}</p>
+                  </div>
+                }
               </div>
             }
           </div>
@@ -934,6 +1038,143 @@ import { MachineUnlockService, UnlockRequirement } from '../../services/machine-
         text-align: center;
         margin: 0;
       }
+
+      /* ── Contracts ────────────────────────────────────────────────── */
+      .contracts-view {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        overflow-y: auto;
+        padding: var(--space-2) 0;
+      }
+
+      .contracts-section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-text-muted, #888);
+        padding: var(--space-1) 0;
+      }
+
+      .contract-card {
+        border: 1px solid rgba(58, 58, 58, 0.6);
+        border-radius: 6px;
+        padding: var(--space-3);
+        background: rgba(30, 26, 18, 0.6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .contract-card--urgent {
+        border-color: rgba(220, 140, 30, 0.5);
+        background: rgba(40, 30, 10, 0.6);
+      }
+
+      .contract-card--active {
+        border-color: rgba(80, 160, 80, 0.4);
+        background: rgba(20, 40, 20, 0.5);
+      }
+
+      .contract-card__header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+
+      .contract-badge {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+
+      .contract-badge--local    { background: rgba(60, 100, 60, 0.4); color: #8bc68b; }
+      .contract-badge--regional { background: rgba(60, 80, 140, 0.4); color: #8aabda; }
+      .contract-badge--corporate{ background: rgba(120, 60, 140, 0.4); color: #c890e0; }
+      .contract-badge--urgent   { background: rgba(160, 80, 20, 0.4); color: #e0a040; }
+
+      .contract-expires {
+        margin-left: auto;
+        font-size: 10px;
+        color: var(--color-text-muted, #888);
+      }
+
+      .contract-deadline {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-accent-positive, #8bc68b);
+      }
+
+      .contract-deadline--low {
+        color: var(--color-accent-negative, #e06060);
+        animation: deadline-pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes deadline-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .contract-card__body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .contract-resource {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .contract-amount {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-text);
+      }
+
+      .contract-resource-name {
+        font-size: 12px;
+        color: var(--color-text-muted, #aaa);
+      }
+
+      .contract-reward {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--color-accent-gold, #d4a730);
+      }
+
+      .contract-card__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .contract-duration {
+        font-size: 11px;
+        color: var(--color-text-muted, #888);
+      }
+
+      .contract-actions {
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      .contracts-empty {
+        text-align: center;
+        padding: var(--space-6);
+        color: var(--color-text-muted, #666);
+        font-size: 12px;
+      }
     `,
   ],
 })
@@ -973,6 +1214,7 @@ export class UpgradesPanelComponent {
   private resourcesService = inject(ResourcesService);
   private scrapGenerationService = inject(ScrapGenerationService);
   translationService = inject(TranslationService);
+  contractService = inject(ContractService);
   private readonly _elRef = inject(ElementRef<HTMLElement>);
   private tutorialService = inject(FirstRunTutorialService);
 
@@ -1382,6 +1624,7 @@ export class UpgradesPanelComponent {
     { id: 'scrap', label: this.translationService.t('upgrades.tabs.scrap') },
     { id: 'storage', label: this.translationService.t('upgrades.tabs.storage') },
     { id: 'machine', label: this.translationService.t('upgrades.tabs.machine') },
+    { id: 'contracts', label: this.translationService.t('upgrades.tabs.contracts') },
   ]);
 
   setActiveTab(tabId: string): void {

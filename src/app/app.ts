@@ -9,7 +9,7 @@ import { StatisticsPanelComponent } from './components/statistics-panel/statisti
 import { CommonModule } from '@angular/common';
 import { BackgroundGridComponent } from './components/ui/background-grid/background-grid.component';
 import { FirstRunTutorialOverlayComponent } from './components/first-run-tutorial-overlay/first-run-tutorial-overlay.component';
-import { DebugControlsComponent } from './components/debug-controls/debug-controls.component';
+import { ContractIntroModalComponent } from './components/ui/contract-intro-modal/contract-intro-modal.component';
 import { PanelFrameComponent } from './components/ui/panel-frame/panel-frame.component';
 import { PanelFrameHComponent } from './components/ui/panel-frame-h/panel-frame-h.component';
 import { SaveService } from './services/save.service';
@@ -21,6 +21,7 @@ import { GameStateService } from './services/game-state.service';
 import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
+import { ContractService } from './services/contract.service';
 
 
 @Component({
@@ -38,6 +39,7 @@ import { FirstRunTutorialService } from './services/first-run-tutorial.service';
     FirstRunTutorialOverlayComponent,
     PanelFrameComponent,
     PanelFrameHComponent,
+    ContractIntroModalComponent,
     // DebugControlsComponent,
   ],
   templateUrl: './app.html',
@@ -54,6 +56,7 @@ export class App implements OnInit, OnDestroy {
   private audioService = inject(AudioService);
   private gameLoopService = inject(GameLoopService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  contractService = inject(ContractService);
   gameStateService = inject(GameStateService);
 
   private autoSaveInterval?: number;
@@ -82,6 +85,7 @@ export class App implements OnInit, OnDestroy {
     this.upgradesService.setSaveService(this.saveService);
     this.scrapGenerationService.setSaveService(this.saveService);
     this.firstRunTutorialService.setSaveService(this.saveService);
+    this.contractService.setSaveService(this.saveService);
 
     // Cargar el juego en segundo plano
     // Si no hay save, se usarán los valores por defecto

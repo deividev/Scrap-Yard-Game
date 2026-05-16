@@ -18,6 +18,8 @@ import { NotificationService } from '../../../services/notification.service';
               🔓
             } @else if (notification.type === 'success') {
               ✅
+            } @else if (notification.type === 'warning') {
+              ⚠️
             } @else {
               ℹ️
             }
@@ -115,6 +117,14 @@ import { NotificationService } from '../../../services/notification.service';
       box-shadow:
         0 4px 24px rgba(255, 152, 0, 0.25),
         0 0 0 1px rgba(255, 152, 0, 0.2);
+    }
+
+    .notification-warning {
+      border-left-color: #f59e0b;
+      background: rgba(18, 20, 24, 0.95);
+      box-shadow:
+        0 4px 24px rgba(245, 158, 11, 0.2),
+        0 0 0 1px rgba(245, 158, 11, 0.2);
     }
 
     @keyframes slideInDown {

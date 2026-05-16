@@ -31,7 +31,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Separador',
     icon: 'assets/cards/separator_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.5,
+    baseSpeed: 0.80, // Balance: 0.50→0.80 — Assembler(0.40/s)+Recycler(0.50/s) demand 0.90/s; Separator at 0.50 starved both
     baseConsumption: [
       {
         resourceId: ResourceType.SCRAP,
@@ -69,7 +69,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Ensambladora',
     icon: 'assets/cards/assembler_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.22, // Fix: was 0.17 (Packager starvation at unlock)
+    baseSpeed: 0.40, // Balance: 0.22→0.40 — must supply EA(0.50/s needs 0.50 comp/s) + Packager(2-comp at 0.1/s = 0.20 comp/s)
     baseConsumption: [
       {
         resourceId: ResourceType.METAL,
@@ -96,12 +96,12 @@ export const INITIAL_MACHINES: Machine[] = [
     baseConsumption: [
       {
         resourceId: ResourceType.COMPONENTS,
-        amount: 4,
+        amount: 2, // Balance: 4→2 — was destroying value ($12 input → $10 output). Now 2×$3=$6 input → $12 output.
       },
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 10,
+      amount: 12, // Balance: $10→$12 — 2× market premium vs selling Components directly; beats manual selling at $1.2/s
     },
     isActive: false,
     progress: 0,
@@ -149,7 +149,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'Ensambladora eléctrica',
     icon: 'assets/cards/electric_assembler_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.32, // Balance pass: feeds E.Packager at full rate + leaves headroom for PCB Printer
+    baseSpeed: 0.50, // Balance: 0.32→0.50 — E.Packager needs 0.40/s + PCB Printer (EC:1) needs 0.30/s = 0.70/s total; EA now covers E.Packager solo and partial PCB
     baseConsumption: [
       {
         resourceId: ResourceType.COPPER,
@@ -185,7 +185,7 @@ export const INITIAL_MACHINES: Machine[] = [
       },
       {
         resourceId: ResourceType.ELECTRIC_COMPONENTS,
-        amount: 2,
+        amount: 1, // Balance: 2→1 — halves EC appetite. EA(0.50/s) now covers E.Packager(0.40) + PCB(0.30) with 1 upgrade headroom.
       },
     ],
     baseProduction: {
@@ -253,7 +253,7 @@ export const INITIAL_MACHINES: Machine[] = [
     name: 'GPU Fab',
     icon: 'assets/cards/gpu_fab_card_new_slot.png',
     level: 0,
-    baseSpeed: 0.05, // PRD A.2 T6: CB×1 + HDD×1 + Copper×1 → GPU
+    baseSpeed: 0.10, // Balance: 0.05→0.10 — can now sustain T8 Smartphone(0.045/s) + T9 Laptop(0.035/s) simultaneously at base
     baseConsumption: [
       {
         resourceId: ResourceType.CIRCUIT_BOARD,

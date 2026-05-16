@@ -171,7 +171,8 @@
     "tabs": {
       "scrap": "Scrap",
       "storage": "Storage",
-      "machine": "Machine"
+      "machine": "Machine",
+      "contracts": "Contracts"
     },
     "nivel": "Level",
     "max_level": "Maximum level reached",
@@ -264,6 +265,36 @@
     "max": "MAX",
     "stock_label": "Stock",
     "cycles_per_second": "c/s"
+  },
+  "contracts": {
+    "available_title": "Available contracts",
+    "active_title": "Active contracts",
+    "empty": "No contracts right now. New orders will arrive soon...",
+    "accept": "Accept",
+    "reject": "Reject",
+    "deliver": "Deliver",
+    "expires_in": "Expires in",
+    "type": {
+      "local": "Local",
+      "regional": "Regional",
+      "corporate": "Corporate"
+    },
+    "urgency": {
+      "urgent": "Urgent"
+    },
+    "notifications": {
+      "delivered": "Contract fulfilled: +${reward}$ for {resource}",
+      "failed": "Contract failed: -{penalty}$",
+      "new": "New contract available: {resource}",
+      "deadline_warning": "\u26a0\ufe0f {resource} contract expires in 30 seconds!"
+    },
+    "intro": {
+      "title": "\ud83d\udcbc Contracts unlocked!",
+      "body_1": "<strong>Clients</strong> will send you resource orders. Check the <strong>Contracts</strong> tab to see them.",
+      "body_2": "\u2022 <strong>Accept</strong> a contract to commit to delivering it before the deadline.\n\u2022 Deliver on time to earn a <strong>reward</strong> higher than market price.\n\u2022 Miss the deadline and you pay a <strong>penalty</strong>.\n\u2022 <strong>Reject</strong> any contract for free if it doesn't suit you.",
+      "body_3": "You can hold up to <strong>2 active contracts</strong> at once. Plan your production!",
+      "dismiss": "Got it"
+    }
   },
   "alerts": {
     "save_corrupted": "Failed to load saved game. The file may be corrupted.\n\nStarting a new game."

@@ -16,7 +16,9 @@ export interface SavedContract {
   reward: number;
   penaltyAmount: number;
   durationSeconds: number;
-  acceptedAt: number; // 0 si no aceptado
+  spawnedAt?: number;      // ms timestamp when spawned (optional: compat with older saves)
+  availableUntil?: number; // ms timestamp when it expires if unaccepted (optional: compat)
+  acceptedAt: number;      // ms timestamp; 0 = not accepted
   isAccepted: boolean;
 }
 

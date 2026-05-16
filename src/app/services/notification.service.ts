@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export interface Notification {
   id: number;
   message: string;
-  type: 'success' | 'info' | 'unlock';
+  type: 'success' | 'info' | 'unlock' | 'warning';
   timestamp: number;
   icon?: string;
 }
@@ -19,11 +19,12 @@ export class NotificationService {
     success: 3000, // Upgrades: 3 segundos
     info: 3500, // Info: 3.5 segundos
     unlock: 5000, // Desbloqueos: 5 segundos
+    warning: 4500, // Warnings: 4.5 segundos
   };
 
   notifications$ = this.notifications.asReadonly();
 
-  show(message: string, type: 'success' | 'info' | 'unlock' = 'info', icon?: string): void {
+  show(message: string, type: 'success' | 'info' | 'unlock' | 'warning' = 'info', icon?: string): void {
     const notification: Notification = {
       id: this.nextId++,
       message,

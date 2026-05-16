@@ -146,6 +146,27 @@ export class AudioService {
     this.playSweep(320, 60, 0.28, 0.09, 'sawtooth', 'sfx');
   }
 
+  // Contract deadline warning — 4 rapid ascending pulses (alarm-style: tight, high-pitched, urgent)
+  playContractWarning(): void {
+    if (!this.canPlayWithCooldown('contract-warning', 2000)) {
+      return;
+    }
+    this.playTone(1100, 0.04, 0.08, 'square', 'sfx', 0.0);
+    this.playTone(1200, 0.04, 0.085, 'square', 'sfx', 0.07);
+    this.playTone(1300, 0.04, 0.09, 'square', 'sfx', 0.14);
+    this.playTone(1400, 0.05, 0.095, 'square', 'sfx', 0.21);
+  }
+
+  // New contract available — subtle rising 2-tone ping (opportunity knock)
+  playContractNew(): void {
+    if (!this.canPlayWithCooldown('contract-new', 1000)) {
+      return;
+    }
+    this.playNoiseBurst(0.03, 0.025, 3500, 'highpass', 'sfx');
+    this.playTone(660, 0.12, 0.05, 'triangle', 'sfx', 0.02);
+    this.playTone(880, 0.14, 0.055, 'triangle', 'sfx', 0.1);
+  }
+
   // Storage full warning — industrial lowpass thud + descending 2-note sawtooth "dunk-wunk"
   playStorageFull(): void {
     if (!this.canPlayWithCooldown('storage-full', 3000)) {

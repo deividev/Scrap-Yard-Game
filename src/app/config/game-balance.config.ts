@@ -89,11 +89,11 @@ export const MARKET_CONFIG = {
   BATCH_BONUSES: {
     MEDIUM: {
       threshold: 15,
-      multiplier: 1.0,
+      multiplier: 1.10, // +10% bonus when selling 15+ units at once — rewards stockpiling
     },
     LARGE: {
       threshold: 30,
-      multiplier: 1.0,
+      multiplier: 1.20, // +20% bonus when selling 30+ units at once — rewards full storage before selling
     },
   },
 };
