@@ -1,69 +1,98 @@
 # Project Context — Scrap Yard Idle
 
+## Resumen ejecutivo
+
+`Scrap Yard Idle` ya tiene implementado el core jugable completo hasta T12, incluyendo contratos. El estado real del proyecto en mayo de 2026 es:
+
+- F0 completada.
+- F1 completada.
+- F2 completada.
+- F3 pendiente.
+- F4 pendiente.
+- QA largo, hardening de release y salida en Steam pendientes.
+
+La estrategia actual del proyecto es terminar todo el PRD antes de preparar el launch en Steam.
+
 ## Qué es el juego
 
-**Scrap Yard Idle** es un juego incremental (idle) 2D de escritorio donde el jugador gestiona un depósito de chatarra. El jugador recolecta chatarra, la procesa a través de máquinas industriales, vende los productos resultantes y usa el dinero para desbloquear y mejorar nuevas máquinas y almacenes.
+Es un idle/management de escritorio donde el jugador transforma chatarra en una cadena industrial cada vez mas compleja. Empieza recolectando scrap de forma manual y termina ensamblando hardware de alto nivel como Desktop PCs, Mining Rigs y Server Racks.
 
-El juego está construido como aplicación de escritorio nativa con:
+## Stack real
 
-- **Angular** — UI reactiva con Signals
-- **Electron** — empaquetar y distribuir como `.exe`
-- **TypeScript** — tipado estricto en todo el proyecto
-- Destino de distribución: **Steam**
+| Area | Tecnologia |
+|---|---|
+| Frontend | Angular 21 standalone |
+| Estado reactivo | Signals + `inject()` |
+| Desktop wrapper | Electron |
+| Lenguaje | TypeScript strict |
+| Testing | `ng test` + coverage gate |
+| i18n | JSON `es/en` |
+| Build Windows | `electron-builder` |
 
 ## Objetivo del jugador
 
-Automatizar y optimizar la cadena de producción del depósito para maximizar la generación de dinero. El progreso sigue un árbol de desbloqueo: las máquinas avanzadas requieren niveles de upgrade en las anteriores.
+1. Generar chatarra.
+2. Procesarla en maquinas industriales.
+3. Vender recursos y productos.
+4. Comprar upgrades.
+5. Desbloquear tiers superiores.
+6. Optimizar la cadena completa para sostener contratos y produccion late game.
 
-Ciclo macro:
+## Estado por fases
 
-1. Recolectar chatarra (manual o automática)
-2. Procesar chatarra en máquinas
-3. Vender outputs al mercado
-4. Comprar upgrades con el dinero obtenido
-5. Desbloquear nuevas máquinas y seguir escalando
+| Fase | Estado | Nota |
+|---|---|---|
+| F0 - Rebalanceo Tier 3 | Implementada | La Fundidora ya consume Scrap directo y el balance fue ajustado |
+| F1 - Contratos | Implementada | Servicio, UI, persistencia, intro modal y tick integrados |
+| F2 - Cadenas T4-T12 | Implementada | Recursos, maquinas, upgrades y mercado avanzado presentes en codigo |
+| F3 - Eventos de mercado | Pendiente | No existe aun un sistema real de eventos sobre el mercado |
+| F4 - Milestones / flavor text | Pendiente | Solo hay placeholder de persistencia, no sistema jugable |
+| Release engineering | Pendiente | Falta QA largo, build final y limpieza de deuda de release |
+| Steam launch | Pendiente | Se hara despues de cerrar todo el PRD |
 
-## Bucle principal (Game Loop)
+## Sistemas implementados
 
-El juego corre en un **tick global de 1 segundo** sin timers adicionales. Todo el estado del juego avanza dentro de este tick:
+| Sistema | Estado | Evidencia |
+|---|---|---|
+| Game loop global 1s | Implementado | `GameLoopService` |
+| Recursos T1-T12 | Implementado | `resources.config.ts` |
+| Maquinas T1-T12 | Implementado | `machines.config.ts` |
+| Mercado y venta manual | Implementado | `MarketService` + botones UI |
+| Upgrades de storage, scrap y maquinas | Implementado | `upgrade-definitions.config.ts` |
+| Unlock progresivo | Implementado | `MachineUnlockService` |
+| Contratos | Implementado | `ContractService` + tab de contratos |
+| Persistencia local | Implementado | `SaveService` + Electron `userData` |
+| Tutorial first-run | Implementado | `FirstRunTutorialService` |
+| Audio y notificaciones | Implementado | `AudioService` + `NotificationService` |
+| Estadisticas | Implementado | `StatisticsService` |
+| i18n es/en | Implementado | `src/assets/i18n/*.json` |
 
-```
-Tick (cada 1s)
-├── Generación automática de Chatarra
-├── Actualización de estadísticas
-├── Procesado de producción de máquinas
-│   ├── Por cada máquina activa y desbloqueada:
-│   │   ├── (inicio de ciclo) verificar inputs disponibles y espacio de output
-│   │   ├── consumir inputs al inicio del ciclo
-│   │   ├── avanzar progress += baseSpeed
-│   │   └── (progress >= 1) producir output → resetear progress
-├── Avance de progreso de upgrades en curso
-└── Auto-guardado cada 15 ticks (si estado dirty)
-```
+## Gaps reales del proyecto
 
-Las máquinas consumen sus inputs al **inicio** del ciclo y producen el output al **final** (cuando `progress` alcanza 1.0).
+### Producto
 
-## Estado actual
+- F3 - Eventos de mercado.
+- F4 - Milestones con flavor text y feedback de progresion.
+- D1 - Refactor del header de recursos para soportar mejor el late game.
+- D2 - Tabs o filtros de maquinas para bajar densidad visual.
 
-El núcleo del juego está **completamente implementado** e integrado:
+### Release engineering
 
-| Sistema | Estado |
-|---|---|
-| Game Loop (tick 1s) | ✅ Implementado |
-| Recursos (8 tipos) | ✅ Implementado |
-| Máquinas (8 tipos) | ✅ Implementado |
-| Producción y consumo | ✅ Implementado |
-| Mercado (venta manual) | ✅ Implementado |
-| Upgrades (storage, máquinas, chatarra) | ✅ Implementado |
-| Desbloqueo progresivo de máquinas | ✅ Implementado |
-| Persistencia local (Electron userData) | ✅ Implementado |
-| Tutorial first-run | ✅ Implementado |
-| Audio | ✅ Implementado |
-| Estadísticas | ✅ Implementado |
-| Notificaciones | ✅ Implementado |
-| i18n / Traducción | ✅ Implementado |
-| Menú principal y opciones | ✅ Implementado |
-| Documentación del proyecto (`/docs`) | ⚠️ Vacía (este archivo la inicia) |
-| Distribución / Steam build | ❌ Pendiente |
+- Validar build Windows end-to-end con `package:win`.
+- QA completo de progresion T1-T12 sin cheats.
+- Revisar leftovers de beta/demo antes de una release real.
+- Preparar assets, store page, pipeline de subida y checklist de Steam.
 
-La carpeta `/docs` estaba vacía. Este archivo inaugura la documentación del proyecto.
+### Deuda tecnica relevante
+
+- El runtime desktop real usa `electron/main.js` y `electron/preload.js`; los `.ts` equivalentes no estan perfectamente alineados y no deben tomarse como unica fuente de verdad de release.
+- Parte de la documentacion estaba describiendo F1 y F2 como pendientes cuando ya estaban implementadas.
+
+## Prioridad recomendada
+
+1. Implementar F3.
+2. Implementar F4.
+3. Resolver D1 y D2.
+4. Ejecutar QA largo y balance.
+5. Cerrar release engineering.
+6. Preparar y lanzar en Steam.

@@ -1,7 +1,12 @@
 # Scrap Yard Idle — Roadmap de Expansión (Post-Demo)
 
-> Documento de ideación para el juego completo una vez terminada la demo.
-> No es una especificación técnica, sino un mapa de posibilidades ordenado por capas de profundidad.
+> Documento de ideación histórica.
+> No usar como fuente de verdad del estado actual del proyecto.
+> Para estado real y backlog vigente usar `docs/project-context.md`, `docs/FULL_GAME_TASKS.md` y `docs/RELEASE_ROADMAP.md`.
+
+## Nota de vigencia
+
+Cuando este documento se escribió, contratos y las cadenas avanzadas seguían en fase de planificación. En el árbol actual ambas ya están implementadas. Este archivo se conserva como referencia de diseño, no como checklist vigente.
 
 ---
 

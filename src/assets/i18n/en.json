@@ -273,6 +273,7 @@
     "accept": "Accept",
     "reject": "Reject",
     "deliver": "Deliver",
+    "penalty": "Penalty",
     "expires_in": "Expires in",
     "type": {
       "local": "Local",

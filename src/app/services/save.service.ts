@@ -118,7 +118,8 @@ export class SaveService {
       statistics: this.statisticsService.getState(),
       firstRunTutorial: this.firstRunTutorialService.serialize(),
       contracts: this.contractService.serialize(),
-      firstContractSpawned: this.contractService.hasSeenContractIntro(),
+      firstContractSpawned: this.contractService.hasSpawnedFirstContract(),
+      hasSeenContractIntro: this.contractService.hasSeenContractIntro(),
     };
 
     // Custom replacer to handle Infinity values
@@ -205,6 +206,11 @@ export class SaveService {
   private restoreState(saveState: SaveState): void {
     this.resourcesService.setState(saveState.resources);
 
+    this.contractService.hydrate(saveState.contracts, {
+      hasSeenIntro: saveState.hasSeenContractIntro ?? saveState.firstContractSpawned ?? false,
+      hasSpawnedFirstContract: saveState.firstContractSpawned ?? false,
+    });
+
     // Merge saved machines with INITIAL_MACHINES to inject any new machines
     // added after the save was created (they won't exist in the save file).
     const savedIds = new Set(saveState.machines.map((m) => m.id));
@@ -288,9 +294,6 @@ export class SaveService {
     }
 
     this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
-
-    // Restaurar contratos
-    this.contractService.hydrate(saveState.contracts, saveState.firstContractSpawned ?? false);
 
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
@@ -460,6 +463,17 @@ export class SaveService {
         version: 3,
         resources: [...save.resources, ...newResources],
         machines: [...save.machines, ...newMachines],
+      };
+      this.isDirty.set(true);
+    }
+
+    // v3 → v4: separar "primer contrato spawneado" de "intro visto"
+    if (save.version < 4) {
+      save = {
+        ...save,
+        version: 4,
+        hasSeenContractIntro: save.hasSeenContractIntro ?? save.firstContractSpawned ?? false,
+        firstContractSpawned: save.firstContractSpawned ?? false,
       };
       this.isDirty.set(true);
     }

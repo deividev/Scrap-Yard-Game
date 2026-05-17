@@ -1,124 +1,47 @@
 # TODO — Scrap Yard Idle
 
-> Última actualización: Abril 5, 2026
+> Última actualización: Mayo 17, 2026
+> Este archivo es la cola corta de trabajo. Para backlog completo ver `docs/FULL_GAME_TASKS.md`.
 
 ---
 
-## 🗓️ Plan de Lanzamiento
+## Objetivo actual
 
-### Objetivo
-Lanzar la demo en Steam con su página antes del **Steam Next Fest (junio 2026)** para maximizar wishlists. El juego completo sale en **julio-agosto 2026**.
+Completar todo el PRD y dejar Steam para despues, cuando el juego ya tenga cerradas F3, F4 y el hardening final de release.
 
-### Fases en orden
+## Ahora
 
-```
-AHORA — Preparación del trailer y Steam pages
-  ✅ TRAILER_BRIEFING.md entregado al publisher
-  ⬜ Publisher produce el trailer (45-50s) siguiendo el brief
-  ⬜ Trailer subido a la Steam page del juego completo (ya creada)
-  ⬜ Steam page de la DEMO creada y configurada
-    ↓
-ANTES DE NEXT FEST — Demo lista para lanzar
-  ✅ Demo cap implementado (SMELTER/RECYCLER/E.ASSEMBLER/E.PACKAGER bloqueadas)
-  ✅ Modal demo-end dispara en primer ciclo de Empaquetadora (no timeout)
-  ✅ Icono de la app reemplazado (steampunk scrap press, ICO + PNG + favicon)
-  ✅ Modal demo-end pulido visualmente (ModalShellComponent, i18n body, sin footnote)
-  ⬜ demo-end-overlay apunta a la URL real de la Steam page (pendiente Steam page)
-  ⬜ Build de producción verificado (.exe sin errores)
-  ⬜ Balance y QA — sesión completa sin softlocks
-  ⬜ Lanzamiento: Steam page demo + demo disponible para descarga
-    ↓
-STEAM NEXT FEST — Junio 2026
-  ⬜ Demo expuesta en Next Fest → wishlists del juego completo
-    ↓
-IMPLEMENTACIÓN JUEGO COMPLETO — Mayo → Julio 2026
-  (~3 meses con diseño ya cerrado y sin cambios de scope)
-  ⬜ T3: Recicladora → Ensambladora Eléctrica → Empaquetadora Eléctrica
-  ⬜ Contratos
-  ⬜ Tier 4: PCB Printer → Circuit Board
-  ⬜ Tier 5: HDD Assembler + Screen Fabricator
-  ⬜ Eventos de mercado
-  ⬜ Tier 6: GPU Fab + Smartphone + Laptop + PC Builder
-  ⬜ Tier 7: Data Center Assembly + Mining Rig Assembly
-  ⬜ Narrativa / Flavor text en milestones
-    ↓
-LANZAMIENTO JUEGO COMPLETO — Julio-Agosto 2026
-```
+- [x] Re-sincronizar la documentacion activa con el estado real del codigo.
+- [ ] Empezar F3 - Eventos de mercado.
+- [ ] Definir el diseño final de F4 - Milestones / flavor text.
 
-### Documentos clave
-| Documento | Propósito |
-|---|---|
-| `docs/TRAILER_BRIEFING.md` | Guía completa para el publisher — storyboard, audio, prompts de iconos |
-| `docs/FULL_GAME_EXPANSION_ROADMAP.md` | Diseño del juego completo — tiers, máquinas, orden de implementación |
-| `docs/todo.md` (este archivo) | Tareas técnicas pendientes |
+## Siguiente bloque
 
----
+- [ ] Implementar F3 con servicio, config, UI, save e i18n.
+- [ ] Implementar F4 con milestones persistidos y feedback visible.
+- [ ] Refactor D1 del header de recursos.
+- [ ] Refactor D2 de tabs/filtros de maquinas.
 
-## Estado general
+## Antes de pensar en Steam
 
-El núcleo jugable del MVP está **implementado y funcional**. El juego compila y corre como aplicación Electron. Los sistemas de recursos, máquinas, upgrades, mercado, persistencia y tutorial están completos.
+- [ ] Playthrough completo T1-T12 sin cheats.
+- [ ] QA de save/load durante toda la progresion.
+- [ ] Balance final del late game.
+- [ ] Verificar `package:win` en una corrida limpia.
+- [ ] Revisar drift entre runtime JS y archivos TS de Electron.
+- [ ] Quitar o cerrar leftovers de beta/demo si siguen vigentes.
 
-La carpeta `/docs` estaba vacía; este archivo y los demás de esta carpeta son la documentación recién generada.
+## Hecho recientemente
 
----
+- [x] F0 implementada.
+- [x] F1 implementada.
+- [x] F2 implementada.
+- [x] Coverage honesto por encima del gate actual.
+- [x] Roadmap y contexto del proyecto actualizados.
 
-## Tareas actuales
+## No volver a listar como pendiente
 
-### 🔴 Crítico — bloquea el lanzamiento de la demo
-
-- [ ] **URL del modal demo sin configurar** — El botón de Steam Wishlist del `demo-end-overlay` necesita apuntar a la URL real de la Steam page del juego completo. Pendiente hasta que la página esté publicada.
-  - Archivo: `src/app/config/game-balance.config.ts` → `DEMO_CONFIG.STEAM_WISHLIST_URL`
-
-- [ ] **Build de producción verificado** — Confirmar que `electron-builder` genera el `.exe` sin errores y con todos los assets empaquetados correctamente.
-
-### 🟡 Importante
-
-- [ ] **Balance validado en sesión larga** — Jugar una run completa hasta la Empaquetadora verificando:
-  - No hay softlock económico (el jugador siempre puede generar dinero para el siguiente upgrade)
-  - Las máquinas avanzadas tienen suficiente input de las anteriores para no bloquearse
-  - Los precios de venta vs coste de upgrades son sostenibles
-
-- [ ] **Flags de dev desactivados en build** — Verificar antes del build que `debug-machines-panel` y `debug-controls` no son visibles en producción. `DEV_CALIBRATION_ENABLED = false` ya está correcto.
-
-- [ ] **Venta de Cobre y Plástico Reciclado en UI** — Verificar que tienen botón de venta expuesto. Si el inventario se llena sin poder venderlos, la producción se bloquea.
-
-- [ ] **Panel de estadísticas** — Verificar que `statistics-panel` muestra correctamente `totalScrapGenerated`, `playTimeFormatted`, `totalMoneyEarned` y `activeMachinesCount`.
-
-### 🟢 Post-lanzamiento demo / juego completo
-
-- [ ] **Quitar `IS_DEMO` / `DEMO_MACHINE_CAP` para el juego completo** — Cuando se inicie la implementación del juego completo, cambiar `IS_DEMO = false` en `dev-flags.config.ts`. Esto re-habilita automáticamente el desbloqueo de SMELTER, RECYCLER, ELECTRIC_ASSEMBLER y ELECTRIC_PACKAGER.
-
----
-
-## Completado
-
-- [x] Sistema de recursos (8 tipos, capacidades, dirty flag)
-- [x] UI base de recursos (header, panel)
-- [x] Sistema de máquinas (8 máquinas, producción, consumo)
-- [x] Cadena de producción completa (Crusher → ... → Electric Packager)
-- [x] Game Loop global (tick 1s, sin timers adicionales)
-- [x] Mercado (venta manual con bonus de lote)
-- [x] Upgrades de almacenamiento (7 recursos, hasta nivel 50)
-- [x] Upgrades de velocidad de máquinas
-- [x] Upgrade de generación automática de chatarra (niveles 0–10)
-- [x] Desbloqueo progresivo de máquinas (árbol de requisitos)
-- [x] Persistencia local Electron userData (auto-save 15s, save on close, escritura atómica)
-- [x] Tutorial first-run paso a paso (event-driven, persistido)
-- [x] Estadísticas (scrap total, play time, dinero ganado)
-- [x] Audio (efectos en desbloqueos y acciones)
-- [x] Notificaciones (desbloqueos, upgrades)
-- [x] **Save versioning** — `SAVE_VERSION = 1`, campo `version` en `SaveState`, migración progresiva `migrateSave()` en vez de rechazo. Alerta en JSON corrupto
-- [x] **DevTools bloqueados en producción** — F12/Ctrl+Shift+I deshabilitados cuando `app.isPackaged` en `electron/main.js`
-- [x] **End-game demo — modal de fin de demo** — Implementado. Dispara en el primer ciclo completado de la Empaquetadora (no timeout). Modal con diseño industrial via `ModalShellComponent` (shell genérico reutilizable), botón de Steam Wishlist y "Seguir jugando". Flag `demoEndSeen` persistido en `SaveState`. Body text via i18n. Componente: `demo-end-overlay`.
-- [x] **ModalShellComponent** — Componente genérico de modal (`src/app/components/ui/modal-shell/`). Backdrop + panel dark + animación slide-in + top/bottom bars opcionales. `ConfirmationModal` y `DemoEndOverlay` refactorizados para usarlo.
-- [x] **i18n audit completo** — Todos los textos visibles al usuario pasan por `translationService.t()`. Claves añadidas: `demo_end.*`, `common.{max,stock_label,cycles_per_second}`, `alerts.save_corrupted`. Cero strings hardcodeados en componentes de producción.
-- [x] **Sonido de fanfare en modal demo-end** — `playMaxLevelReached()` (5 notas Do-Mi-Sol-Do-Mi) se dispara al aparecer la modal. Implementado en `game-loop.service.ts` junto al trigger del modal.
-- [x] i18n / Traducción
-- [x] Settings (idioma, audio)
-- [x] Menú principal y opciones
-- [x] Generación manual de chatarra (6 scrap/click, coste $1)
-- [x] Generación automática de chatarra (hasta 4.2 scrap/s en nivel 10)
-- [x] Debug controls y debug machines panel (solo desarrollo)
-- [x] Progression hint component
-- [x] Machine card v2 con estados visuales (OK / falta input / output lleno / parada / bloqueada)
-- [x] UI ajustable (paneles minimizables)
+- [x] Contratos.
+- [x] Recursos y maquinas avanzadas T4-T12.
+- [x] Upgrades y unlocks avanzados.
+- [x] Persistencia base del juego.

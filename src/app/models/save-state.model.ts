@@ -5,7 +5,7 @@ import { UpgradeProgress } from './upgrade-progress.model';
 import { FirstRunTutorialState } from './tutorial-step.model';
 import { GameSettings } from '../services/settings.service';
 
-export const SAVE_VERSION = 3; // F2: cadenas T4-T7 (9 recursos + 9 máquinas)
+export const SAVE_VERSION = 4; // F2 content + contract persistence flags
 
 export interface SavedContract {
   id: string;
@@ -37,7 +37,8 @@ export interface SaveState {
   // F1 fields (pre-initialized in v1→v2 migration)
   contracts?: SavedContract[]; // contratos activos/disponibles
   lastContractSpawnCheck?: number; // timestamp del último check de spawn
-  firstContractSpawned?: boolean; // true una vez que se spawneó el primer contrato
+  firstContractSpawned?: boolean; // true una vez que se generó el primer contrato
+  hasSeenContractIntro?: boolean; // true una vez que el modal de introducción fue descartado
   // F4 fields (pre-initialized in v1→v2 migration)
   completedMilestones?: string[]; // IDs de milestones completados
 }

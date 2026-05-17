@@ -2,7 +2,7 @@
 
 > **Tipo:** Product Requirements Document  
 > **Estado:** En progreso  
-> **Última actualización:** Abril 2026  
+> **Última actualización:** Mayo 17, 2026  
 > **Autor:** Equipo de desarrollo  
 >
 > Este documento define QUÉ se construye y POR QUÉ. El CÓMO está en `docs/FULL_GAME_TASKS.md`.  
@@ -11,6 +11,19 @@
 ---
 
 ## 1. Visión del Producto
+
+## Estado actual del PRD
+
+| Fase | Estado actual |
+|---|---|
+| F0 - Rebalanceo Tier 3 | Implementada |
+| F1 - Sistema de Contratos | Implementada |
+| F2 - Cadenas T4-T12 | Implementada |
+| F3 - Eventos de Mercado | Pendiente |
+| F4 - Narrativa mínima / Flavor Text | Pendiente |
+| Launch en Steam | Diferido hasta completar todo el PRD |
+
+La decision actual del proyecto es completar el scope completo antes de entrar en fase de release para Steam.
 
 **Scrap Yard Idle** es un juego idle/incremental de escritorio donde el jugador convierte chatarra en dinero construyendo y optimizando una cadena industrial de reciclaje. Empieza con un solo golpe de mazo y termina gestionando una fábrica de servidores y Mining Rigs.
 
@@ -56,7 +69,7 @@ Jugadores de idle games de PC (Clicker Heroes, Idle Factory Tycoon, Factorio-lit
 
 Aplican a todas las fases:
 
-- **Angular 19 standalone** — sin NgModules, `inject()` en lugar de constructor injection
+- **Angular 21 standalone** — sin NgModules, `inject()` en lugar de constructor injection
 - **Signals para todo estado reactivo** — no RxJS, no BehaviorSubject para estado local
 - **i18n obligatorio** — todo texto visible al jugador pasa por `translationService.t(key)`
 - **Config files para balance** — ningún número de juego hardcodeado en servicios
@@ -69,27 +82,25 @@ Aplican a todas las fases:
 ## 4. Ciclo de desarrollo por fases
 
 ```
-F0 Rebalanceo Fundidora
-        ↓
-F2a T4-T7 Base de datos (enums, configs, modelos — sin UI nueva)
-        ↓
-F2b T4-T7 Gameplay completo (upgrades, sell buttons, unlock, QA balance)
-        ↓
-F1 Sistema de Contratos
-        ↓
-F3 Eventos de Mercado
-        ↓
-F4 Narrativa / Flavor Text
-        ↓
-QA balance sesión larga
-        ↓
-Build final
+[hecho] F0 Rebalanceo Fundidora
+  ↓
+[hecho] F1 Sistema de Contratos
+  ↓
+[hecho] F2 Cadenas T4-T12 completas
+  ↓
+[pendiente] F3 Eventos de Mercado
+  ↓
+[pendiente] F4 Narrativa / Flavor Text
+  ↓
+[pendiente] QA balance sesión larga
+  ↓
+[pendiente] Build final + Steam
 ```
 
 **Orden justificado:**
 - F0 primero porque corrige el diseño base antes de construir encima. Todo lo que viene después asume el nuevo comportamiento de la Fundidora.
-- F2 completo (a+b) antes de F1 porque los contratos son más valiosos con recursos T4-T7 disponibles. Además, el refactor de `MarketService` (obligatorio en F2a) es prerequisito para el sistema de multiplicadores de F3.
-- F1 antes de F3 porque los eventos de mercado interactúan con el sistema de contratos (multiplicador de precio afecta rewards URGENT). Mejor tener contratos funcionando y probados primero.
+- F1 y F2 ya están cerradas en el árbol actual. A partir de este punto el orden real de implementación es F3 -> F4 -> QA -> release.
+- F3 debe ir antes de F4 porque impacta de forma directa en economía, contratos y feedback de progresión.
 - F4 al final porque solo añade notificaciones sobre milestones — cero riesgo de romper mecánicas anteriores.
 
 Cada fase se revisa y valida contra sus criterios de aceptación antes de empezar la siguiente.

@@ -1,321 +1,124 @@
 # Scrap Yard Idle — Tareas de Implementación del Juego Completo
 
-> Última actualización: Abril 4, 2026
-> Este documento es la fuente de verdad para la implementación del juego completo post-demo.
-> Cada tarea es atómica y contiene el archivo exacto a tocar y qué hacer.
+> Última actualización: Mayo 17, 2026
+> Este documento vuelve a ser la fuente de verdad del backlog activo.
+> No usarlo para replanificar F0, F1 o F2 como si siguieran pendientes: esas fases ya están implementadas.
 
 ---
 
-## Índice
+## Resumen actual
+
+| Fase | Estado | Nota |
+|---|---|---|
+| F0 - Rebalanceo Tier 3 | Completada | Ya vive en `machines.config.ts` y balance actual |
+| F1 - Sistema de contratos | Completada | Servicio, UI, save e intro modal integrados |
+| F2 - Cadenas T4-T12 | Completada | Recursos, maquinas, upgrades, unlocks y mercado avanzado presentes |
+| F3 - Eventos de mercado | Pendiente | Siguiente fase de producto recomendada |
+| F4 - Milestones / flavor text | Pendiente | Depende de definir triggers y copy |
+| D1 - Header late game | Pendiente | Refactor visual/ergonomico |
+| D2 - Tabs/filtros de maquinas | Pendiente | Refactor de navegacion de UI |
+| Release engineering | Pendiente | QA, packaging y Steam vendran despues del PRD completo |
 
-- [Fase 0 — Rebalanceo Tier 3](#fase-0--rebalanceo-tier-3)
-- [Fase 1 — Sistema de Contratos](#fase-1--sistema-de-contratos)
-- [Fase 2 — Nuevas cadenas T4-T7 (9 máquinas nuevas)](#fase-2--nuevas-cadenas-t4-t7)
-- [Fase 3 — Eventos de Mercado](#fase-3--eventos-de-mercado)
-- [Fase 4 — Narrativa mínima / Flavor Text](#fase-4--narrativa-mínima--flavor-text)
+## Qué NO hay que reimplementar
 
----
+- No reabrir F0 salvo para bugs o rebalance puntual.
+- No reimplementar contratos como feature nueva; ya existen en codigo.
+- No replanificar T4-T12 como si fueran roadmap futuro; ya estan en el juego.
+- No usar este archivo para tareas de demo/Next Fest antiguas.
 
-## Fase 0 — Rebalanceo Tier 3
+## Fase activa recomendada — F3 Eventos de mercado
 
-> Antes de añadir nada nuevo, el Tier 3 existente tiene un problema de diseño: la Fundidora consume Metal para producir Cobre, lo que la pone en competencia directa con la Ensambladora. El fix es hacer que la Fundidora también procese Scrap directamente, igual que la Trituradora y el Separador.
+### Objetivo
 
-### Cadena objetivo tras el fix
+Añadir variaciones temporales al mercado que obliguen al jugador a decidir si vender ahora, stockear o priorizar contratos durante ventanas de precio favorables o desfavorables.
 
-```
-Trituradora:   1 Scrap → 2 Metal      (extracción física → hierro)
-Separador:     1 Scrap → 1 Plástico   (separación química → polímeros)
-Fundidora:     2 Scrap → 1 Cobre      (fundición térmica → cobre)
-```
+### Checklist de implementación
 
----
+- [ ] Definir modelo de evento de mercado.
+- [ ] Crear config con tipos de evento, duracion, cooldown y multiplicadores.
+- [ ] Crear `MarketEventService` con estado reactivo y tick.
+- [ ] Integrar eventos con `GameLoopService`.
+- [ ] Integrar multiplicadores en `MarketService`.
+- [ ] Mostrar estado actual del mercado en UI.
+- [ ] Añadir notificaciones y audio si corresponde.
+- [ ] Persistir el estado necesario en save.
+- [ ] Añadir i18n es/en para nombres y mensajes.
+- [ ] Añadir tests unitarios del servicio y de integracion clave.
 
-### F0-01 — Cambiar input de Fundidora de Metal a Scrap
+### Archivos candidatos
 
-**Archivo:** `src/app/config/machines.config.ts`
+- `src/app/config/game-balance.config.ts`
+- `src/app/services/market.service.ts`
+- `src/app/services/game-loop.service.ts`
+- `src/app/services/save.service.ts`
+- `src/app/models/save-state.model.ts`
+- `src/assets/i18n/es.json`
+- `src/assets/i18n/en.json`
+- Nuevo servicio/modelo/componente segun diseño final
 
-- Localizar la máquina `MachineType.SMELTER`
-- Cambiar `baseConsumption`:
-  - Antes: `[{ resourceId: ResourceType.METAL, amount: 4 }]`
-  - Después: `[{ resourceId: ResourceType.SCRAP, amount: 2 }]`
-- Cambiar `baseProduction`:
-  - Antes: `{ resourceId: ResourceType.COPPER, amount: 2 }`
-  - Después: `{ resourceId: ResourceType.COPPER, amount: 1 }`
-- Justificación del ratio 2:1: la Fundidora es más lenta que las otras T2 (0.25/s), así que producir 1 Cobre por ciclo sigue siendo rentable sin inundar el inventario.
+## Fase siguiente — F4 Milestones y flavor text
 
----
+### Objetivo
 
-### F0-02 — Ajustar baseSpeed de la Fundidora
+Dar feedback de progresion y narrativa minima sin convertir el juego en un sistema de quests pesado.
 
-**Archivo:** `src/app/config/machines.config.ts`
+### Checklist de implementación
 
-- Actualmente: `baseSpeed: 0.25`
-- Propuesta: `baseSpeed: 0.33`
-- Razón: con el input de Scrap compartido entre tres máquinas, la Fundidora puede ser ligeramente más rápida sin starvar a las otras porque el Scrap es fácil de generar.
+- [ ] Definir catalogo de milestones y sus condiciones.
+- [ ] Crear `MilestoneService` o equivalente.
+- [ ] Conectar milestones con sistemas existentes de recursos, maquinas, upgrades y contratos.
+- [ ] Persistir milestones completados.
+- [ ] Mostrar notificaciones y/o historial visible.
+- [ ] Añadir flavor text es/en.
+- [ ] Añadir tests unitarios y de persistencia.
 
----
+### Archivos candidatos
 
-### F0-03 — Revisar precio de venta del Cobre
+- `src/app/models/save-state.model.ts`
+- `src/app/services/save.service.ts`
+- `src/app/services/notification.service.ts`
+- `src/assets/i18n/es.json`
+- `src/assets/i18n/en.json`
+- Nuevos archivos de config, servicio y UI
 
-**Archivo:** `src/app/config/game-balance.config.ts`
+## Mejoras de UI post-F4
 
-- Actualmente: `COPPER: 2.8` en `MARKET_CONFIG.BASE_PRICES`
-- Precio definitivo: `3.0` (Cobre se desbloquea después de Componentes $3.0 → debe valer al menos igual; $2.0 eliminaba el incentivo de procesado)
-- También es input de la Ensambladora Eléctrica → precio alto hace la alternativa de venta real
+### D1 — Refactor del header de recursos
 
----
+- [ ] Reducir densidad visual en late game.
+- [ ] Revisar cómo se presentan cantidades, capacidad y acciones de venta.
+- [ ] Evitar que la escala T4-T12 vuelva inmanejable el header.
 
-### F0-04 — Revisar la cadena Ensambladora Eléctrica con el nuevo Cobre
+### D2 — Tabs o filtros de maquinas
 
-**Archivo:** `src/app/config/machines.config.ts`
+- [ ] Separar basicas y avanzadas o introducir filtros por tier.
+- [ ] Mantener legible la lista completa de maquinas una vez cerradas F3 y F4.
+- [ ] Cubrir la nueva navegacion con tests de UI.
 
-- Confirmar que la Ensambladora Eléctrica (`MachineType.ELECTRIC_ASSEMBLER`) sigue siendo viable después del cambio:
-  - Inputs actuales: `Cobre x1 + Componentes x1 + Plástico Reciclado x1 → 1 Comp. Eléctrico`
-  - Con Fundidora produciendo 1 Cobre por ciclo a 0.33/s = ~0.33 Cobre/s sin upgrades
-  - La E.Assembler consume a 0.2/s → tiene suficiente input de Cobre al inicio
-  - No requiere cambio de receta, solo verificar con números
+## Backlog de release engineering
 
----
+Esto se ejecuta despues de cerrar el PRD funcional.
 
-### F0-05 — Validar balance Empaquetadora básica vs Eléctrica
+- [ ] Playthrough completo T1-T12 sin cheats.
+- [ ] QA de save/load en toda la progresion.
+- [ ] Balance economico final y deteccion de softlocks.
+- [ ] Verificar `pnpm run package:win` en una corrida limpia.
+- [ ] Revisar drift entre `electron/main.js` y `electron/main.ts`.
+- [ ] Revisar drift entre `electron/preload.js` y `electron/preload.ts`.
+- [ ] Revisar flags, labels o leftovers de beta/demo antes de release.
+- [ ] Preparar assets, store page y pipeline de Steam.
 
-**Archivo:** `src/app/config/machines.config.ts` + `game-balance.config.ts`
+## Criterio para considerar el PRD completo
 
-- Empaquetadora básica: consume 4 Componentes → produce $10 a 0.1/s = $1/s
-- Empaquetadora eléctrica: consume 4 Comp. Eléctricos → produce $60 a 0.1/s = $6/s
-- El salto es ×6 en dinero. El setup de la Emp. Eléctrica requiere ~4 máquinas adicionales = justificado
-- Si en QA resulta demasiado agresivo, bajar a `amount: 40` ($4/s = ×4 sobre la básica)
+El PRD se considera implementado cuando se cumplan todos estos puntos:
 
----
+- [ ] F3 cerrada.
+- [ ] F4 cerrada.
+- [ ] D1 resuelta o descartada con decision explicita.
+- [ ] D2 resuelta o descartada con decision explicita.
+- [ ] QA funcional completo realizado.
 
-### F0-06 — Actualizar `docs/systems.md` con la nueva cadena de Fundidora
-
-**Archivo:** `docs/systems.md`
-
-- En la tabla de máquinas, actualizar la fila de `smelter`:
-  - Inputs: `2 Chatarra` (antes era `4 Metal`)
-  - Output: `1 Cobre` (antes era `2 Cobre`)
-- En el diagrama ASCII de la cadena, cambiar la flecha de Metal → Fundidora por Chatarra → Fundidora
-
----
-
-## Fase 1 — Sistema de Contratos
-
-> Los contratos obligan al jugador a priorizar cadenas de producción concretas. Son la capa de decisión más importante del juego completo. Se implementan ANTES que los nuevos tiers para que el jugador ya tenga contratos disponibles desde T3.
-
-### Diseño de datos
-
-```typescript
-// Tipos de recurso que un contrato puede pedir (solo los que el jugador puede producir)
-type ContractResourceTarget = ResourceType;
-
-interface Contract {
-  id: string;
-  type: 'local' | 'corporate' | 'urgent' | 'chain';
-  resourceId: ContractResourceTarget;
-  amount: number;           // cantidad a entregar
-  timeLimit: number;        // segundos
-  rewardMoney: number;
-  penaltyMoney: number;     // solo si type === 'urgent'
-  isActive: boolean;
-  isCompleted: boolean;
-  isFailed: boolean;
-  timeRemaining: number;    // decrementado por el game loop
-  chainIndex?: number;      // posición en la cadena si type === 'chain'
-  chainId?: string;         // ID del grupo de cadena
-}
-```
-
----
-
-### C-01 — Modelo de datos: `contract.model.ts`
-
-**Archivo a crear:** `src/app/models/contract.model.ts`
-
-- Definir la interfaz `Contract` según el diseño de datos de arriba
-- Definir el enum `ContractType`: `LOCAL | CORPORATE | URGENT | CHAIN`
-- Las propiedades `chainIndex` y `chainId` son opcionales (solo presentes en contratos `CHAIN`)
-
----
-
-### C-02 — Config de contratos: `contracts.config.ts`
-
-**Archivo a crear:** `src/app/config/contracts.config.ts`
-
-- `CONTRACT_SPAWN_INTERVAL`: cada cuántos segundos puede aparecer un contrato nuevo (default: 120s)
-- `MAX_ACTIVE_CONTRACTS`: máximo de contratos simultáneos (default: 3)
-- Tabla de templates por tipo:
-  ```
-  LOCAL:     rewardMoney = amount × basePrice × 1.2,  timeLimit = 300s,  penaltyMoney = 0
-  CORPORATE: rewardMoney = amount × basePrice × 1.5,  timeLimit = 1800s, penaltyMoney = 0
-  URGENT:    rewardMoney = amount × basePrice × 2.0,  timeLimit = 120s,  penaltyMoney = amount × basePrice × 0.5
-  ```
-- Tabla de pools de recursos por tipo de contrato:
-  ```
-  LOCAL:     METAL, PLASTIC, COPPER
-  CORPORATE: COMPONENTS, COPPER, ELECTRIC_COMPONENTS
-  URGENT:    COMPONENTS, ELECTRIC_COMPONENTS
-  ```
-
----
-
-### C-03 — Servicio: `ContractService`
-
-**Archivo a crear:** `src/app/services/contract.service.ts`
-
-Responsabilidades:
-- `contracts` signal: array de contratos activos
-- `generateContract(type: ContractType): Contract` — genera un contrato aleatorio según el template del tipo
-- `acceptContract(id: string): void` — activa un contrato (marca `isActive = true`, arranca el timer)
-- `ignoreContract(id: string): void` — descarta la oferta sin penalización
-- `completeContract(id: string): void` — llamado cuando el player cumple los requisitos; resta recursos, suma reward
-- `failContract(id: string): void` — llamado cuando el timer llega a 0; aplica penalización si es URGENT
-- `tick(): void` — decrementar `timeRemaining` de contratos activos; llamado desde `GameLoopService`
-- `canAccept(contract: Contract): boolean` — false si ya hay `MAX_ACTIVE_CONTRACTS` activos
-- Integración con `ResourcesService.subtract()` al completar
-- Integración con `ResourcesService` (MONEY) para reward y penalización
-- `setSaveService(save: SaveService)` — patrón estándar del proyecto
-- `markDirty()` en cada cambio de estado
-
----
-
-### C-04 — Integrar `ContractService` en `GameLoopService`
-
-**Archivo:** `src/app/services/game-loop.service.ts`
-
-- Inyectar `ContractService` con `inject()`
-- En el método `tick()`: llamar a `contractService.tick()`
-- El timer de contratos decrementa 1 cada tick (1s)
-
----
-
-### C-05 — Integrar `ContractService` en `App`
-
-**Archivo:** `src/app/app.ts`
-
-- Inyectar `ContractService`
-- Llamar a `contractService.setSaveService(this.saveService)` en `ngOnInit`, igual que los demás servicios
-- Añadir `contractService.contracts` al estado de guardado (ver C-10)
-
----
-
-### C-06 — Añadir contratos al `SaveState`
-
-**Archivo:** `src/app/services/save.service.ts` (o donde esté definido `SaveState`)
-
-- Añadir campo `contracts: Contract[]` (opcional, default `[]`)
-- En `migrateSave()`: si `contracts` no existe, inicializar como `[]`
-
----
-
-### C-07 — Componente: `contracts-panel`
-
-**Archivo a crear:** `src/app/components/contracts-panel/contracts-panel.ts`
-**Template:** `src/app/components/contracts-panel/contracts-panel.html`
-**Estilos:** `src/app/components/contracts-panel/contracts-panel.css`
-
-- Lista los contratos activos con:
-  - Tipo (badge: LOCAL / CORPORATIVO / URGENTE)
-  - Recurso y cantidad requerida
-  - Timer visual (barra de progreso o cuenta regresiva)
-  - Estado: pendiente de aceptar / en progreso / completado / fallado
-- Botón "Aceptar" en contratos ofertados
-- Botón "Entregar" activo cuando el jugador tiene los recursos suficientes
-- Para contratos URGENTE: mostrar la penalización claramente en rojo
-
----
-
-### C-08 — Componente: `contract-card`
-
-**Archivo a crear:** `src/app/components/contracts-panel/contract-card/contract-card.ts`
-
-- Componente hijo de `contracts-panel`
-- Input: `@Input() contract: Contract`
-- Emite: `accept`, `deliver`
-- El color del borde cambia según el tipo: gris (local), azul (corporativo), naranja (urgente)
-- Timer: si `timeRemaining < 30s`, el timer parpadea o se muestra en rojo
-
----
-
-### C-09 — Añadir `contracts-panel` al layout principal
-
-**Archivo:** `src/app/app.html` (o el componente de game view)
-
-- Añadir `<app-contracts-panel>` en la vista de juego
-- Posicionarlo como panel colapsable igual que el upgrades-panel
-- Oculto cuando no hay contratos activos o disponibles (para no saturar la UI)
-
----
-
-### C-10 — i18n: claves de contratos
-
-**Archivos:** `src/assets/i18n/es.json` y `src/assets/i18n/en.json`
-
-Claves a añadir:
-```json
-"contracts.panel.title": "Contratos",
-"contracts.type.local": "Local",
-"contracts.type.corporate": "Corporativo",
-"contracts.type.urgent": "URGENTE",
-"contracts.action.accept": "Aceptar",
-"contracts.action.deliver": "Entregar",
-"contracts.action.ignore": "Ignorar",
-"contracts.status.inProgress": "En curso",
-"contracts.status.completed": "Completado",
-"contracts.status.failed": "Fallado",
-"contracts.label.reward": "Recompensa",
-"contracts.label.penalty": "Penalización",
-"contracts.label.timeLeft": "Tiempo restante",
-"contracts.label.deliver": "Entregar {{amount}} {{resource}}",
-"contracts.notification.accepted": "Contrato aceptado",
-"contracts.notification.completed": "¡Contrato completado! +{{reward}}$",
-"contracts.notification.failed": "Contrato fallado. -{{penalty}}$"
-```
-
----
-
-## Fase 2 — Nuevas cadenas T4-T7
-
-> 9 máquinas nuevas, 9 recursos nuevos, desbloqueados progresivamente. Toda esta fase es aditiva — no modifica nada del T1-T3 ya implementado.
-
-### Mapa completo de lo que se añade
-
-```
-T4: PCB Printer        → Circuit Board       (Cobre + Componentes)
-T5: HDD Assembler      → Disco Duro          (Circuit Board + Metal)
-    Screen Fabricator  → Pantalla            (Circuit Board + Comp. Eléctricos + Plástico Reciclado)
-T6: GPU Fab            → GPU                 (Circuit Board x2 + Cobre)
-    Smartphone Factory → Smartphone          (Pantalla + Circuit Board)
-    Laptop Workshop    → Laptop              (Disco Duro + Pantalla + Circuit Board)
-    PC Builder         → Desktop PC          (Disco Duro + GPU + Metal)
-T7: Data Center Asm.   → Server Rack         (Desktop PC x2 + Circuit Board x4)
-    Mining Rig Asm.    → Mining Rig          (Desktop PC + GPU x2 + Comp. Eléctricos x2)
-```
-
----
-
-### T-01 — Añadir recursos al enum `ResourceType`
-
-**Archivo:** `src/app/models/resource.model.ts`
-
-Añadir al enum `ResourceType`:
-```typescript
-CIRCUIT_BOARD = 'circuit_board',
-HDD = 'hdd',
-SCREEN = 'screen',
-GPU = 'gpu',
-SMARTPHONE = 'smartphone',
-LAPTOP = 'laptop',
-DESKTOP_PC = 'desktop_pc',
-SERVER_RACK = 'server_rack',
-MINING_RIG = 'mining_rig',
-```
-
----
-
-### T-02 — Añadir definiciones de recursos en `resources.config.ts`
-
-**Archivo:** `src/app/config/resources.config.ts`
+Cuando eso ocurra, el proyecto pasa de backlog de producto a backlog de release.
 
 Para cada recurso nuevo, añadir a `INITIAL_RESOURCES`:
 - `id`: el nuevo `ResourceType`

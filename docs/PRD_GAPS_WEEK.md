@@ -1,9 +1,8 @@
 # PRD — Semana de ajuste fino antes de implementar
 
-> **Objetivo:** Cerrar todos los gaps de especificación antes de tocar código.
-> Al terminar esta semana, el PRD puede pasarse a cualquier desarrollador sin preguntas abiertas.
-> Cada tarea indica exactamente qué archivo abrir, qué buscar, qué decidir y qué escribir en el PRD.
-> Las propuestas ya están redactadas — solo hay que confirmarlas o ajustarlas.
+> Documento histórico de pre-implementación.
+> Muchas de las validaciones y decisiones de este archivo ya fueron absorbidas por el código actual.
+> No usarlo como backlog vigente; para estado real usar `docs/project-context.md` y `docs/FULL_GAME_TASKS.md`.
 
 ---
 

@@ -371,10 +371,29 @@ import { Contract } from '../../models/contract.model';
                           <span class="contract-amount">{{ contract.amount }}×</span>
                           <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
                         </div>
-                        <div class="contract-reward">
-                          <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
-                          <span>{{ contract.reward }}</span>
+                        <div class="contract-meta">
+                          <div class="contract-reward">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            <span>{{ contract.reward }}</span>
+                          </div>
+                          @if (contract.penaltyAmount > 0) {
+                            <div class="contract-penalty">
+                              <span>{{ translationService.t('contracts.penalty') }}:</span>
+                              <span>-{{ contract.penaltyAmount }}</span>
+                            </div>
+                          }
                         </div>
+                      </div>
+                      <div class="contract-card__progress">
+                        <app-progress-bar
+                          [progress]="getAvailableContractProgress(contract)"
+                          [label]="translationService.t('contracts.expires_in') + ' ' + contractService.formatTimer(contractService.getAvailableSeconds(contract))"
+                          [showLabel]="false"
+                          [inline]="true"
+                        />
+                      </div>
+                      <div class="contract-stock" [class.contract-stock--ready]="hasContractStock(contract)">
+                        {{ translationService.t('common.stock_label') }} {{ getContractStock(contract) }} / {{ contract.amount }}
                       </div>
                       <div class="contract-card__footer">
                         <span class="contract-duration">⏱ {{ contractService.formatTimer(contract.durationSeconds) }}</span>
@@ -421,10 +440,29 @@ import { Contract } from '../../models/contract.model';
                           <span class="contract-amount">{{ contract.amount }}×</span>
                           <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
                         </div>
-                        <div class="contract-reward">
-                          <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
-                          <span>{{ contract.reward }}</span>
+                        <div class="contract-meta">
+                          <div class="contract-reward">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            <span>{{ contract.reward }}</span>
+                          </div>
+                          @if (contract.penaltyAmount > 0) {
+                            <div class="contract-penalty">
+                              <span>{{ translationService.t('contracts.penalty') }}:</span>
+                              <span>-{{ contract.penaltyAmount }}</span>
+                            </div>
+                          }
                         </div>
+                      </div>
+                      <div class="contract-card__progress">
+                        <app-progress-bar
+                          [progress]="getActiveContractProgress(contract)"
+                          [label]="contractService.formatTimer(contractService.getRemainingSeconds(contract))"
+                          [showLabel]="false"
+                          [inline]="true"
+                        />
+                      </div>
+                      <div class="contract-stock" [class.contract-stock--ready]="hasContractStock(contract)">
+                        {{ translationService.t('common.stock_label') }} {{ getContractStock(contract) }} / {{ contract.amount }}
                       </div>
                       <div class="contract-card__footer">
                         <app-button
@@ -1125,6 +1163,7 @@ import { Contract } from '../../models/contract.model';
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: var(--space-3);
       }
 
       .contract-resource {
@@ -1144,6 +1183,13 @@ import { Contract } from '../../models/contract.model';
         color: var(--color-text-muted, #aaa);
       }
 
+      .contract-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+
       .contract-reward {
         display: flex;
         align-items: center;
@@ -1151,6 +1197,29 @@ import { Contract } from '../../models/contract.model';
         font-size: 13px;
         font-weight: 700;
         color: var(--color-accent-gold, #d4a730);
+      }
+
+      .contract-penalty {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-accent-negative, #e06060);
+      }
+
+      .contract-card__progress {
+        margin-top: 8px;
+      }
+
+      .contract-stock {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--color-text-muted, #999);
+      }
+
+      .contract-stock--ready {
+        color: var(--color-accent-positive, #8bc68b);
       }
 
       .contract-card__footer {
@@ -1794,6 +1863,26 @@ export class UpgradesPanelComponent {
       const minutes = Math.floor((seconds % 3600) / 60);
       return `${hours}h ${minutes}m`;
     }
+  }
+
+  getContractStock(contract: Contract): number {
+    return this.resourcesService.getAmount(contract.resourceId);
+  }
+
+  hasContractStock(contract: Contract): boolean {
+    return this.contractService.canDeliver(contract);
+  }
+
+  getAvailableContractProgress(contract: Contract): number {
+    const totalSeconds = Math.max(1, Math.ceil((contract.availableUntil - contract.spawnedAt) / 1000));
+    const remaining = Math.max(0, this.contractService.getAvailableSeconds(contract));
+    return Math.max(0, Math.min(1, (totalSeconds - remaining) / totalSeconds));
+  }
+
+  getActiveContractProgress(contract: Contract): number {
+    const totalSeconds = Math.max(1, contract.durationSeconds);
+    const remaining = Math.max(0, this.contractService.getRemainingSeconds(contract));
+    return Math.max(0, Math.min(1, (totalSeconds - remaining) / totalSeconds));
   }
 
   /**

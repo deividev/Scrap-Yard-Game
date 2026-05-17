@@ -1,3 +1,5 @@
+import { ResourceType } from './resource.model';
+
 export type ContractType = 'local' | 'regional' | 'corporate';
 export type ContractUrgency = 'normal' | 'urgent';
 
@@ -5,7 +7,7 @@ export interface Contract {
   id: string;
   type: ContractType;
   urgency: ContractUrgency;
-  resourceId: string;
+  resourceId: ResourceType;
   amount: number;
   reward: number;
   penaltyAmount: number;

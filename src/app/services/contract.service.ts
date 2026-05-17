@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Contract } from '../models/contract.model';
 import { SavedContract } from '../models/save-state.model';
 import { SaveMarker } from '../models/save-marker.model';
@@ -9,7 +9,7 @@ import { TranslationService } from './translation.service';
 import { AudioService } from './audio.service';
 import { ResourceType } from '../models/resource.model';
 import { MachineType } from '../models/machine.model';
-import { CONTRACT_TEMPLATES, CONTRACTS_CONFIG } from '../config/contracts.config';
+import { CONTRACT_TEMPLATES, CONTRACTS_CONFIG, ContractTemplate } from '../config/contracts.config';
 
 @Injectable({
   providedIn: 'root',
@@ -28,12 +28,24 @@ export class ContractService {
   private _overdueOnLoadIds = new Set<string>();
   private readonly WARNING_THRESHOLD_SECONDS = 30;
 
+  private _firstContractSpawned = signal(false);
   private _hasSeenContractIntro = signal(false);
   private _showContractIntro = signal(false);
+  /** true once any first contract has been spawned/generated */
+  readonly hasSpawnedFirstContract = this._firstContractSpawned.asReadonly();
   /** true once the player has dismissed the contracts intro modal */
   readonly hasSeenContractIntro = this._hasSeenContractIntro.asReadonly();
   /** true when the intro modal should be shown (first-ever contract spawned) */
   readonly showContractIntro = this._showContractIntro.asReadonly();
+
+  private readonly _firstContractUnlockEffect = effect(() => {
+    const assemblerLevel = this.machinesService.getMachine(MachineType.ASSEMBLER)?.level ?? 0;
+    if (assemblerLevel < 1 || this._firstContractSpawned()) {
+      return;
+    }
+
+    this.spawnForcedLocalContract();
+  });
 
   readonly available = computed(() =>
     this.contracts().filter((c) => !c.isAccepted && Date.now() < c.availableUntil),
@@ -200,8 +212,12 @@ export class ContractService {
     }));
   }
 
-  hydrate(saved?: SavedContract[], hasSeenIntro = false): void {
-    this._hasSeenContractIntro.set(hasSeenIntro);
+  hydrate(
+    saved?: SavedContract[],
+    options: { hasSeenIntro?: boolean; hasSpawnedFirstContract?: boolean } = {},
+  ): void {
+    this._hasSeenContractIntro.set(options.hasSeenIntro ?? false);
+    this._firstContractSpawned.set(options.hasSpawnedFirstContract ?? false);
     this._overdueOnLoadIds.clear();
     this.warnedContractIds.clear();
 
@@ -217,7 +233,7 @@ export class ContractService {
         id: s.id,
         type: s.type,
         urgency: s.urgency,
-        resourceId: s.resourceId,
+        resourceId: s.resourceId as ResourceType,
         amount: s.amount,
         reward: s.reward,
         penaltyAmount: s.penaltyAmount,
@@ -251,7 +267,7 @@ export class ContractService {
     this.contracts.set(contracts);
 
     // Show intro modal if player never dismissed it but already has contracts
-    this._showContractIntro.set(!hasSeenIntro && contracts.length > 0);
+    this._showContractIntro.set(!this._hasSeenContractIntro() && contracts.length > 0);
   }
 
   reset(): void {
@@ -259,6 +275,7 @@ export class ContractService {
     this.ticksSinceSpawnCheck = 0;
     this.warnedContractIds.clear();
     this._overdueOnLoadIds.clear();
+    this._firstContractSpawned.set(false);
     this._hasSeenContractIntro.set(false);
     this._showContractIntro.set(false);
   }
@@ -266,12 +283,12 @@ export class ContractService {
   // ─── Private ────────────────────────────────────────────────────────────────
 
   private trySpawn(now: number): void {
-    // Gate: contracts only available once the Packager is unlocked
-    const packager = this.machinesService.getMachine(MachineType.PACKAGER);
-    if (!packager || packager.level === 0) return;
+    // Contracts unlock once the assembler is available.
+    const assembler = this.machinesService.getMachine(MachineType.ASSEMBLER);
+    if (!assembler || assembler.level === 0) return;
 
-    const available = this.contracts().filter((c) => !c.isAccepted && now < c.availableUntil);
-    if (available.length >= CONTRACTS_CONFIG.MAX_AVAILABLE) return;
+    const visibleContracts = this.contracts().filter((c) => c.isAccepted || now < c.availableUntil);
+    if (visibleContracts.length >= CONTRACTS_CONFIG.MAX_AVAILABLE) return;
 
     // Exclude resources already in available or active contracts to avoid duplicates
     const existingResourceIds = new Set(this.contracts().map((c) => c.resourceId));
@@ -297,7 +314,39 @@ export class ContractService {
       ? Math.round(template.penaltyAmount * CONTRACTS_CONFIG.URGENT_PENALTY_MULT)
       : template.penaltyAmount;
 
-    const contract: Contract = {
+    this.registerSpawn(this.createContractFromTemplate(template, now, isUrgent));
+  }
+
+  private spawnForcedLocalContract(): void {
+    const now = Date.now();
+    const producible = new Set(this.getProducibleResourceIds());
+    const firstLocalTemplate = CONTRACT_TEMPLATES.find(
+      (template) => template.type === 'local' && producible.has(template.resourceId),
+    );
+
+    if (!firstLocalTemplate) {
+      return;
+    }
+
+    this.registerSpawn(this.createContractFromTemplate(firstLocalTemplate, now, false));
+  }
+
+  private createContractFromTemplate(
+    template: ContractTemplate,
+    now: number,
+    isUrgent: boolean,
+  ): Contract {
+    const duration = isUrgent
+      ? Math.round(template.durationSeconds * CONTRACTS_CONFIG.URGENT_DURATION_MULT)
+      : template.durationSeconds;
+    const reward = isUrgent
+      ? Math.round(template.reward * CONTRACTS_CONFIG.URGENT_REWARD_MULT)
+      : template.reward;
+    const penalty = isUrgent
+      ? Math.round(template.penaltyAmount * CONTRACTS_CONFIG.URGENT_PENALTY_MULT)
+      : template.penaltyAmount;
+
+    return {
       id: `contract_${now}_${Math.random().toString(36).slice(2, 7)}`,
       type: template.type,
       urgency: isUrgent ? 'urgent' : 'normal',
@@ -311,11 +360,13 @@ export class ContractService {
       acceptedAt: 0,
       isAccepted: false,
     };
+  }
 
+  private registerSpawn(contract: Contract): void {
     this.contracts.update((cs) => [...cs, contract]);
+    this._firstContractSpawned.set(true);
     this.saveService?.markDirty();
 
-    // First ever contract — show intro modal if player hasn't seen it yet
     if (!this._hasSeenContractIntro()) {
       this._showContractIntro.set(true);
     }
