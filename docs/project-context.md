@@ -7,11 +7,11 @@
 - F0 completada.
 - F1 completada.
 - F2 completada.
-- F3 pendiente.
-- F4 pendiente.
+- F3 completada.
+- F4 diferida a revisión post-release.
 - QA largo, hardening de release y salida en Steam pendientes.
 
-La estrategia actual del proyecto es terminar todo el PRD antes de preparar el launch en Steam.
+La estrategia actual del proyecto es cerrar QA/hardening del core pre-release antes de preparar Steam. F4 no bloquea release salvo que los playtests demuestren que falta feedback de progresión.
 
 ## Qué es el juego
 
@@ -45,10 +45,10 @@ Es un idle/management de escritorio donde el jugador transforma chatarra en una 
 | F0 - Rebalanceo Tier 3 | Implementada | La Fundidora ya consume Scrap directo y el balance fue ajustado |
 | F1 - Contratos | Implementada | Servicio, UI, persistencia, intro modal y tick integrados |
 | F2 - Cadenas T4-T12 | Implementada | Recursos, maquinas, upgrades y mercado avanzado presentes en codigo |
-| F3 - Eventos de mercado | Pendiente | No existe aun un sistema real de eventos sobre el mercado |
-| F4 - Milestones / flavor text | Pendiente | Solo hay placeholder de persistencia, no sistema jugable |
+| F3 - Eventos de mercado | Implementada | Pool actual de 8 eventos, banner en upgrades, audio por signo y gating por recursos desbloqueados |
+| F4 - Milestones / flavor text | Diferida post-release | Solo hay placeholder de persistencia; no forma parte del core pre-release actual |
 | Release engineering | Pendiente | Falta QA largo, build final y limpieza de deuda de release |
-| Steam launch | Pendiente | Se hara despues de cerrar todo el PRD |
+| Steam launch | Pendiente | Se hara despues de QA/hardening y validacion del build |
 
 ## Sistemas implementados
 
@@ -58,6 +58,7 @@ Es un idle/management de escritorio donde el jugador transforma chatarra en una 
 | Recursos T1-T12 | Implementado | `resources.config.ts` |
 | Maquinas T1-T12 | Implementado | `machines.config.ts` |
 | Mercado y venta manual | Implementado | `MarketService` + botones UI |
+| Eventos de mercado | Implementado | `MarketEventService` + `EventBannerComponent` + multiplicadores runtime |
 | Upgrades de storage, scrap y maquinas | Implementado | `upgrade-definitions.config.ts` |
 | Unlock progresivo | Implementado | `MachineUnlockService` |
 | Contratos | Implementado | `ContractService` + tab de contratos |
@@ -71,8 +72,9 @@ Es un idle/management de escritorio donde el jugador transforma chatarra en una 
 
 ### Producto
 
-- F3 - Eventos de mercado.
-- F4 - Milestones con flavor text y feedback de progresion.
+- QA manual completa del loop T1-T12.
+- Balance final del late game y decision sobre D1/D2 segun findings de QA.
+- F4 - Milestones con flavor text y feedback de progresion solo si el juego demuestra necesitarlo post-release.
 - D1 - Refactor del header de recursos para soportar mejor el late game.
 - D2 - Tabs o filtros de maquinas para bajar densidad visual.
 
@@ -90,9 +92,9 @@ Es un idle/management de escritorio donde el jugador transforma chatarra en una 
 
 ## Prioridad recomendada
 
-1. Implementar F3.
-2. Implementar F4.
-3. Resolver D1 y D2.
-4. Ejecutar QA largo y balance.
-5. Cerrar release engineering.
-6. Preparar y lanzar en Steam.
+1. Ejecutar QA largo y save/load con la checklist manual actual.
+2. Corregir bugs y rebalancear lo que salga de esa pasada.
+3. Resolver D1 y D2 solo si QA confirma que siguen siendo dolor real.
+4. Cerrar release engineering.
+5. Preparar y lanzar en Steam.
+6. Revisar F4 post-release si sigue haciendo falta.

@@ -75,7 +75,8 @@ desktop_pc + gpu + circuit_board -> data_center_assembly -> server_rack
 3. Produccion de maquinas.
 4. Progreso de upgrades en curso.
 5. Tick de contratos.
-6. Auto-save cuando corresponde.
+6. Tick de eventos de mercado.
+7. Auto-save cuando corresponde.
 
 Las maquinas consumen insumos al inicio de ciclo y producen al completar `progress >= 1`.
 
@@ -83,7 +84,9 @@ Las maquinas consumen insumos al inicio de ciclo y producen al completar `progre
 
 - `MarketService` permite venta manual de recursos.
 - Hay bonus por lote configurados en `game-balance.config.ts`.
-- El mercado actual es estatico: todavia no existe un sistema de eventos F3 que altere precios en runtime.
+- `MarketEventService` aplica multiplicadores runtime sobre recursos concretos segun el evento activo.
+- Las ventas manuales conservan precision de 2 decimales, de modo que eventos negativos tambien afectan recursos baratos de forma visible.
+- `EventBannerComponent` vive en el hueco superior del panel de upgrades para mostrar tipo, multiplicador, recursos afectados y tiempo restante sin tapar el header.
 
 ## Upgrades
 
@@ -132,7 +135,7 @@ Los upgrades actuales cubren:
 |---|---|
 | `resources-header` | Estado de recursos y acciones rapidas |
 | `machine-list` | Lista principal de maquinas |
-| `upgrades-panel` | Upgrades + tab de contratos |
+| `upgrades-panel` | Upgrades + tab de contratos + banner de evento de mercado |
 | `statistics-panel` | Totales de la partida |
 | `first-run-tutorial-overlay` | Onboarding guiado |
 | `notification-container` | Feedback de eventos del juego |
@@ -146,7 +149,6 @@ Los upgrades actuales cubren:
 
 ## Sistemas que todavía no existen
 
-- F3 - Eventos de mercado.
 - F4 - Sistema real de milestones y flavor text.
 - Preparacion operativa para Steam.
 

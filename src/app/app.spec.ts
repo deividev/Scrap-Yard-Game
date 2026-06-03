@@ -24,6 +24,7 @@ import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 import { ContractService } from './services/contract.service';
+import { MarketEventService } from './services/market-event.service';
 
 @Component({
   selector: 'app-resources-header',
@@ -206,6 +207,15 @@ class MockContractService extends SaveAwareService {
   }
 }
 
+class MockMarketEventService {
+  debugForceRandomEventCalls = 0;
+
+  debugForceRandomEvent(): boolean {
+    this.debugForceRandomEventCalls += 1;
+    return true;
+  }
+}
+
 describe('App', () => {
   let saveService: MockSaveService;
   let resourcesService: SaveAwareService;
@@ -217,6 +227,7 @@ describe('App', () => {
   let gameLoopService: MockGameLoopService;
   let firstRunTutorialService: MockFirstRunTutorialService;
   let contractService: MockContractService;
+  let marketEventService: MockMarketEventService;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -230,6 +241,7 @@ describe('App', () => {
     gameLoopService = new MockGameLoopService();
     firstRunTutorialService = new MockFirstRunTutorialService();
     contractService = new MockContractService();
+    marketEventService = new MockMarketEventService();
 
     TestBed.configureTestingModule({
       imports: [App],
@@ -244,6 +256,7 @@ describe('App', () => {
         { provide: GameLoopService, useValue: gameLoopService },
         { provide: FirstRunTutorialService, useValue: firstRunTutorialService },
         { provide: ContractService, useValue: contractService },
+        { provide: MarketEventService, useValue: marketEventService },
       ],
     }).overrideComponent(App, {
       remove: {
@@ -404,5 +417,16 @@ describe('App', () => {
 
     clearIntervalSpy.mockRestore();
     removeEventListenerSpy.mockRestore();
+  });
+
+  it('should force a debug market event when X is pressed in game view', () => {
+    gameStateService.setView('game');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    const keyboardEvent = new KeyboardEvent('keydown', { key: 'x' });
+    window.dispatchEvent(keyboardEvent);
+
+    expect(marketEventService.debugForceRandomEventCalls).toBe(1);
   });
 });

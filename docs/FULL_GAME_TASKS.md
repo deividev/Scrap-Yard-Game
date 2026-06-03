@@ -1,6 +1,6 @@
 # Scrap Yard Idle — Tareas de Implementación del Juego Completo
 
-> Última actualización: Mayo 17, 2026
+> Última actualización: Mayo 24, 2026
 > Este documento vuelve a ser la fuente de verdad del backlog activo.
 > No usarlo para replanificar F0, F1 o F2 como si siguieran pendientes: esas fases ya están implementadas.
 
@@ -13,11 +13,11 @@
 | F0 - Rebalanceo Tier 3 | Completada | Ya vive en `machines.config.ts` y balance actual |
 | F1 - Sistema de contratos | Completada | Servicio, UI, save e intro modal integrados |
 | F2 - Cadenas T4-T12 | Completada | Recursos, maquinas, upgrades, unlocks y mercado avanzado presentes |
-| F3 - Eventos de mercado | Pendiente | Siguiente fase de producto recomendada |
-| F4 - Milestones / flavor text | Pendiente | Depende de definir triggers y copy |
+| F3 - Eventos de mercado | Completada | Pool actual de 8 eventos, banner integrado, audio por signo y verificacion archivada |
+| F4 - Milestones / flavor text | Diferida post-release | No bloquea el core pre-release actual |
 | D1 - Header late game | Pendiente | Refactor visual/ergonomico |
 | D2 - Tabs/filtros de maquinas | Pendiente | Refactor de navegacion de UI |
-| Release engineering | Pendiente | QA, packaging y Steam vendran despues del PRD completo |
+| Release engineering | Pendiente | QA, packaging y Steam vienen despues del hardening del core |
 
 ## Qué NO hay que reimplementar
 
@@ -26,24 +26,19 @@
 - No replanificar T4-T12 como si fueran roadmap futuro; ya estan en el juego.
 - No usar este archivo para tareas de demo/Next Fest antiguas.
 
-## Fase activa recomendada — F3 Eventos de mercado
+## Bloque activo recomendado — QA y hardening pre-release
 
 ### Objetivo
 
-Añadir variaciones temporales al mercado que obliguen al jugador a decidir si vender ahora, stockear o priorizar contratos durante ventanas de precio favorables o desfavorables.
+Validar el loop completo con F3 ya integrada, corregir bugs reales y decidir con evidencia si D1 y D2 siguen siendo necesarios.
 
 ### Checklist de implementación
 
-- [ ] Definir modelo de evento de mercado.
-- [ ] Crear config con tipos de evento, duracion, cooldown y multiplicadores.
-- [ ] Crear `MarketEventService` con estado reactivo y tick.
-- [ ] Integrar eventos con `GameLoopService`.
-- [ ] Integrar multiplicadores en `MarketService`.
-- [ ] Mostrar estado actual del mercado en UI.
-- [ ] Añadir notificaciones y audio si corresponde.
-- [ ] Persistir el estado necesario en save.
-- [ ] Añadir i18n es/en para nombres y mensajes.
-- [ ] Añadir tests unitarios del servicio y de integracion clave.
+- [ ] Ejecutar la checklist manual completa T1-T12 sin cheats.
+- [ ] Verificar save/load en early, mid y late game.
+- [ ] Confirmar claridad y balance real del sistema de eventos de mercado.
+- [ ] Rebalancear cuellos de botella y payouts solo si QA lo justifica.
+- [ ] Resolver D1/D2 o descartarlos con decision explicita.
 
 ### Archivos candidatos
 
@@ -56,11 +51,11 @@ Añadir variaciones temporales al mercado que obliguen al jugador a decidir si v
 - `src/assets/i18n/en.json`
 - Nuevo servicio/modelo/componente segun diseño final
 
-## Fase siguiente — F4 Milestones y flavor text
+## F4 — Milestones y flavor text
 
 ### Objetivo
 
-Dar feedback de progresion y narrativa minima sin convertir el juego en un sistema de quests pesado.
+Dar feedback de progresion y narrativa minima sin convertir el juego en un sistema de quests pesado. Queda deliberadamente fuera del bloque pre-release actual.
 
 ### Checklist de implementación
 
@@ -97,7 +92,7 @@ Dar feedback de progresion y narrativa minima sin convertir el juego en un siste
 
 ## Backlog de release engineering
 
-Esto se ejecuta despues de cerrar el PRD funcional.
+Esto se ejecuta despues de cerrar QA/hardening del core pre-release.
 
 - [ ] Playthrough completo T1-T12 sin cheats.
 - [ ] QA de save/load en toda la progresion.
@@ -110,15 +105,14 @@ Esto se ejecuta despues de cerrar el PRD funcional.
 
 ## Criterio para considerar el PRD completo
 
-El PRD se considera implementado cuando se cumplan todos estos puntos:
+El core pre-release se considera cerrado cuando se cumplan todos estos puntos:
 
-- [ ] F3 cerrada.
-- [ ] F4 cerrada.
+- [x] F3 cerrada.
+- [ ] QA funcional completo realizado.
 - [ ] D1 resuelta o descartada con decision explicita.
 - [ ] D2 resuelta o descartada con decision explicita.
-- [ ] QA funcional completo realizado.
 
-Cuando eso ocurra, el proyecto pasa de backlog de producto a backlog de release.
+Cuando eso ocurra, el proyecto pasa de backlog de producto a backlog de release. F4 queda como mejora opcional post-release.
 
 Para cada recurso nuevo, añadir a `INITIAL_RESOURCES`:
 - `id`: el nuevo `ResourceType`
@@ -418,105 +412,65 @@ Verificar que:
 
 ## Fase 3 — Eventos de Mercado
 
-> Eventos aleatorios que modifican los precios del mercado temporalmente. Crean decisiones de timing (¿vender ahora o esperar el boom?).
+> Implementado. Eventos aleatorios que modifican los precios del mercado temporalmente y crean decisiones de timing (¿vender ahora o esperar el boom?).
 
 ---
 
-### M-01 — Modelo: `market-event.model.ts`
+### M-01 — Estado real del sistema
 
-**Archivo a crear:** `src/app/models/market-event.model.ts`
+**Archivos implementados:** `src/app/models/market-event.model.ts`, `src/app/config/market-events.config.ts`, `src/app/services/market-event.service.ts`, `src/app/components/event-banner/event-banner.component.ts`
 
-```typescript
-interface MarketEvent {
-  id: string;
-  type: 'boom' | 'crash' | 'corporate_deal';
-  affectedResources: ResourceType[];  // qué recursos afecta
-  priceMultiplier: number;             // ej. 3.0 para ×3, 0.4 para crash
-  durationSeconds: number;
-  timeRemaining: number;
-  isActive: boolean;
-}
+- `MarketEventService` se integra en `GameLoopService` con tick por segundo.
+- Solo puede haber un evento activo a la vez.
+- Los eventos no se persisten en save; al recargar se reinicia el cooldown runtime.
+- El banner vive dentro de `upgrades-panel`, no sobre el header.
+- Los eventos solo spawnean si al menos uno de sus recursos afectados ya puede producirse con máquinas desbloqueadas.
+- En dev se puede forzar un evento aleatorio con la tecla `X`.
+
+---
+
+### M-02 — Config actual
+
+**Archivo:** `src/app/config/market-events.config.ts`
+
+```
+COOLDOWN_SECONDS: 300
+INITIAL_SECONDS_SINCE_LAST_EVENT: 240
+
+boom_pcs:            Laptop/Desktop PC/Smartphone ×1.65,  90s, peso 16
+boom_components:     Components/Electric Components ×1.4, 150s, peso 20
+market_crash:        Todos los recursos ×0.8,             60s, peso 12
+corporate_deal:      Server Rack/Mining Rig ×2.0,        120s, peso 6
+tech_parts_rush:     Circuit Board/HDD/Screen/GPU ×1.5, 120s, peso 18
+materials_shortage:  Metal/Plastic/Copper/Recycled Plastic ×0.5, 75s, peso 10
+flash_sale:          Circuit Board/HDD/Laptop ×2.0,       30s, peso 8
+recycling_incentive: Recycled Plastic/Electric Components ×1.4, 150s, peso 10
 ```
 
 ---
 
-### M-02 — Config: `market-events.config.ts`
+### M-03 — Integración de precios
 
-**Archivo a crear:** `src/app/config/market-events.config.ts`
-
-```
-SPAWN_INTERVAL_MIN:  300s  (5 min mínimo entre eventos)
-SPAWN_INTERVAL_MAX:  600s  (10 min máximo entre eventos)
-SPAWN_CHANCE:        0.3   (30% de probabilidad en cada ventana)
-
-Tipos de evento:
-  boom_pc:         PCs + Laptops ×3 precio,  120s,  probabilidad 0.4
-  boom_components: Componentes ×2 precio,    180s,  probabilidad 0.3
-  market_crash:    todos los recursos ×0.4,   60s,  probabilidad 0.2
-  corporate_deal:  Servers + Mining Rig ×5,  300s,  probabilidad 0.1 (solo si T7 desbloqueado)
-```
+- `MarketService` expone `activeEventMultipliers` como signal.
+- `getPrice()` aplica `BASE_PRICE × eventMultiplier`.
+- `getManualSaleValue()` aplica también el bonus por lote y conserva 2 decimales para que eventos negativos afecten recursos baratos de forma visible.
+- Ejemplo actual: Metal con `materials_shortage` paga `0.5` en venta manual de 1 unidad.
 
 ---
 
-### M-03 — Servicio: `MarketEventService`
+### M-04 — Feedback actual
 
-**Archivo a crear:** `src/app/services/market-event.service.ts`
-
-- `activeEvent` signal: `MarketEvent | null`
-- `ticksSinceLastEvent` counter interno
-- `tick(): void` — llamado desde `GameLoopService`
-  - Incrementa contador
-  - Si contador supera la ventana de spawn, tira dado de probabilidad
-  - Si hay evento activo, decrementa `timeRemaining`
-  - Cuando `timeRemaining === 0`, desactiva el evento y resetea el contador
-- `getEffectivePrice(resourceId, basePrice): number`
-  - Si hay evento activo y el recurso está en `affectedResources`, aplica `priceMultiplier`
-  - Si no, devuelve `basePrice`
-- Integrar con `MarketService`: `MarketService` llama a `marketEventService.getEffectivePrice()` al calcular precio de venta
+- Notificación al iniciar y al terminar cada evento.
+- Audio de inicio por signo: positivo para multiplicadores `> 1`, negativo para multiplicadores `< 1`.
+- El banner usa multiplicador verde para eventos positivos y rojo para negativos.
 
 ---
 
-### M-04 — Integrar `MarketEventService` en `GameLoopService`
+### M-05 — Cobertura actual
 
-**Archivo:** `src/app/services/game-loop.service.ts`
-
-- Inyectar `MarketEventService`
-- En `tick()`: llamar `marketEventService.tick()` tras los demás ticks
-
----
-
-### M-05 — UI: banner de evento activo
-
-**Archivo a crear:** `src/app/components/ui/market-event-banner/market-event-banner.ts`
-
-- Solo visible cuando hay evento activo (`activeEvent !== null`)
-- Muestra: tipo de evento (con icono), recursos afectados, multiplicador, tiempo restante
-- Timer en tiempo real (cuenta atrás)
-- Para `market_crash`: estilo rojo/urgente; para `boom`: estilo verde/positivo
-- Se coloca en la zona superior de la pantalla de juego (sobre el header de recursos)
-
----
-
-### M-06 — Notificación al inicio y fin de evento
-
-**Archivo:** integrar en `MarketEventService` con `NotificationService`
-
-- Al activar un evento: `notificationService.show('market_event_start', tipo)`
-- Al terminar un evento: `notificationService.show('market_event_end', tipo)`
-
----
-
-### M-07 — i18n para eventos de mercado
-
-**Archivos:** `src/assets/i18n/es.json` y `src/assets/i18n/en.json`
-
-```json
-"market.event.boom_pc": "¡Boom de PCs! ×{{multiplier}} por {{duration}}s",
-"market.event.boom_components": "Alta demanda de Componentes ×{{multiplier}}",
-"market.event.market_crash": "⚠️ Caída del mercado — precios a ×{{multiplier}}",
-"market.event.corporate_deal": "Oferta corporativa — Servers y Rigs ×{{multiplier}}",
-"market.event.ended": "El evento de mercado ha terminado"
-```
+- Tests de `MarketEventService` cubren cooldown, audio por signo, gating por recursos desbloqueados y limpieza de eventos.
+- Tests de `EventBannerComponent` cubren copy, iconos y clases de multiplicador positivo/negativo.
+- Tests de `MarketService` cubren la aplicación del multiplicador y los payouts decimales.
 
 ---
 

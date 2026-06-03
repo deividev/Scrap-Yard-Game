@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, inject, isDevMode, OnDestroy, OnInit, effect } from '@angular/core';
 import { ResourcesHeaderComponent } from './components/resources-header/resources-header.component';
 import { MachineListComponent } from './components/machine-list/machine-list.component';
 import { UpgradesPanelComponent } from './components/upgrades-panel/upgrades-panel.component';
@@ -22,10 +22,14 @@ import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 import { ContractService } from './services/contract.service';
+import { MarketEventService } from './services/market-event.service';
 
 
 @Component({
   selector: 'app-root',
+  host: {
+    '(window:keydown)': 'onWindowKeydown($event)',
+  },
   imports: [
     CommonModule,
     ResourcesHeaderComponent,
@@ -47,6 +51,7 @@ import { ContractService } from './services/contract.service';
 })
 export class App implements OnInit, OnDestroy {
   isPanelMinimized = false;
+  private readonly isDev = isDevMode();
 
   private saveService = inject(SaveService);
   private resourcesService = inject(ResourcesService);
@@ -56,6 +61,7 @@ export class App implements OnInit, OnDestroy {
   private audioService = inject(AudioService);
   private gameLoopService = inject(GameLoopService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private marketEventService = inject(MarketEventService);
   contractService = inject(ContractService);
   gameStateService = inject(GameStateService);
 
@@ -116,6 +122,33 @@ export class App implements OnInit, OnDestroy {
 
   onPanelMinimizedChange(isMinimized: boolean): void {
     this.isPanelMinimized = isMinimized;
+  }
+
+  onWindowKeydown(event: KeyboardEvent): void {
+    if (!this.isDev || this.gameStateService.view() !== 'game') {
+      return;
+    }
+
+    if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+
+    if (event.key.toLowerCase() !== 'x' || this.isTypingTarget(event.target)) {
+      return;
+    }
+
+    if (this.marketEventService.debugForceRandomEvent()) {
+      event.preventDefault();
+    }
+  }
+
+  private isTypingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    const tagName = target.tagName.toLowerCase();
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable;
   }
 
 }

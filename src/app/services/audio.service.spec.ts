@@ -560,6 +560,7 @@ describe('AudioService', () => {
     const internals = service as unknown as AudioServiceInternals;
     const noiseSpy = vi.spyOn(internals, 'playNoiseBurst').mockImplementation(() => {});
     const toneSpy = vi.spyOn(internals, 'playTone').mockImplementation(() => {});
+    const sweepSpy = vi.spyOn(internals, 'playSweep').mockImplementation(() => {});
 
     service.playUiClick();
     service.playUpgradeStarted();
@@ -568,10 +569,13 @@ describe('AudioService', () => {
     service.playMachineUnlocked();
     service.playScrapGenerated();
     service.playResourceSold();
+    service.playMarketEventStart();
+    service.playMarketEventStart(true);
 
     expect(noiseSpy).toHaveBeenCalled();
     expect(toneSpy).toHaveBeenCalled();
-    expect(toneSpy.mock.calls.length).toBeGreaterThan(10);
+    expect(sweepSpy).toHaveBeenCalledTimes(1);
+    expect(toneSpy.mock.calls.length).toBeGreaterThan(12);
   });
 
   it('should run the constructor volume effect with the default settings values', () => {

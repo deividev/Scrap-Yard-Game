@@ -13,6 +13,7 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
 import { MachineUnlockService } from '../../services/machine-unlock.service';
 import { ContractService } from '../../services/contract.service';
 import { AudioService } from '../../services/audio.service';
+import { MarketEventService } from '../../services/market-event.service';
 import { Contract } from '../../models/contract.model';
 import { ResourceType } from '../../models/resource.model';
 import { UpgradeId } from '../../models/upgrade.model';
@@ -209,6 +210,10 @@ class MockAudioService {
   playUiClick(): void {}
 }
 
+class MockMarketEventService {
+  activeEvent = signal(null);
+}
+
 class MockContractService {
   available = signal<Contract[]>([]);
   active = signal<Contract[]>([]);
@@ -293,6 +298,7 @@ describe('UpgradesPanelComponent', () => {
         { provide: MachineUnlockService, useClass: MockMachineUnlockService },
         { provide: ContractService, useClass: MockContractService },
         { provide: AudioService, useClass: MockAudioService },
+        { provide: MarketEventService, useClass: MockMarketEventService },
       ],
     }).compileComponents();
   });

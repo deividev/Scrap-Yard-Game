@@ -26,18 +26,23 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
 import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
 import { ContractService } from '../../services/contract.service';
 import { Contract } from '../../models/contract.model';
+import { EventBannerComponent } from '../event-banner/event-banner.component';
 
 @Component({
   selector: 'app-upgrades-panel',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [AppButtonComponent, ProgressBarComponent, FormatNumberPipe],
+  imports: [AppButtonComponent, ProgressBarComponent, FormatNumberPipe, EventBannerComponent],
   template: `
     <div class="upgrades-panel" data-tutorial-id="upgrades-panel">
       <div class="panel-header">
         <h2 class="section-title">
           {{ translationService.t('upgrades.title') }}
         </h2>
+      </div>
+
+      <div class="upgrades-panel__event-slot">
+        <app-event-banner></app-event-banner>
       </div>
 
       <div class="panel-content">
@@ -532,6 +537,11 @@ import { Contract } from '../../models/contract.model';
         height: 100%;
         overflow: hidden;
         animation: panel-fade-in 0.2s ease-out;
+      }
+
+      .upgrades-panel__event-slot {
+        margin: 0 var(--pf-bar, 28px) var(--space-2);
+        padding-inline: calc(var(--pf-corner, 100px) - var(--pf-bar, 28px));
       }
 
       @keyframes panel-fade-in {

@@ -299,5 +299,41 @@
   },
   "alerts": {
     "save_corrupted": "Failed to load saved game. The file may be corrupted.\n\nStarting a new game."
+  },
+  "events": {
+    "type": {
+      "boom_pcs": "📈 PC Boom! Sell prices ×1.65",
+      "boom_components": "⚡ Component Rush! Sell prices ×1.4",
+      "market_crash": "📉 Market Crash! Prices drop",
+      "corporate_deal": "💼 Corporate Deal! Server prices ×2",
+      "tech_parts_rush": "🔧 Tech Parts Rush! Mid-tier tech ×1.5",
+      "materials_shortage": "⚠️ Material Glut! Materials ×0.5",
+      "flash_sale": "⏱️ Flash Sale! Sell window ×2",
+      "recycling_incentive": "♻️ Recycling Incentive! Recycling ×1.4"
+    },
+    "ended": {
+      "boom_pcs": "PC Boom ended",
+      "boom_components": "Component Rush ended",
+      "market_crash": "Market Crash ended",
+      "corporate_deal": "Corporate Deal expired",
+      "tech_parts_rush": "Tech Parts Rush ended",
+      "materials_shortage": "Material Glut ended",
+      "flash_sale": "Flash Sale ended",
+      "recycling_incentive": "Recycling Incentive ended"
+    },
+    "name": {
+      "boom_pcs": "PC Boom",
+      "boom_components": "Component Rush",
+      "market_crash": "Market Crash",
+      "corporate_deal": "Corporate Deal",
+      "tech_parts_rush": "Tech Parts Rush",
+      "materials_shortage": "Material Glut",
+      "flash_sale": "Flash Sale",
+      "recycling_incentive": "Recycling Incentive"
+    },
+    "banner": {
+      "time_remaining": "Ends in {time}s",
+      "all_resources_affected": "All resources are affected by the market crash"
+    }
   }
 }

@@ -81,7 +81,7 @@ describe('MarketService', () => {
     expect(service.isManuallySellable(ResourceType.METAL)).toBe(true);
     expect(service.isManuallySellable(ResourceType.SCRAP)).toBe(false);
     expect(service.getManualSaleAmount(ResourceType.METAL)).toBe(40);
-    expect(service.getManualSaleValue(ResourceType.METAL, 15)).toBe(17);
+    expect(service.getManualSaleValue(ResourceType.METAL, 15)).toBe(16.5);
     expect(service.getManualSaleValue(ResourceType.METAL, 30)).toBe(36);
     expect(service.getBatchBonusPercent(15)).toBe(10);
     expect(service.getBatchBonusPercent(30)).toBe(20);
@@ -92,8 +92,8 @@ describe('MarketService', () => {
     expect(service.sellMetal(15)).toBe(true);
 
     expect(resourcesService.getAmount(ResourceType.METAL)).toBe(25);
-    expect(resourcesService.getAmount(ResourceType.MONEY)).toBe(117);
-    expect(statisticsService.earnings).toEqual([17]);
+    expect(resourcesService.getAmount(ResourceType.MONEY)).toBe(116.5);
+    expect(statisticsService.earnings).toEqual([16.5]);
     expect(tutorialService.events).toEqual(['metal-sold']);
   });
 
@@ -114,5 +114,40 @@ describe('MarketService', () => {
     expect(resourcesService.getAmount(ResourceType.MONEY)).toBe(100);
     expect(statisticsService.earnings).toEqual([]);
     expect(tutorialService.events).toEqual([]);
+  });
+
+  it('should expose activeEventMultipliers as a readonly signal that starts empty', () => {
+    expect(service.activeEventMultipliers()).toEqual({});
+  });
+
+  it('should update activeEventMultipliers and apply them in getPrice', () => {
+    service.setActiveEventMultipliers({ [ResourceType.METAL]: 3 });
+
+    expect(service.activeEventMultipliers()[ResourceType.METAL]).toBe(3);
+    expect(service.getPrice(ResourceType.METAL)).toBe(3);
+
+    service.setActiveEventMultipliers({});
+    expect(service.getPrice(ResourceType.METAL)).toBe(1);
+  });
+
+  it('should apply event multiplier × batch bonus in getManualSaleValue', () => {
+    service.setActiveEventMultipliers({ [ResourceType.METAL]: 3 });
+
+    // base=1, event=3, effective=3; 15 units, batch 1.10 → 49.5
+    expect(service.getManualSaleValue(ResourceType.METAL, 15)).toBe(49.5);
+  });
+
+  it('should preserve visible drops for low-price resources during negative events', () => {
+    service.setActiveEventMultipliers({ [ResourceType.METAL]: 0.5 });
+
+    expect(service.getPrice(ResourceType.METAL)).toBe(0.5);
+    expect(service.getManualSaleValue(ResourceType.METAL, 1)).toBe(0.5);
+  });
+
+  it('should return base price for resources not affected by the active event', () => {
+    service.setActiveEventMultipliers({ [ResourceType.LAPTOP]: 3 });
+
+    expect(service.getPrice(ResourceType.METAL)).toBe(1);
+    expect(service.getPrice(ResourceType.LAPTOP)).toBeGreaterThan(0);
   });
 });

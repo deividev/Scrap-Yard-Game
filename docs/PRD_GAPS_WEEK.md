@@ -4,6 +4,13 @@
 > Muchas de las validaciones y decisiones de este archivo ya fueron absorbidas por el código actual.
 > No usarlo como backlog vigente; para estado real usar `docs/project-context.md` y `docs/FULL_GAME_TASKS.md`.
 
+## Snapshot actual
+
+- F0, F1, F2 y F3 ya están implementadas en el árbol actual.
+- Parte de F3 evolucionó respecto a esta semana de diseño: la implementación real terminó en un pool de 8 eventos y no en la spec temprana de 4 eventos con multiplicadores más agresivos.
+- F4 no se tomó como siguiente fase obligatoria; quedó diferida a revisión post-release.
+- El foco vigente ya no es cerrar gaps del PRD, sino ejecutar QA/hardening sobre el core actual.
+
 ---
 
 ## DÍA 1 — Reconocimiento de código (lunes)

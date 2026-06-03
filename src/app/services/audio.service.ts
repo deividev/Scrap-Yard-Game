@@ -167,6 +167,22 @@ export class AudioService {
     this.playTone(880, 0.14, 0.055, 'triangle', 'sfx', 0.1);
   }
 
+  // Market event trigger — bright trading-floor sting for positive events, bearish drop for crashes
+  playMarketEventStart(isNegative = false): void {
+    if (isNegative) {
+      this.playNoiseBurst(0.05, 0.045, 900, 'bandpass', 'sfx');
+      this.playTone(1047, 0.08, 0.06, 'square', 'sfx');
+      this.playTone(784, 0.1, 0.065, 'sawtooth', 'sfx', 0.07);
+      this.playSweep(660, 180, 0.26, 0.07, 'triangle', 'sfx');
+      return;
+    }
+
+    this.playNoiseBurst(0.035, 0.028, 3200, 'highpass', 'sfx');
+    this.playTone(740, 0.11, 0.06, 'square', 'sfx', 0.01);
+    this.playTone(988, 0.13, 0.065, 'triangle', 'sfx', 0.08);
+    this.playTone(1319, 0.18, 0.075, 'triangle', 'sfx', 0.16);
+  }
+
   // Storage full warning — industrial lowpass thud + descending 2-note sawtooth "dunk-wunk"
   playStorageFull(): void {
     if (!this.canPlayWithCooldown('storage-full', 3000)) {

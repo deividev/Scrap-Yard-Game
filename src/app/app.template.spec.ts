@@ -23,6 +23,7 @@ import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
 import { ContractService } from './services/contract.service';
+import { MarketEventService } from './services/market-event.service';
 
 class MockSaveService {
   async save(): Promise<void> {}
@@ -81,6 +82,12 @@ class MockContractService extends SaveAwareService {
 
   dismissContractIntro(): void {
     this.introSignal.set(false);
+  }
+}
+
+class MockMarketEventService {
+  debugForceRandomEvent(): boolean {
+    return true;
   }
 }
 
@@ -145,6 +152,7 @@ describe('App template coverage', () => {
         { provide: GameLoopService, useClass: MockGameLoopService },
         { provide: FirstRunTutorialService, useClass: MockFirstRunTutorialService },
         { provide: ContractService, useValue: contractService },
+        { provide: MarketEventService, useClass: MockMarketEventService },
       ],
     })
       .overrideComponent(App, {

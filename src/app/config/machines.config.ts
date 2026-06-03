@@ -101,7 +101,7 @@ export const INITIAL_MACHINES: Machine[] = [
     ],
     baseProduction: {
       resourceId: ResourceType.MONEY,
-      amount: 12, // Balance: $10→$12 — 2× market premium vs selling Components directly; beats manual selling at $1.2/s
+      amount: 8, // Balance: 2×$3=$6 input → $8 output (~33% premium over selling components directly)
     },
     isActive: false,
     progress: 0,

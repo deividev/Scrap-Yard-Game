@@ -12,6 +12,7 @@ import { AudioService } from './audio.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
 import { ContractService } from './contract.service';
+import { MarketEventService } from './market-event.service';
 import { MachineType } from '../models/machine.model';
 import { ResourceType } from '../models/resource.model';
 import { UpgradeId } from '../models/upgrade.model';
@@ -220,6 +221,14 @@ class MockContractService {
   }
 }
 
+class MockMarketEventService {
+  ticks = 0;
+
+  tick(): void {
+    this.ticks += 1;
+  }
+}
+
 describe('GameLoopService', () => {
   let service: GameLoopService;
   let resourcesService: MockResourcesService;
@@ -233,6 +242,7 @@ describe('GameLoopService', () => {
   let statisticsService: MockStatisticsService;
   let tutorialService: MockFirstRunTutorialService;
   let contractService: MockContractService;
+  let marketEventService: MockMarketEventService;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -248,6 +258,7 @@ describe('GameLoopService', () => {
     statisticsService = new MockStatisticsService();
     tutorialService = new MockFirstRunTutorialService();
     contractService = new MockContractService();
+    marketEventService = new MockMarketEventService();
 
     TestBed.configureTestingModule({
       providers: [
@@ -263,6 +274,7 @@ describe('GameLoopService', () => {
         { provide: StatisticsService, useValue: statisticsService },
         { provide: FirstRunTutorialService, useValue: tutorialService },
         { provide: ContractService, useValue: contractService },
+        { provide: MarketEventService, useValue: marketEventService },
       ],
     });
 
@@ -285,6 +297,7 @@ describe('GameLoopService', () => {
     expect(scrapGenerationService.processCalls).toBe(15);
     expect(saveService.saveCalls).toBe(1);
     expect(contractService.ticks).toBe(15);
+    expect(marketEventService.ticks).toBe(15);
   });
 
   it('should process an active machine cycle, consume inputs, produce output, and reset progress later', () => {

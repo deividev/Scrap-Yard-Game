@@ -2,7 +2,7 @@
 
 > **Tipo:** Product Requirements Document  
 > **Estado:** En progreso  
-> **Última actualización:** Mayo 17, 2026  
+> **Última actualización:** Mayo 24, 2026  
 > **Autor:** Equipo de desarrollo  
 >
 > Este documento define QUÉ se construye y POR QUÉ. El CÓMO está en `docs/FULL_GAME_TASKS.md`.  
@@ -19,11 +19,11 @@
 | F0 - Rebalanceo Tier 3 | Implementada |
 | F1 - Sistema de Contratos | Implementada |
 | F2 - Cadenas T4-T12 | Implementada |
-| F3 - Eventos de Mercado | Pendiente |
-| F4 - Narrativa mínima / Flavor Text | Pendiente |
-| Launch en Steam | Diferido hasta completar todo el PRD |
+| F3 - Eventos de Mercado | Implementada |
+| F4 - Narrativa mínima / Flavor Text | Diferida a revisión post-release |
+| Launch en Steam | Diferido hasta cerrar QA/hardening y build release |
 
-La decision actual del proyecto es completar el scope completo antes de entrar en fase de release para Steam.
+La decision actual del proyecto es cerrar el core pre-release con F3 ya integrada, ejecutar QA/hardening y dejar F4 como mejora opcional post-release salvo que los playtests la vuelvan necesaria.
 
 **Scrap Yard Idle** es un juego idle/incremental de escritorio donde el jugador convierte chatarra en dinero construyendo y optimizando una cadena industrial de reciclaje. Empieza con un solo golpe de mazo y termina gestionando una fábrica de servidores y Mining Rigs.
 
@@ -88,20 +88,21 @@ Aplican a todas las fases:
   ↓
 [hecho] F2 Cadenas T4-T12 completas
   ↓
-[pendiente] F3 Eventos de Mercado
+[hecho] F3 Eventos de Mercado
   ↓
-[pendiente] F4 Narrativa / Flavor Text
+[pendiente] QA manual T1-T12 + save/load
   ↓
-[pendiente] QA balance sesión larga
+[pendiente] Balance final + hardening
   ↓
 [pendiente] Build final + Steam
 ```
 
 **Orden justificado:**
 - F0 primero porque corrige el diseño base antes de construir encima. Todo lo que viene después asume el nuevo comportamiento de la Fundidora.
-- F1 y F2 ya están cerradas en el árbol actual. A partir de este punto el orden real de implementación es F3 -> F4 -> QA -> release.
-- F3 debe ir antes de F4 porque impacta de forma directa en economía, contratos y feedback de progresión.
+- F1, F2 y F3 ya están cerradas en el árbol actual. A partir de este punto el orden real es QA/hardening -> build release -> Steam.
+- F3 se cerró antes de QA porque impacta de forma directa en economía, contratos y feedback de progresión.
 - F4 al final porque solo añade notificaciones sobre milestones — cero riesgo de romper mecánicas anteriores.
+- Decisión actual de producto: F4 queda diferida a revisión post-release. No se considera parte obligatoria del core pre-release salvo que los playtests demuestren que falta feedback de progresión.
 
 Cada fase se revisa y valida contra sus criterios de aceptación antes de empezar la siguiente.
 
@@ -424,7 +425,7 @@ Nota: estos números se ajustan en QA (T-15). Son targets de diseño, no valores
 
 ---
 
-## FASE 3 — Eventos de Mercado
+## FASE 3 — Eventos de Mercado ✅ COMPLETADA
 
 ### Objetivo
 Añadir variabilidad temporal a los precios. Los eventos de mercado crean decisiones de timing que no existen actualmente: ¿vendo ahora o espero el boom? ¿liquido todo durante el crash o aguanto?
@@ -435,10 +436,14 @@ Esta capa transforma el mercado de "vende cuando puedas" a "el cuándo importa".
 
 | Tipo | Efecto | Duración | Frecuencia |
 |---|---|---|---|
-| Boom de demanda (PCs) | Laptops, Desktop PC, Smartphones ×3 precio | 120s | Común |
-| Boom de componentes | Componentes, Comp. Eléctricos ×2 precio | 180s | Común |
-| Market Crash | Todos los recursos ×0.4 precio | 60s | Poco frecuente |
-| Corporate Deal | Server Rack, Mining Rig ×5 precio | 300s | Raro, solo si T7 desbloqueado |
+| Boom de demanda (PCs) | Laptops, Desktop PC y Smartphones ×1.65 precio | 90s | Peso 16 |
+| Boom de componentes | Componentes y Comp. Eléctricos ×1.4 precio | 150s | Peso 20 |
+| Market Crash | Todos los recursos ×0.8 precio | 60s | Peso 12 |
+| Corporate Deal | Server Rack y Mining Rig ×2.0 precio | 120s | Peso 6 |
+| Tech Parts Rush | Circuit Board, HDD, Screen y GPU ×1.5 precio | 120s | Peso 18 |
+| Material Glut | Metal, Plastic, Copper y Recycled Plastic ×0.5 precio | 75s | Peso 10 |
+| Flash Sale | Circuit Board, HDD y Laptop ×2.0 precio | 30s | Peso 8 |
+| Recycling Incentive | Recycled Plastic y Comp. Eléctricos ×1.4 precio | 150s | Peso 10 |
 
 Solo puede estar activo un evento a la vez. Entre eventos hay un intervalo mínimo de 5 minutos.
 
@@ -452,24 +457,24 @@ Solo puede estar activo un evento a la vez. Entre eventos hay un intervalo míni
 ### Requisitos funcionales
 
 1. Un evento de mercado es un estado global temporal con un timer.
-1b. `MarketEventService` se integra en el game loop mediante `tick()` llamado cada segundo. El spawn es garantizado al cumplirse el cooldown; solo la distribución de tipos usa probabilidades (35/35/20/10%). El timer del cooldown es interno y no persiste en el save.
-1c. Nuevo servicio: `MarketEventService` en `src/app/services/market-event.service.ts`. Nuevo componente: `EventBannerComponent` en `src/app/components/event-banner/event-banner.component.ts`. El banner se inserta en `app.html` al mismo nivel que `notification-container`.
+1b. `MarketEventService` se integra en el game loop mediante `tick()` llamado cada segundo. El spawn es garantizado al cumplirse el cooldown; la distribución de tipos se hace por pesos definidos en config. El timer del cooldown es interno y no persiste en el save.
+1c. Servicio: `MarketEventService` en `src/app/services/market-event.service.ts`. Componente: `EventBannerComponent` en `src/app/components/event-banner/event-banner.component.ts`. El banner se inserta en el hueco superior de `upgrades-panel`, no sobre el header principal.
 2. Solo puede haber un evento activo simultáneamente.
-3. El evento afecta los precios de venta en tiempo real (los botones de venta muestran el precio modificado). **Arquitectura:** `MarketService` expone un signal `activeEventMultipliers = signal<Partial<Record<ResourceType, number>>>({})`. El precio efectivo de un recurso es `BASE_PRICES[resourceId] * (activeEventMultipliers()[resourceId] ?? 1.0)`. Esto permite que cada evento afecte exactamente los recursos que le corresponden (Boom PCs → solo Laptop/Desktop/Smartphone; Market Crash → todos; etc.) sin que se filtren unos con otros. No mutar `BASE_PRICES` — es una constante estática. Fórmula final con batch bonus: `BASE_PRICE × eventMultiplier × batchBonus` (multiplicativo). Al terminar un evento, se resetea `activeEventMultipliers` a `{}`.
+3. El evento afecta los precios de venta en tiempo real (los botones de venta muestran el precio modificado). **Arquitectura:** `MarketService` expone un signal `activeEventMultipliers = signal<Partial<Record<ResourceType, number>>>({})`. El precio efectivo de un recurso es `BASE_PRICES[resourceId] * (activeEventMultipliers()[resourceId] ?? 1.0)`. Esto permite que cada evento afecte exactamente los recursos que le corresponden sin que se filtren unos con otros. No mutar `BASE_PRICES` — es una constante estática. Fórmula final con batch bonus: `BASE_PRICE × eventMultiplier × batchBonus` (multiplicativo). El valor de venta manual conserva 2 decimales para que eventos negativos también afecten recursos baratos de forma visible. Al terminar un evento, se resetea `activeEventMultipliers` a `{}`.
 4. El banner de evento es visible mientras el evento está activo y desaparece al terminar.
 5. El banner muestra: tipo de evento, recursos afectados, multiplicador, tiempo restante.
-6. Al inicio y al fin del evento se muestra una notificación.
+6. Al inicio y al fin del evento se muestra una notificación. Al inicio también se reproduce un SFX positivo o negativo según el signo del multiplicador.
 7. Los eventos no se persisten en el save (son efímeros — si cierras el juego durante uno, simplemente no estará al volver).
-8. El Corporate Deal solo puede generarse si el jugador tiene **`MachineType.DATA_CENTER_ASSEMBLY`** (Data Center Assembly) o **`MachineType.MINING_RIG_ASSEMBLY`** (Mining Rig Assembly) desbloqueados — cualquiera de los dos es suficiente. Estas son las únicas máquinas T7. El término “T7 machine unlocked” en cualquier parte del documento se refiere exclusivamente a estas dos.
+8. Un evento solo puede generarse si al menos uno de sus recursos afectados ya puede producirse con una máquina desbloqueada. Esto evita spawns de eventos irrelevantes para el estado actual del jugador. Corporate Deal queda, por tanto, bloqueado hasta T7 de forma natural.
 
 ### Criterios de aceptación
 
-- [ ] El precio mostrado en el botón de venta cambia visiblemente durante un evento (sin necesidad de cerrar/abrir el panel).
-- [ ] El market crash dura exactamente 60s y los precios vuelven a 100% al segundo 61.
-- [ ] En una sesión de 60 minutos, el jugador ve entre 4 y 8 eventos de distinto tipo (probabilidades correctas).
-- [ ] El Corporate Deal no aparece hasta que el jugador tiene al menos una máquina T7 desbloqueada.
-- [ ] Los eventos no se solapan (si hay uno activo, no puede generarse otro hasta que termine).
-- [ ] El banner de evento no tapa controles importantes de la UI.
+- [x] El precio mostrado en el botón de venta cambia visiblemente durante un evento (sin necesidad de cerrar/abrir el panel).
+- [x] El market crash dura exactamente 60s y los precios vuelven a 100% al segundo 61.
+- [x] Los eventos usan un pool ponderado de 8 tipos y solo spawnean si tienen recursos afectados ya desbloqueados.
+- [x] Los eventos no se solapan (si hay uno activo, no puede generarse otro hasta que termine).
+- [x] El banner de evento no tapa controles importantes de la UI.
+- [x] Los eventos negativos afectan también recursos baratos de forma visible; por ejemplo, Metal a ×0.5 paga `0.5`.
 
 ### Out of scope para esta fase
 - Minijuego de subasta.
@@ -537,7 +542,7 @@ El juego completo está terminado cuando:
 - [x] F0 — Fundidora recibe Scrap directo y el balance T3 está validado en QA.
 - [ ] F1 — El jugador puede completar, ignorar y que expiren contratos en una sesión de 30 min sin bugs.
 - [ ] F2 — El jugador puede llegar de Scrap a Server Rack en una sesión sin softlocks ni crashes.
-- [ ] F3 — Los 4 tipos de evento aparecen con las frecuencias correctas y los precios cambian en tiempo real.
+- [x] F3 — El pool actual de 8 eventos aparece con la lógica de elegibilidad correcta y los precios cambian en tiempo real.
 - [ ] F4 — Los 7 flavor texts aparecen exactamente una vez en el momento correcto.
 - [ ] Build de producción (`pnpm package:win`) genera un `.exe` funcional sin errores de consola.
 - [ ] El save es compatible hacia adelante: un save de v1 (demo) carga en el juego completo.
@@ -938,16 +943,20 @@ firstContractSpawned: boolean;       // one-time flag: primer LOCAL forzado ya d
 
 | Tipo | Recursos afectados | Multiplicador | Duración | Frecuencia relativa |
 |---|---|---|---|---|
-| Boom PCs | Laptop, Desktop PC, Smartphone | ×3 | 120s | 35% |
-| Boom Componentes | Componentes, Comp. Eléctricos | ×2 | 180s | 35% |
-| Market Crash | Todos los recursos | ×0.4 | 60s | 20% |
-| Corporate Deal | Server Rack, Mining Rig | ×5 | 300s | 10% |
+| Boom PCs | Laptop, Desktop PC, Smartphone | ×1.65 | 90s | Peso 16 |
+| Boom Componentes | Componentes, Comp. Eléctricos | ×1.4 | 150s | Peso 20 |
+| Market Crash | Todos los recursos | ×0.8 | 60s | Peso 12 |
+| Corporate Deal | Server Rack, Mining Rig | ×2.0 | 120s | Peso 6 |
+| Tech Parts Rush | Circuit Board, HDD, Screen, GPU | ×1.5 | 120s | Peso 18 |
+| Material Glut | Metal, Plastic, Copper, Recycled Plastic | ×0.5 | 75s | Peso 10 |
+| Flash Sale | Circuit Board, HDD, Laptop | ×2.0 | 30s | Peso 8 |
+| Recycling Incentive | Recycled Plastic, Comp. Eléctricos | ×1.4 | 150s | Peso 10 |
 
 | Config | Valor |
 |---|---|
 | Intervalo mínimo entre eventos | 300s (5 min) |
 | Solo 1 evento activo simultáneamente | Sí |
-| Corporate Deal requiere | Data Center Assembly O Mining Rig Assembly desbloqueada |
+| Elegibilidad | Al menos un recurso afectado ya producible |
 | Eventos se persisten en save | No (efímeros) |
 
 > **Cooldown entre sesiones:** En el constructor de `MarketEventService`, inicializar `secondsSinceLastEvent = 240` (runtime only, no persisted). Al cargar un save, no se restaura este valor — el constructor siempre parte en 240. El primer evento llega ~60s después de cargar. El cooldown no se persiste en el save.
@@ -1017,6 +1026,11 @@ events.type.boom_pcs         → "Boom de Demanda (PCs)"
 events.type.boom_components  → "Boom de Componentes"
 events.type.market_crash     → "Desplome de Mercado"
 events.type.corporate_deal   → "Oferta Corporativa"
+events.type.tech_parts_rush  → "Tech Parts Rush"
+events.type.materials_shortage → "Exceso de Materiales"
+events.type.flash_sale       → "Flash Sale"
+events.type.recycling_incentive → "Incentivo al Reciclaje"
+events.banner.all_resources_affected → "Todos los recursos"
 events.ends_in               → "Termina en:"
 ```
 
@@ -1032,9 +1046,7 @@ milestones.first_boom_sell
 
 ## Apéndice C — Spec de Audio
 
-Métodos existentes en `AudioService`: `playGameMusicLoop`, `playUiClick`, `playUpgradeStarted`, `playUpgradeCompleted`, `playMaxLevelReached`, `playMachineUnlocked`, `playMachineComplete`, `playResourceSold`, `playScrapGenerated`, `playProductionTick`, `playError`.
-
-**No se requieren SFX nuevos para F1, F3 ni F4.** Reutilización de métodos existentes.
+Métodos actuales en `AudioService`: `playGameMusicLoop`, `playUiClick`, `playUpgradeStarted`, `playUpgradeCompleted`, `playMaxLevelReached`, `playMachineUnlocked`, `playMachineComplete`, `playResourceSold`, `playScrapGenerated`, `playProductionTick`, `playError`, `playMarketEventStart`.
 
 **F1 — Contratos**
 
@@ -1049,9 +1061,8 @@ Métodos existentes en `AudioService`: `playGameMusicLoop`, `playUiClick`, `play
 
 | Evento | SFX | Justificación |
 |---|---|---|
-| Inicio de Boom | `playMachineUnlocked()` | Fanfare existente, evento positivo |
-| Market Crash | — | El silencio es el drama |
-| Corporate Deal | `playMaxLevelReached()` | SFX más épico disponible |
+| Inicio de evento positivo | `playMarketEventStart(false)` | Feedback claro de oportunidad de venta |
+| Inicio de evento negativo | `playMarketEventStart(true)` | Feedback claro de riesgo/castigo |
 | Fin de evento | — | Sin audio |
 
 **F4 — Milestones:** Sin SFX. La notificación visual con borde naranja es suficiente.
