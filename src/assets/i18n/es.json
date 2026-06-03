@@ -42,7 +42,18 @@
     "money": "Dinero",
     "copper": "Cobre",
     "recycled_plastic": "Plástico reciclado",
-    "electric_components": "Componentes eléctricos"
+    "electric_components": "Componentes eléctricos",
+    "circuit_board": "Placa de Circuito",
+    "hdd": "Disco Duro",
+    "screen": "Pantalla",
+    "gpu": "GPU",
+    "smartphone": "Smartphone",
+    "laptop": "Laptop",
+    "desktop_pc": "PC de Escritorio",
+    "mining_rig": "Mining Rig",
+    "server_rack": "Servidor Rack",
+    "section_basic": "Recursos Básicos",
+    "section_advanced": "Recursos Avanzados"
   },
   "machines": {
     "crusher": "Trituradora",
@@ -52,7 +63,21 @@
     "packager": "Empaquetadora",
     "electric_packager": "Empaquetadora eléctrica",
     "recycler": "Recicladora",
-    "electric_assembler": "Ensambladora eléctrica"
+    "electric_assembler": "Ensambladora eléctrica",
+    "pcb_printer": "Impresora PCB",
+    "hdd_assembler": "Ensamblador de HDD",
+    "screen_fabricator": "Fabricadora de Pantallas",
+    "gpu_fab": "GPU Fab",
+    "smartphone_factory": "Fábrica de Smartphones",
+    "laptop_workshop": "Taller de Laptops",
+    "pc_builder": "Ensamblador de PCs",
+    "mining_rig_assembly": "Ensamblaje de Mining Rigs",
+    "data_center_assembly": "Ensamblaje de Data Centers",
+    "tiers": {
+      "linea_base": "Línea Base",
+      "electronica": "Electrónica",
+      "manufactura_digital": "Manufactura Digital"
+    }
   },
   "status": {
     "parada": "Apagada",
@@ -86,6 +111,7 @@
   },
   "progression": {
     "next_unlock": "Próximo desbloqueo: {machine} · {requirements}",
+    "next_unlock_label": "Próximo desbloqueo:",
     "all_unlocked": "🎉 ¡Todas las máquinas desbloqueadas!"
   },
   "tutorial": {
@@ -145,7 +171,8 @@
     "tabs": {
       "scrap": "Chatarra",
       "storage": "Almacenamiento",
-      "machine": "Máquina"
+      "machine": "Máquina",
+      "contracts": "Contratos"
     },
     "nivel": "Nivel",
     "max_level": "Nivel máximo alcanzado",
@@ -168,7 +195,17 @@
       "components": "Ampliar Estantería de Componentes",
       "copper": "Ampliar Depósito de Cobre",
       "recycled_plastic": "Ampliar Silo de Plástico Reciclado",
-      "electric_components": "Ampliar Rack Eléctrico"
+      "electric_components": "Ampliar Rack Eléctrico",
+      "circuit_board": "Ampliar Almacén de Placas",
+      "hdd": "Ampliar Almacén de Discos Duros",
+      "screen": "Ampliar Almacén de Pantallas",
+      "gpu": "Ampliar Almacén de GPUs",
+      "smartphone": "Ampliar Almacén de Smartphones",
+      "laptop": "Ampliar Almacén de Laptops",
+      "desktop_pc": "Ampliar Almacén de PCs",
+      "mining_rig": "Ampliar Almacén de Mining Rigs",
+      "server_rack": "Ampliar Almacén de Server Racks",
+      "locked_hint": "Desbloquea la máquina requerida para acceder a este almacén"
     },
     "capacity_label": "Capacidad:",
     "machine_tab": {
@@ -214,9 +251,89 @@
     "total_money": "Dinero generado",
     "scrap_rate": "Chatarra auto/seg"
   },
+  "demo_end": {
+    "badge_label": "DEMO COMPLETADA",
+    "title": "¡Has dominado<br>el depósito!",
+    "cta_wishlist": "Añadir a la lista de deseados",
+    "cta_continue": "Seguir jugando la demo",
+    "body": "Has desbloqueado la <strong>Empaquetadora</strong> y completado la demo de Scrap Yard Idle. La versión completa desbloquea nuevas máquinas, recursos avanzados y más."
+  },
   "common": {
     "level_short": "Nv",
     "cycle_time": "~{{time}}s",
-    "unlock_requires": "Necesitas:"
+    "unlock_requires": "Necesitas:",
+    "max": "MÁX",
+    "stock_label": "Stock",
+    "cycles_per_second": "c/s"
+  },
+  "contracts": {
+    "available_title": "Contratos disponibles",
+    "active_title": "Contratos activos",
+    "empty": "Sin contratos activos. Espera a que lleguen nuevos pedidos...",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "deliver": "Entregar",
+    "penalty": "Penalización",
+    "expires_in": "Expira en",
+    "type": {
+      "local": "Local",
+      "regional": "Regional",
+      "corporate": "Corporativo"
+    },
+    "urgency": {
+      "urgent": "Urgente"
+    },
+    "notifications": {
+      "delivered": "Contrato completado: +${reward}$ por {resource}",
+      "failed": "Contrato fallido: -{penalty}$",
+      "new": "Nuevo contrato disponible: {resource}",
+      "deadline_warning": "\u26a0\ufe0f Contrato de {resource} expira en 30 segundos!"
+    },
+    "intro": {
+      "title": "\ud83d\udcbc \u00a1Contratos disponibles!",
+      "body_1": "Los <strong>clientes</strong> te encargar\u00e1n pedidos de recursos. Revisa la pesta\u00f1a <strong>Contratos</strong> para verlos.",
+      "body_2": "\u2022 <strong>Acepta</strong> un contrato para comprometerte a entregarlo antes del plazo.\n\u2022 Si entregas a tiempo, cobras una <strong>recompensa</strong> mejor que el precio de mercado.\n\u2022 Si fallas el plazo, pagas una <strong>penalizaci\u00f3n</strong> en dinero.\n\u2022 <strong>Rechaza</strong> un contrato si no te interesa, sin coste.",
+      "body_3": "Puedes tener hasta <strong>2 contratos activos</strong> a la vez. \u00a1Organiza tu producci\u00f3n!",
+      "dismiss": "Entendido"
+    }
+  },
+  "alerts": {
+    "save_corrupted": "No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva."
+  },
+  "events": {
+    "type": {
+      "boom_pcs": "📈 ¡Boom de PCs! Precios de venta ×1.65",
+      "boom_components": "⚡ ¡Fiebre de Componentes! Precios ×1.4",
+      "market_crash": "📉 ¡Caída del mercado! Precios reducidos",
+      "corporate_deal": "💼 ¡Contrato Corporativo! Servidores ×2",
+      "tech_parts_rush": "🔧 ¡Demanda tecnológica! Piezas tech ×1.5",
+      "materials_shortage": "⚠️ ¡Exceso de materiales! Materiales ×0.5",
+      "flash_sale": "⏱️ ¡Flash sale! Ventana de venta ×2",
+      "recycling_incentive": "♻️ ¡Incentivo verde! Reciclaje ×1.4"
+    },
+    "ended": {
+      "boom_pcs": "Boom de PCs finalizado",
+      "boom_components": "Fiebre de Componentes finalizada",
+      "market_crash": "Caída del mercado finalizada",
+      "corporate_deal": "Contrato Corporativo expirado",
+      "tech_parts_rush": "Demanda tecnológica finalizada",
+      "materials_shortage": "Exceso de materiales finalizado",
+      "flash_sale": "Flash sale finalizada",
+      "recycling_incentive": "Incentivo verde finalizado"
+    },
+    "name": {
+      "boom_pcs": "Boom de PCs",
+      "boom_components": "Fiebre de Componentes",
+      "market_crash": "Caída del Mercado",
+      "corporate_deal": "Contrato Corporativo",
+      "tech_parts_rush": "Demanda Tecnológica",
+      "materials_shortage": "Exceso de Materiales",
+      "flash_sale": "Flash Sale",
+      "recycling_incentive": "Incentivo Verde"
+    },
+    "banner": {
+      "time_remaining": "Termina en {time}s",
+      "all_resources_affected": "Todos los recursos se ven afectados por la caída del mercado"
+    }
   }
 }

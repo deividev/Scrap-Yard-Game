@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ResourcesService } from './resources.service';
 import { ResourceType } from '../models/resource.model';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
@@ -13,16 +13,21 @@ export class MarketService {
   private firstRunTutorialService = inject(FirstRunTutorialService);
   private statisticsService = inject(StatisticsService);
 
+  private readonly _activeEventMultipliers = signal<Partial<Record<ResourceType, number>>>({});
+  readonly activeEventMultipliers = this._activeEventMultipliers.asReadonly();
+
+  setActiveEventMultipliers(multipliers: Partial<Record<ResourceType, number>>): void {
+    this._activeEventMultipliers.set(multipliers);
+  }
+
   isManuallySellable(resourceId: string): boolean {
     return this.getPrice(resourceId) > 0;
   }
 
   getPrice(resourceId: string): number {
-    if (resourceId === ResourceType.METAL) return MARKET_CONFIG.BASE_PRICES.METAL;
-    if (resourceId === ResourceType.PLASTIC) return MARKET_CONFIG.BASE_PRICES.PLASTIC;
-    if (resourceId === ResourceType.COMPONENTS) return MARKET_CONFIG.BASE_PRICES.COMPONENTS;
-    if (resourceId === ResourceType.COPPER) return MARKET_CONFIG.BASE_PRICES.COPPER;
-    return 0;
+    const base = MARKET_CONFIG.BASE_PRICES[resourceId as ResourceType] ?? 0;
+    const multiplier = this._activeEventMultipliers()[resourceId as ResourceType] ?? 1;
+    return base * multiplier;
   }
 
   getManualSaleAmount(resourceId: string): number {
@@ -35,7 +40,7 @@ export class MarketService {
     }
 
     const baseValue = this.getPrice(resourceId) * amount;
-    return Math.round(baseValue * this.getBatchBonusMultiplier(amount));
+    return Number((baseValue * this.getBatchBonusMultiplier(amount)).toFixed(2));
   }
 
   getBatchBonusPercent(amount: number): number {

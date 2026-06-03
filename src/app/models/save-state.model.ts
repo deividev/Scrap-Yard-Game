@@ -5,7 +5,22 @@ import { UpgradeProgress } from './upgrade-progress.model';
 import { FirstRunTutorialState } from './tutorial-step.model';
 import { GameSettings } from '../services/settings.service';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 4; // F2 content + contract persistence flags
+
+export interface SavedContract {
+  id: string;
+  type: 'local' | 'regional' | 'corporate';
+  urgency: 'normal' | 'urgent';
+  resourceId: string;
+  amount: number;
+  reward: number;
+  penaltyAmount: number;
+  durationSeconds: number;
+  spawnedAt?: number;      // ms timestamp when spawned (optional: compat with older saves)
+  availableUntil?: number; // ms timestamp when it expires if unaccepted (optional: compat)
+  acceptedAt: number;      // ms timestamp; 0 = not accepted
+  isAccepted: boolean;
+}
 
 export interface SaveState {
   version: number;
@@ -19,5 +34,11 @@ export interface SaveState {
   gameStarted?: boolean; // Indica si el usuario ha iniciado el juego (true) o solo ha guardado configuraciones (false/undefined)
   statistics?: { totalScrapGenerated: number; playTimeSeconds: number };
   firstRunTutorial?: FirstRunTutorialState;
-  demoEndSeen?: boolean;
+  // F1 fields (pre-initialized in v1→v2 migration)
+  contracts?: SavedContract[]; // contratos activos/disponibles
+  lastContractSpawnCheck?: number; // timestamp del último check de spawn
+  firstContractSpawned?: boolean; // true una vez que se generó el primer contrato
+  hasSeenContractIntro?: boolean; // true una vez que el modal de introducción fue descartado
+  // F4 fields (pre-initialized in v1→v2 migration)
+  completedMilestones?: string[]; // IDs de milestones completados
 }

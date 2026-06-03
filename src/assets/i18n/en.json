@@ -42,7 +42,18 @@
     "money": "Money",
     "copper": "Copper",
     "recycled_plastic": "Recycled Plastic",
-    "electric_components": "Electric Components"
+    "electric_components": "Electric Components",
+    "circuit_board": "Circuit Board",
+    "hdd": "Hard Drive",
+    "screen": "Screen",
+    "gpu": "GPU",
+    "smartphone": "Smartphone",
+    "laptop": "Laptop",
+    "desktop_pc": "Desktop PC",
+    "mining_rig": "Mining Rig",
+    "server_rack": "Server Rack",
+    "section_basic": "Basic Resources",
+    "section_advanced": "Advanced Resources"
   },
   "machines": {
     "crusher": "Crusher",
@@ -52,7 +63,21 @@
     "packager": "Packager",
     "electric_packager": "Electric Packager",
     "recycler": "Recycler",
-    "electric_assembler": "Electric Assembler"
+    "electric_assembler": "Electric Assembler",
+    "pcb_printer": "PCB Printer",
+    "hdd_assembler": "HDD Assembler",
+    "screen_fabricator": "Screen Fabricator",
+    "gpu_fab": "GPU Fab",
+    "smartphone_factory": "Smartphone Factory",
+    "laptop_workshop": "Laptop Workshop",
+    "pc_builder": "PC Builder",
+    "mining_rig_assembly": "Mining Rig Assembly",
+    "data_center_assembly": "Data Center Assembly",
+    "tiers": {
+      "linea_base": "Base Line",
+      "electronica": "Electronics",
+      "manufactura_digital": "Digital Manufacturing"
+    }
   },
   "status": {
     "parada": "Offline",
@@ -86,6 +111,7 @@
   },
   "progression": {
     "next_unlock": "Next unlock: {machine} · {requirements}",
+    "next_unlock_label": "Next unlock:",
     "all_unlocked": "🎉 All machines unlocked!"
   },
   "tutorial": {
@@ -145,7 +171,8 @@
     "tabs": {
       "scrap": "Scrap",
       "storage": "Storage",
-      "machine": "Machine"
+      "machine": "Machine",
+      "contracts": "Contracts"
     },
     "nivel": "Level",
     "max_level": "Maximum level reached",
@@ -168,7 +195,17 @@
       "components": "Expand Components Rack",
       "copper": "Expand Copper Depot",
       "recycled_plastic": "Expand Recycled Plastic Silo",
-      "electric_components": "Expand Electric Parts Rack"
+      "electric_components": "Expand Electric Parts Rack",
+      "circuit_board": "Expand Circuit Board Storage",
+      "hdd": "Expand HDD Storage",
+      "screen": "Expand Screen Storage",
+      "gpu": "Expand GPU Storage",
+      "smartphone": "Expand Smartphone Storage",
+      "laptop": "Expand Laptop Storage",
+      "desktop_pc": "Expand Desktop PC Storage",
+      "mining_rig": "Expand Mining Rig Storage",
+      "server_rack": "Expand Server Rack Storage",
+      "locked_hint": "Unlock the required machine to access this storage"
     },
     "capacity_label": "Capacity:",
     "machine_tab": {
@@ -214,9 +251,89 @@
     "total_money": "Total earnings",
     "scrap_rate": "Auto scrap/sec"
   },
+  "demo_end": {
+    "badge_label": "DEMO COMPLETE",
+    "title": "You've mastered<br>the scrap yard!",
+    "cta_wishlist": "Add to Wishlist",
+    "cta_continue": "Keep playing the demo",
+    "body": "You've unlocked the <strong>Packager</strong> and completed the Scrap Yard Idle demo. The full version unlocks new machines, advanced resources and more."
+  },
   "common": {
     "level_short": "Lv",
     "cycle_time": "~{{time}}s",
-    "unlock_requires": "Requires:"
+    "unlock_requires": "Requires:",
+    "max": "MAX",
+    "stock_label": "Stock",
+    "cycles_per_second": "c/s"
+  },
+  "contracts": {
+    "available_title": "Available contracts",
+    "active_title": "Active contracts",
+    "empty": "No contracts right now. New orders will arrive soon...",
+    "accept": "Accept",
+    "reject": "Reject",
+    "deliver": "Deliver",
+    "penalty": "Penalty",
+    "expires_in": "Expires in",
+    "type": {
+      "local": "Local",
+      "regional": "Regional",
+      "corporate": "Corporate"
+    },
+    "urgency": {
+      "urgent": "Urgent"
+    },
+    "notifications": {
+      "delivered": "Contract fulfilled: +${reward}$ for {resource}",
+      "failed": "Contract failed: -{penalty}$",
+      "new": "New contract available: {resource}",
+      "deadline_warning": "\u26a0\ufe0f {resource} contract expires in 30 seconds!"
+    },
+    "intro": {
+      "title": "\ud83d\udcbc Contracts unlocked!",
+      "body_1": "<strong>Clients</strong> will send you resource orders. Check the <strong>Contracts</strong> tab to see them.",
+      "body_2": "\u2022 <strong>Accept</strong> a contract to commit to delivering it before the deadline.\n\u2022 Deliver on time to earn a <strong>reward</strong> higher than market price.\n\u2022 Miss the deadline and you pay a <strong>penalty</strong>.\n\u2022 <strong>Reject</strong> any contract for free if it doesn't suit you.",
+      "body_3": "You can hold up to <strong>2 active contracts</strong> at once. Plan your production!",
+      "dismiss": "Got it"
+    }
+  },
+  "alerts": {
+    "save_corrupted": "Failed to load saved game. The file may be corrupted.\n\nStarting a new game."
+  },
+  "events": {
+    "type": {
+      "boom_pcs": "📈 PC Boom! Sell prices ×1.65",
+      "boom_components": "⚡ Component Rush! Sell prices ×1.4",
+      "market_crash": "📉 Market Crash! Prices drop",
+      "corporate_deal": "💼 Corporate Deal! Server prices ×2",
+      "tech_parts_rush": "🔧 Tech Parts Rush! Mid-tier tech ×1.5",
+      "materials_shortage": "⚠️ Material Glut! Materials ×0.5",
+      "flash_sale": "⏱️ Flash Sale! Sell window ×2",
+      "recycling_incentive": "♻️ Recycling Incentive! Recycling ×1.4"
+    },
+    "ended": {
+      "boom_pcs": "PC Boom ended",
+      "boom_components": "Component Rush ended",
+      "market_crash": "Market Crash ended",
+      "corporate_deal": "Corporate Deal expired",
+      "tech_parts_rush": "Tech Parts Rush ended",
+      "materials_shortage": "Material Glut ended",
+      "flash_sale": "Flash Sale ended",
+      "recycling_incentive": "Recycling Incentive ended"
+    },
+    "name": {
+      "boom_pcs": "PC Boom",
+      "boom_components": "Component Rush",
+      "market_crash": "Market Crash",
+      "corporate_deal": "Corporate Deal",
+      "tech_parts_rush": "Tech Parts Rush",
+      "materials_shortage": "Material Glut",
+      "flash_sale": "Flash Sale",
+      "recycling_incentive": "Recycling Incentive"
+    },
+    "banner": {
+      "time_remaining": "Ends in {time}s",
+      "all_resources_affected": "All resources are affected by the market crash"
+    }
   }
 }

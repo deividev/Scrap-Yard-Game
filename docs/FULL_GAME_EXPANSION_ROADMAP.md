@@ -1,7 +1,19 @@
 # Scrap Yard Idle — Roadmap de Expansión (Post-Demo)
 
-> Documento de ideación para el juego completo una vez terminada la demo.
-> No es una especificación técnica, sino un mapa de posibilidades ordenado por capas de profundidad.
+> Documento de ideación histórica.
+> No usar como fuente de verdad del estado actual del proyecto.
+> Para estado real y backlog vigente usar `docs/project-context.md`, `docs/FULL_GAME_TASKS.md` y `docs/RELEASE_ROADMAP.md`.
+
+## Nota de vigencia
+
+Cuando este documento se escribió, contratos y las cadenas avanzadas seguían en fase de planificación. En el árbol actual ambas ya están implementadas. Este archivo se conserva como referencia de diseño, no como checklist vigente.
+
+## Snapshot actual
+
+- F0, F1, F2 y F3 ya están implementadas en el árbol actual.
+- F3 no se quedó en la versión ideada aquí: hoy existe un pool real de 8 eventos con banner integrado, audio por signo y gating por recursos desbloqueados.
+- F4 no forma parte del bloque pre-release actual; quedó diferida a revisión post-release.
+- El foco real del proyecto ahora es QA manual, hardening y release engineering.
 
 ---
 
@@ -18,9 +30,9 @@
 | 5 | Sistema de Trabajadores (con salarios) | ❌ DESCARTADA | Riesgo de complicar el loop económico. Revisar en v2 si el loop base lo pide. |
 | 6 | Red Eléctrica | ❌ DESCARTADA | Alto riesgo de scope creep. El loop eléctrico ya existe vía Ensambladora Eléctrica. |
 | 7 | Zonas físicas del patio | ❌ DESCARTADA | Rediseño de layout demasiado grande para el scope actual. |
-| 8 | Eventos de mercado (booms, crashes) | ✅ CONFIRMADA | Mucho efecto, poco código. Se construye sobre el mercado ya implementado. |
+| 8 | Eventos de mercado (booms, crashes) | ✅ CONFIRMADA | Ya implementada en el árbol actual; esta tabla conserva la decisión histórica de diseño. |
 | 9 | Prestige (soft reset) | ❌ DESCARTADA | Alta complejidad y riesgo de diseño. Fuera del scope del juego completo v1. |
-| 10 | Narrativa mínima / flavor text | ✅ CONFIRMADA | Bajo coste. El FirstRunTutorialService ya existe como base. No se muestra en trailer. |
+| 10 | Narrativa mínima / flavor text | ✅ CONFIRMADA | Confirmada como idea de producto, pero hoy está diferida a revisión post-release. |
 
 **Leyenda:**
 - ✅ **CONFIRMADA** — entra en el juego final, se puede mostrar en el trailer
@@ -117,7 +129,7 @@ Tier 4  →  Circuit Board          (Cobre + Componentes)          [PCB Printer 
            ↳ pivote de todo T5-T7. Todos los productos de alta gama lo requieren.
 
 Tier 5  →  Disco Duro             (Circuit Board + Metal)        [HDD Assembler ← nueva]
-           Pantalla               (Circuit Board + Comp. Eléctricos + Plástico) [Screen Fabricator ← nueva]
+           Pantalla               (Circuit Board + Comp. Eléctricos + Plástico Reciclado) [Screen Fabricator ← nueva]
            ↳ dos máquinas, dos productos que se venden bien solos o se usan en T6.
            ↳ Plástico entra aquí → el Separador sigue siendo relevante en late game.
 
@@ -173,7 +185,7 @@ Máquinas para procesar los recursos de los tiers 4-7.
 |---|---|---|---|---|
 | PCB Printer | Cobre + Componentes | Circuit Board | 4 | Pivote de todo T5-T7. Primera unlock post-demo. |
 | HDD Assembler | Circuit Board + Metal | Disco Duro | 5 | Storage para Laptop y Desktop PC. |
-| Screen Fabricator | Circuit Board + Comp. Eléctricos + Plástico | Pantalla | 5 | Display para Smartphone y Laptop. Plástico relevante en late game. |
+| Screen Fabricator | Circuit Board + Comp. Eléctricos + Plástico Reciclado | Pantalla | 5 | Display para Smartphone y Laptop. Plástico Reciclado crea dependencia valiosa de Recicladora en late game. |
 | GPU Fab | Circuit Board x2 + Cobre | GPU | 6 | Primer unlock de T6. Habilita Desktop PC y Mining Rig. |
 | Smartphone Factory | Pantalla + Circuit Board | Smartphone | 6 | Producto de consumo medio. Sin redundancia de ingredientes. |
 | Laptop Workshop | Disco Duro + Pantalla + Circuit Board | Laptop | 6 | Producto de consumo alto. |
@@ -264,6 +276,7 @@ Cada zona es una sección visual distinta del patio. Puede ser scroll horizontal
 ## Capa 8 — Mercado Dinámico y Eventos
 
 ### Eventos de mercado (aleatorios, tiempo limitado)
+- Nota de vigencia: la implementación real actual está documentada en `docs/PRD.md`. Los valores y tipos de evento de esta sección son ideación temprana, no la spec vigente.
 - **Boom de demanda** — "Holiday PC Season": x3 precio PCs por 10 min
 - **Market Crash** — Precios caen 60% durante 2 min (decisión: aguantar o liquidar)
 - **Subasta de Scrap** — Minijuego de bid para conseguir lote de Scrap de lujo
@@ -317,6 +330,7 @@ No un juego story-heavy, pero sí **flavor text** que da contexto:
 - Al hacer Prestige 1: *"Vendiste ScrapYard Básico a un inversor local. Con ese capital, abres ScrapYard Industries."*
 
 ### Milestones con diálogo
+- Nota de vigencia: esta capa sigue siendo referencia de diseño. No está implementada y quedó fuera del core pre-release actual.
 Basado en el `FirstRunTutorialService` existente, pero extendido a eventos de mid/late game:
 - Primer PC ensamblado
 - Primera avería reparada
@@ -374,17 +388,19 @@ Prestige 2+ — Multiplicadores. Meta-game de reputación
 
 > Seguir este orden estrictamente. Cada bloque se puede probar y pulir antes de abrir el siguiente.
 
+> Estado real hoy: esta tabla ya no representa el backlog vigente. F1, F2 y F3 están cerradas; el próximo trabajo real es QA/hardening. F4 quedó diferida post-release.
+
 | Orden | Feature | Complejidad | Estado |
 |---|---|---|---|
-| — | **Demo** — T1-T2: Trituradora → Separador → Ensambladora → Empaquetadora | — | ✅ Demo |
-| 1 | **T3 completo** — Recicladora → Ensambladora Eléctrica → Empaquetadora Eléctrica | Baja | 🔲 Por implementar |
-| 2 | **Sistema de Contratos** — UI de objetivos temporales con recursos T1-T3 | Baja | 🔲 Por implementar |
-| 3 | **Tier 4** — PCB Printer → Circuit Board | Media | 🔲 Por implementar |
-| 4 | **Tier 5** — HDD Assembler + Screen Fabricator → Disco Duro + Pantalla | Media | 🔲 Por implementar |
-| 5 | **Eventos de mercado** — booms, crashes, contratos especiales sobre productos T5 | Media | 🔲 Por implementar |
-| 6 | **Tier 6** — GPU Fab + Smartphone Factory + Laptop Workshop + PC Builder | Alta | 🔲 Por implementar |
-| 7 | **Tier 7** — Data Center Assembly + Mining Rig Assembly | Alta | 🔲 Por implementar |
-| 8 | **Narrativa / Flavor text** — milestones a lo largo de toda la progresión | Baja | 🔲 Por implementar |
+| — | **Demo** — T1-T2: Trituradora → Separador → Ensambladora → Empaquetadora | — | ✅ Histórico |
+| 1 | **T3 completo** — Recicladora → Ensambladora Eléctrica → Empaquetadora Eléctrica | Baja | ✅ Implementado |
+| 2 | **Sistema de Contratos** — UI de objetivos temporales con recursos T1-T3 | Baja | ✅ Implementado |
+| 3 | **Tier 4** — PCB Printer → Circuit Board | Media | ✅ Implementado |
+| 4 | **Tier 5** — HDD Assembler + Screen Fabricator → Disco Duro + Pantalla | Media | ✅ Implementado |
+| 5 | **Eventos de mercado** — booms, crashes, contratos especiales sobre productos T5 | Media | ✅ Implementado |
+| 6 | **Tier 6** — GPU Fab + Smartphone Factory + Laptop Workshop + PC Builder | Alta | ✅ Implementado |
+| 7 | **Tier 7** — Data Center Assembly + Mining Rig Assembly | Alta | ✅ Implementado |
+| 8 | **Narrativa / Flavor text** — milestones a lo largo de toda la progresión | Baja | ⏸ Diferido post-release |
 | — | Tipos de Scrap diferenciados | Media | ❌ Descartado |
 | — | Trabajadores con salarios | Media-Alta | ❌ Descartado |
 | — | Red Eléctrica | Alta | ❌ Descartado |

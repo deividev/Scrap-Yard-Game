@@ -1,0 +1,88 @@
+/*
+  PanelFrameHComponent — HORIZONTAL variant of PanelFrameComponent.
+
+  Same assets as the vertical frame, but corners are rotated so the LONG arm
+  of frame_corner.png runs along the horizontal (top/bottom) edges instead of
+  the vertical ones.  Ideal for wide, thin panels like the statistics bar.
+
+  Corner arm directions (original image: long=DOWN, short=RIGHT):
+    c-tl: rotate(-90deg) scaleX(-1)  → long=RIGHT  short=DOWN
+    c-tr: rotate(90deg)               → long=LEFT   short=DOWN
+    c-bl: rotate(-90deg)              → long=RIGHT  short=UP
+    c-br: rotate(90deg)  scaleX(-1)  → long=LEFT   short=UP
+
+  (In CSS, transforms in `transform:` are applied RIGHT-TO-LEFT, so
+   `rotate(Xdeg) scaleX(-1)` = scaleX(-1) first, then rotate.)
+*/
+
+:host {
+  --pfh-bar:    28px;   /* edge strip thickness */
+  --pfh-corner: 95px;   /* corner decoration box — kept smaller for thin panels */
+  display: block;
+  position: relative;
+}
+
+.pfh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* HORIZONTAL EDGES */
+.e-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--pfh-bar);
+  background-image: url('../../../assets/image/frame_edge.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+.e-top { top: 0; }
+.e-bot { bottom: 0; transform: scaleY(-1); }
+
+/* VERTICAL EDGES — same rotation trick as the vertical panel-frame */
+.e-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--pfh-bar);
+  overflow: hidden;
+}
+.e-left  { left: 0; }
+.e-right { right: 0; transform: scaleX(-1); }
+
+.e-v::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--pfh-bar);
+  width: 9999px;
+  height: var(--pfh-bar);
+  background-image: url('../../../assets/image/frame_edge.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: left top;
+  transform-origin: 0 0;
+  transform: rotate(90deg);
+}
+
+/* CORNERS — rotated so the long arm runs horizontally */
+.c {
+  position: absolute;
+  z-index: 1;
+  width:  var(--pfh-corner);
+  height: var(--pfh-corner);
+  background-image: url('../../../assets/image/frame_corner.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* CSS applies transforms right-to-left:
+   "rotate(Xdeg) scaleX(-1)" = scaleX(-1) first, then rotate */
+.c-tl { top: 0;    left: 0;   transform: rotate(-90deg) scaleX(-1); }
+.c-tr { top: 0;    right: 0;  transform: rotate(90deg); }
+.c-bl { bottom: 0; left: 0;   transform: rotate(-90deg); }
+.c-br { bottom: 0; right: 0;  transform: rotate(90deg) scaleX(-1); }

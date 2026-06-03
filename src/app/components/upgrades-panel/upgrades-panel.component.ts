@@ -4,12 +4,9 @@ import {
   computed,
   effect,
   inject,
-  Output,
-  EventEmitter,
   ElementRef,
   ViewEncapsulation,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AppButtonComponent } from '../ui/app-button/app-button.component';
 import { ProgressBarComponent } from '../ui/progress-bar/progress-bar.component';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
@@ -26,36 +23,29 @@ import { Machine, MachineType } from '../../models/machine.model';
 import { INITIAL_RESOURCES } from '../../config/resources.config';
 import { SCRAP_GENERATION_CONFIG, STORAGE_UPGRADE_CONFIG } from '../../config/game-balance.config';
 import { FirstRunTutorialService } from '../../services/first-run-tutorial.service';
+import { MachineUnlockService, UnlockRequirement } from '../../services/machine-unlock.service';
+import { ContractService } from '../../services/contract.service';
+import { Contract } from '../../models/contract.model';
+import { EventBannerComponent } from '../event-banner/event-banner.component';
 
 @Component({
   selector: 'app-upgrades-panel',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, AppButtonComponent, ProgressBarComponent, FormatNumberPipe],
+  imports: [AppButtonComponent, ProgressBarComponent, FormatNumberPipe, EventBannerComponent],
   template: `
-    <div class="upgrades-panel" data-tutorial-id="upgrades-panel" [class.minimized]="isMinimized()">
+    <div class="upgrades-panel" data-tutorial-id="upgrades-panel">
       <div class="panel-header">
-        @if (!isMinimized()) {
-          <h2 class="section-title">
-            {{ translationService.t('upgrades.title') }}
-          </h2>
-        }
-        <app-button
-          [label]="isMinimized() ? '◀' : '▶'"
-          variant="ghost"
-          size="sm"
-          [attr.aria-label]="
-            isMinimized()
-              ? translationService.t('upgrades.expand')
-              : translationService.t('upgrades.collapse')
-          "
-          [attr.aria-expanded]="!isMinimized()"
-          (clicked)="toggleMinimize()"
-        />
+        <h2 class="section-title">
+          {{ translationService.t('upgrades.title') }}
+        </h2>
       </div>
 
-      @if (!isMinimized()) {
-        <div class="panel-content">
+      <div class="upgrades-panel__event-slot">
+        <app-event-banner></app-event-banner>
+      </div>
+
+      <div class="panel-content">
           <div class="tabs">
             @for (tab of tabs(); track tab.id) {
               <app-button
@@ -72,189 +62,100 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
             @if (activeTab() === 'scrap') {
               <div class="scrap-upgrades">
                 <!-- Manual Scrap Boost Upgrade -->
-                <div
-                  class="upgrade-item"
-                  [class.upgrade-item--locked]="scrapManualUpgrade().isLocked"
-                >
-                  <div class="machine-card-header">
-                    <div class="machine-card-title-group">
-                      <div
-                        class="machine-icon-badge"
-                        [class.locked]="scrapManualUpgrade().isLocked"
-                      >
-                        <img
-                          src="assets/icons/scrap_manual.png"
-                          class="machine-icon"
-                          alt=""
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <h4 class="machine-card-name">{{ scrapManualUpgrade().name }}</h4>
-                    </div>
-                    @if (!scrapManualUpgrade().isLocked) {
-                      <span class="machine-card-level">
-                        {{ translationService.t('upgrades.nivel') }}
-                        {{ scrapManualUpgrade().level }}
-                      </span>
-                    }
-                    @if (scrapManualUpgrade().isLocked) {
-                      <span class="machine-card-locked">
-                        <img
-                          src="assets/icons/lock_icon.png"
-                          class="machine-card-locked-icon"
-                          width="14"
-                          height="14"
-                          alt=""
-                          aria-hidden="true"
-                        />
-                        {{ translationService.t('status.bloqueada') }}
-                      </span>
-                    }
+                <div class="machine-upgrade-card" [class.locked]="scrapManualUpgrade().isLocked">
+                  <div class="muc-image" [class.locked]="scrapManualUpgrade().isLocked">
+                    <img src="assets/icons/scrap_manual.png" class="machine-icon" alt="" aria-hidden="true" />
                   </div>
-                  @if (scrapManualUpgrade().isLocked) {
-                    <p class="upgrade-locked-hint">
-                      {{ translationService.t('upgrades.scrap_manual.locked_hint') }}
-                    </p>
-                  }
-                  @if (!scrapManualUpgrade().isLocked) {
-                    <div class="upgrade-details">
-                      <p class="detail-line">
-                        <strong>{{
-                          translationService.t('upgrades.scrap_details.manual_label')
-                        }}</strong>
-                        +{{ scrapManualUpgrade().currentGeneration }}
-                        {{ translationService.t('upgrades.scrap_details.per_click') }}
-                      </p>
-                      @if (!scrapManualUpgrade().isMaxLevel) {
-                        <p class="detail-line">
-                          <strong>{{
-                            translationService.t('upgrades.scrap_details.next_level_label')
-                          }}</strong>
-                          +{{ scrapManualUpgrade().nextGeneration }}
-                          {{ translationService.t('upgrades.scrap_details.per_click') }}
-                        </p>
+                  <div class="muc-content">
+                    <div class="muc-header">
+                      <h4 class="machine-card-name">{{ scrapManualUpgrade().name }}</h4>
+                      @if (!scrapManualUpgrade().isLocked) {
+                        <span class="machine-card-level">{{ translationService.t('common.level_short') }} {{ scrapManualUpgrade().level }}</span>
+                      }
+                      @if (scrapManualUpgrade().isLocked) {
+                        <span class="machine-card-locked">
+                          <img src="assets/icons/lock_icon.png" class="machine-card-locked-icon" width="14" height="14" alt="" aria-hidden="true" />
+                          {{ translationService.t('status.bloqueada') }}
+                        </span>
                       }
                     </div>
-
-                    <!-- Barra de progreso -->
-                    @if (isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)) {
-                      <app-progress-bar
-                        [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_001)"
-                        [label]="
-                          translationService.t('upgrades.upgrading') +
-                          ': ' +
-                          formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_001))
-                        "
-                      />
+                    @if (scrapManualUpgrade().isLocked) {
+                      <p class="upgrade-locked-hint">{{ translationService.t('upgrades.scrap_manual.locked_hint') }}</p>
                     }
-
-                    <app-button
-                      [label]="translationService.t('buttons.mejorar')"
-                      variant="primary"
-                      size="md"
-                      [disabled]="
-                        !scrapManualUpgrade().canAfford ||
-                        isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)
-                      "
-                      (clicked)="purchaseScrapManualUpgrade()"
-                    >
-                      <span btn-cost class="upgrade-btn-cost">
-                        <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
-                        {{ scrapManualUpgrade().cost.money | formatNumber }}
-                        @if (scrapManualUpgrade().cost.components > 0) {
-                          <img
-                            src="assets/icons/components_resource.png"
-                            class="btn-cost-icon"
-                            alt=""
-                          />
-                          {{ scrapManualUpgrade().cost.components | formatNumber }}
+                    @if (!scrapManualUpgrade().isLocked) {
+                      <div class="machine-card-body">
+                        <div class="upgrade-stat">
+                          <span class="stat-label">{{ translationService.t('upgrades.scrap_details.manual_label') }}:</span>
+                          <span class="stat-value">+{{ scrapManualUpgrade().currentGeneration }} {{ translationService.t('upgrades.scrap_details.per_click') }}</span>
+                        </div>
+                        @if (!scrapManualUpgrade().isMaxLevel) {
+                          <div class="upgrade-stat">
+                            <span class="stat-label">{{ translationService.t('upgrades.scrap_details.next_level_label') }}:</span>
+                            <span class="stat-value next-bonus-value">+{{ scrapManualUpgrade().nextGeneration }} {{ translationService.t('upgrades.scrap_details.per_click') }}</span>
+                          </div>
                         }
-                      </span>
-                    </app-button>
-                  }
+                        @if (isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)) {
+                          <app-progress-bar [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_001)" [label]="translationService.t('upgrades.upgrading') + ': ' + formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_001))" />
+                        }
+                        <app-button [label]="translationService.t('buttons.mejorar')" variant="primary" size="md" [disabled]="!scrapManualUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_001)" (clicked)="purchaseScrapManualUpgrade()">
+                          <span btn-cost class="upgrade-btn-cost">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            {{ scrapManualUpgrade().cost.money | formatNumber }}
+                            @if (scrapManualUpgrade().cost.components > 0) {
+                              <img src="assets/icons/components_resource.png" class="btn-cost-icon" alt="" />
+                              {{ scrapManualUpgrade().cost.components | formatNumber }}
+                            }
+                          </span>
+                        </app-button>
+                      </div>
+                    }
+                  </div>
                 </div>
 
                 <!-- Automatic Scrap Generation Upgrade -->
-                <div class="upgrade-item">
-                  <div class="machine-card-header">
-                    <div class="machine-card-title-group">
-                      <div class="machine-icon-badge">
-                        <img
-                          src="assets/icons/scrap_resource.png"
-                          class="machine-icon"
-                          [attr.alt]="translationService.t('resources.scrap')"
-                        />
-                      </div>
+                <div class="machine-upgrade-card">
+                  <div class="muc-image">
+                    <img src="assets/icons/scrap_resource.png" class="machine-icon" [attr.alt]="translationService.t('resources.scrap')" />
+                  </div>
+                  <div class="muc-content">
+                    <div class="muc-header">
                       <h4 class="machine-card-name">{{ scrapAutoUpgrade().name }}</h4>
+                      <span class="machine-card-level">{{ translationService.t('common.level_short') }} {{ scrapAutoUpgrade().level }} / {{ SCRAP_GENERATION_CONFIG.MAX_LEVEL }}</span>
                     </div>
-                    <span class="machine-card-level">
-                      {{ translationService.t('upgrades.nivel') }} {{ scrapAutoUpgrade().level }} /
-                      {{ SCRAP_GENERATION_CONFIG.MAX_LEVEL }}
-                    </span>
+                    <div class="muc-level-bar">
+                      <div class="muc-level-fill" [style.width.%]="(scrapAutoUpgrade().level / SCRAP_GENERATION_CONFIG.MAX_LEVEL) * 100"></div>
+                    </div>
+                    <div class="machine-card-body">
+                      <div class="upgrade-stat">
+                        <span class="stat-label">{{ translationService.t('upgrades.scrap_details.automatic_current_label') }}:</span>
+                        <span class="stat-value">+{{ scrapAutoUpgrade().currentRate }}{{ translationService.t('upgrades.scrap_details.per_second') }}</span>
+                      </div>
+                      @if (!scrapAutoUpgrade().isMaxLevel) {
+                        <div class="upgrade-stat">
+                          <span class="stat-label">{{ translationService.t('upgrades.scrap_details.next_level_label') }}:</span>
+                          <span class="stat-value next-bonus-value">+{{ scrapAutoUpgrade().nextRate }}{{ translationService.t('upgrades.scrap_details.per_second') }}</span>
+                        </div>
+                      }
+                      @if (isUpgradeInProgress(UpgradeId.UPG_SCRAP_002)) {
+                        <app-progress-bar [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_002)" [label]="translationService.t('upgrades.upgrading') + ': ' + formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_002))" />
+                      }
+                      @if (!scrapAutoUpgrade().isMaxLevel) {
+                        <app-button [label]="translationService.t('buttons.mejorar')" variant="primary" size="md" [disabled]="!scrapAutoUpgrade().canAfford || isUpgradeInProgress(UpgradeId.UPG_SCRAP_002)" (clicked)="purchaseScrapUpgrade()">
+                          <span btn-cost class="upgrade-btn-cost">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            {{ scrapAutoUpgrade().cost.money | formatNumber }}
+                            @if (scrapAutoUpgrade().cost.components > 0) {
+                              <img src="assets/icons/components_resource.png" class="btn-cost-icon" alt="" />
+                              {{ scrapAutoUpgrade().cost.components | formatNumber }}
+                            }
+                          </span>
+                        </app-button>
+                      }
+                      @if (scrapAutoUpgrade().isMaxLevel) {
+                        <p class="max-level">{{ translationService.t('upgrades.max_level') }}</p>
+                      }
+                    </div>
                   </div>
-
-                  <div class="upgrade-details">
-                    <p class="detail-line">
-                      <strong>{{
-                        translationService.t('upgrades.scrap_details.automatic_current_label')
-                      }}</strong>
-                      +{{ scrapAutoUpgrade().currentRate
-                      }}{{ translationService.t('upgrades.scrap_details.per_second') }}
-                    </p>
-                    @if (!scrapAutoUpgrade().isMaxLevel) {
-                      <p class="detail-line">
-                        <strong>{{
-                          translationService.t('upgrades.scrap_details.next_level_label')
-                        }}</strong>
-                        +{{ scrapAutoUpgrade().nextRate
-                        }}{{ translationService.t('upgrades.scrap_details.per_second') }}
-                      </p>
-                    }
-                  </div>
-
-                  <!-- Barra de progreso -->
-                  @if (isUpgradeInProgress(UpgradeId.UPG_SCRAP_002)) {
-                    <app-progress-bar
-                      [progress]="getUpgradeProgress(UpgradeId.UPG_SCRAP_002)"
-                      [label]="
-                        translationService.t('upgrades.upgrading') +
-                        ': ' +
-                        formatTime(getRemainingTime(UpgradeId.UPG_SCRAP_002))
-                      "
-                    />
-                  }
-
-                  @if (!scrapAutoUpgrade().isMaxLevel) {
-                    <app-button
-                      [label]="translationService.t('buttons.mejorar')"
-                      variant="primary"
-                      size="md"
-                      [disabled]="
-                        !scrapAutoUpgrade().canAfford ||
-                        isUpgradeInProgress(UpgradeId.UPG_SCRAP_002)
-                      "
-                      (clicked)="purchaseScrapUpgrade()"
-                    >
-                      <span btn-cost class="upgrade-btn-cost">
-                        <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
-                        {{ scrapAutoUpgrade().cost.money | formatNumber }}
-                        @if (scrapAutoUpgrade().cost.components > 0) {
-                          <img
-                            src="assets/icons/components_resource.png"
-                            class="btn-cost-icon"
-                            alt=""
-                          />
-                          {{ scrapAutoUpgrade().cost.components | formatNumber }}
-                        }
-                      </span>
-                    </app-button>
-                  }
-
-                  @if (scrapAutoUpgrade().isMaxLevel) {
-                    <p class="max-level">
-                      {{ translationService.t('upgrades.max_level') }}
-                    </p>
-                  }
                 </div>
               </div>
             }
@@ -262,74 +163,58 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
             @if (activeTab() === 'storage') {
               <div class="storage-upgrades">
                 @for (upgrade of storageUpgrades(); track upgrade.upgradeId) {
-                  <div class="upgrade-item">
-                    <div class="machine-card-header">
-                      <div class="machine-card-title-group">
-                        <div class="machine-icon-badge">
-                          <img [src]="upgrade.icon" class="machine-icon" [alt]="upgrade.name" />
-                        </div>
+                  <div class="machine-upgrade-card" [class.locked]="upgrade.isLocked">
+                    <div class="muc-image" [class.locked]="upgrade.isLocked">
+                      <img [src]="upgrade.icon" class="machine-icon" [alt]="upgrade.name" />
+                    </div>
+                    <div class="muc-content">
+                      <div class="muc-header">
                         <h4 class="machine-card-name">{{ upgrade.name }}</h4>
+                        @if (!upgrade.isLocked) {
+                          <span class="machine-card-level">{{ translationService.t('common.level_short') }} {{ upgrade.level }} / {{ STORAGE_UPGRADE_CONFIG.MAX_LEVEL }}</span>
+                        }
+                        @if (upgrade.isLocked) {
+                          <span class="machine-card-locked">
+                            <img src="assets/icons/lock_icon.png" class="machine-card-locked-icon" width="14" height="14" alt="" aria-hidden="true" />
+                            {{ translationService.t('status.bloqueada') }}
+                          </span>
+                        }
                       </div>
-                      <span class="machine-card-level">
-                        {{ translationService.t('upgrades.nivel') }} {{ upgrade.level }}
-                      </span>
-                    </div>
-
-                    <div class="upgrade-capacity">
-                      <span class="capacity-label">{{
-                        translationService.t('upgrades.capacity_label')
-                      }}</span>
-                      <span class="capacity-current">{{
-                        upgrade.currentCapacity | formatNumber
-                      }}</span>
-                      <span class="capacity-arrow">→</span>
-                      <span class="capacity-next">{{ upgrade.nextCapacity | formatNumber }}</span>
-                    </div>
-
-                    <!-- Barra de progreso -->
-                    @if (isUpgradeInProgress(upgrade.upgradeId)) {
-                      <app-progress-bar
-                        [progress]="getUpgradeProgress(upgrade.upgradeId)"
-                        [label]="
-                          translationService.t('upgrades.upgrading') +
-                          ': ' +
-                          formatTime(getRemainingTime(upgrade.upgradeId))
-                        "
-                      />
-                    }
-
-                    @if (!upgrade.isMaxLevel) {
-                      <app-button
-                        [label]="translationService.t('buttons.mejorar')"
-                        variant="primary"
-                        size="md"
-                        [disabled]="!upgrade.canAfford || isUpgradeInProgress(upgrade.upgradeId)"
-                        (clicked)="purchaseStorageUpgrade(upgrade.upgradeId)"
-                      >
-                        <span btn-cost class="upgrade-btn-cost">
-                          <img
-                            src="assets/icons/gold_resource_1.png"
-                            class="btn-cost-icon"
-                            alt=""
-                          />
-                          {{ upgrade.cost.money | formatNumber }}
-                          @if (upgrade.cost.components > 0) {
-                            <img
-                              src="assets/icons/components_resource.png"
-                              class="btn-cost-icon"
-                              alt=""
-                            />
-                            {{ upgrade.cost.components | formatNumber }}
+                      @if (!upgrade.isLocked) {
+                        <div class="muc-level-bar">
+                          <div class="muc-level-fill" [style.width.%]="(upgrade.level / STORAGE_UPGRADE_CONFIG.MAX_LEVEL) * 100"></div>
+                        </div>
+                      }
+                      <div class="machine-card-body">
+                        @if (upgrade.isLocked) {
+                          <p class="upgrade-locked-hint">{{ translationService.t('upgrades.storage.locked_hint') }}</p>
+                        }
+                        @if (!upgrade.isLocked) {
+                          <div class="upgrade-stat">
+                            <span class="stat-label">{{ translationService.t('upgrades.capacity_label') }}:</span>
+                            <span class="stat-value">{{ upgrade.currentCapacity | formatNumber }} → <span class="next-bonus-value">{{ upgrade.nextCapacity | formatNumber }}</span></span>
+                          </div>
+                          @if (isUpgradeInProgress(upgrade.upgradeId)) {
+                            <app-progress-bar [progress]="getUpgradeProgress(upgrade.upgradeId)" [label]="translationService.t('upgrades.upgrading') + ': ' + formatTime(getRemainingTime(upgrade.upgradeId))" />
                           }
-                        </span>
-                      </app-button>
-                    }
-
-                    @if (upgrade.isMaxLevel) {
-                      <p class="max-level">
-                        {{ translationService.t('upgrades.max_level') }}
-                      </p>
-                    }
+                          @if (!upgrade.isMaxLevel) {
+                            <app-button [label]="translationService.t('buttons.mejorar')" variant="primary" size="md" [disabled]="!upgrade.canAfford || isUpgradeInProgress(upgrade.upgradeId)" (clicked)="purchaseStorageUpgrade(upgrade.upgradeId)">
+                              <span btn-cost class="upgrade-btn-cost">
+                                <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                                {{ upgrade.cost.money | formatNumber }}
+                                @if (upgrade.cost.components > 0) {
+                                  <img src="assets/icons/components_resource.png" class="btn-cost-icon" alt="" />
+                                  {{ upgrade.cost.components | formatNumber }}
+                                }
+                              </span>
+                            </app-button>
+                          }
+                          @if (upgrade.isMaxLevel) {
+                            <p class="max-level">{{ translationService.t('upgrades.max_level') }}</p>
+                          }
+                        }
+                      </div>
+                    </div>
                   </div>
                 }
               </div>
@@ -346,180 +231,293 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
                       [class.locked]="machineUpgrade.isLocked"
                       [class.highlighted]="machineUpgrade.machineId === selectedMachine()?.id"
                     >
-                      <div class="machine-card-header">
-                        <div class="machine-card-title-group">
-                          @if (machineUpgrade.icon) {
-                            <div
-                              class="machine-icon-badge"
-                              [class.locked]="machineUpgrade.isLocked"
-                            >
-                              <img [src]="machineUpgrade.icon" class="machine-icon" alt="" />
-                            </div>
-                          }
-                          <h4 class="machine-card-name">{{ machineUpgrade.machineName }}</h4>
-                        </div>
-                        @if (!machineUpgrade.isLocked) {
-                          <span class="machine-card-level">
-                            {{ translationService.t('common.level_short') }}
-                            {{ machineUpgrade.level }} / {{ machineUpgrade.maxLevel }}
-                          </span>
-                        }
-                        @if (machineUpgrade.isLocked) {
-                          <span class="machine-card-locked">
-                            <img
-                              src="assets/icons/lock_icon.png"
-                              class="machine-card-locked-icon"
-                              width="14"
-                              height="14"
-                              alt=""
-                              aria-hidden="true"
-                            />
-                            {{ translationService.t('status.bloqueada') }}
-                          </span>
+                      <!-- Image column -->
+                      <div class="muc-image" [class.locked]="machineUpgrade.isLocked">
+                        @if (machineUpgrade.icon) {
+                          <img [src]="machineUpgrade.icon" class="machine-icon" alt="" />
                         }
                       </div>
-
-                      @if (!machineUpgrade.isLocked) {
-                        <div class="machine-card-body">
-                          <div class="upgrade-stat">
-                            <span class="stat-label"
-                              >{{ translationService.t('upgrades.machine_tab.speed_label') }}:</span
-                            >
-                            <span class="stat-value">
-                              {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} c/s
-                              @if ((machineUpgrade.speedBonus || 0) > 0) {
-                                <span class="bonus">
-                                  (+{{ ((machineUpgrade.speedBonus || 0) * 100).toFixed(0) }}%)
-                                </span>
-                              }
+                      <!-- Content column -->
+                      <div class="muc-content">
+                        <div class="muc-header">
+                          <h4 class="machine-card-name">{{ machineUpgrade.machineName }}</h4>
+                          @if (!machineUpgrade.isLocked) {
+                            <span class="machine-card-level">
+                              {{ translationService.t('common.level_short') }}
+                              {{ machineUpgrade.level }} / {{ machineUpgrade.maxLevel }}
                             </span>
-                          </div>
-
-                          @if ((machineUpgrade.productionMultiplier || 1) > 1) {
-                            <div class="upgrade-stat">
-                              <span class="stat-label"
-                                >{{
-                                  translationService.t('upgrades.machine_tab.production_label')
-                                }}:</span
-                              >
-                              <span class="stat-value efficiency-gain"
-                                >×{{ machineUpgrade.productionMultiplier || 1 }}</span
-                              >
-                            </div>
                           }
-
-                          @if (
-                            (machineUpgrade.nextBonusAt || 0) > 0 && !machineUpgrade.isMaxLevel
-                          ) {
-                            <div class="upgrade-stat">
-                              <span class="stat-label"
-                                >{{
-                                  translationService.t('upgrades.machine_tab.next_bonus_label')
-                                }}:</span
-                              >
-                              <span class="stat-value next-bonus-value"
-                                >×{{ machineUpgrade.nextProductionMultiplier }}
-                                {{ translationService.t('upgrades.machine_tab.in') }}
-                                {{ machineUpgrade.nextBonusAt }}
-                                {{ translationService.t('upgrades.machine_tab.levels') }}</span
-                              >
-                            </div>
-                          }
-
-                          @if (machineUpgrade.isInProgress && machineUpgrade.upgradeId) {
-                            <app-progress-bar
-                              [progress]="getUpgradeProgress(machineUpgrade.upgradeId)"
-                              [label]="formatTime(getRemainingTime(machineUpgrade.upgradeId))"
-                            />
-                          }
-
-                          @if (!machineUpgrade.isMaxLevel) {
-                            <div
-                              class="tutorial-button-anchor"
-                              [attr.data-tutorial-id]="
-                                tutorialMachineUpgradeButtonId(machineUpgrade.machineId)
-                              "
-                            >
-                              <app-button
-                                [label]="translationService.t('buttons.mejorar')"
-                                variant="primary"
-                                size="md"
-                                [class.btn-can-afford]="
-                                  machineUpgrade.canAfford && !machineUpgrade.isInProgress
-                                "
-                                [disabled]="
-                                  !machineUpgrade.canAfford || machineUpgrade.isInProgress
-                                "
-                                (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
-                              >
-                                @if (machineUpgrade.cost) {
-                                  <span btn-cost class="upgrade-btn-cost">
-                                    <img
-                                      src="assets/icons/gold_resource_1.png"
-                                      class="btn-cost-icon"
-                                      alt=""
-                                    />
-                                    {{ machineUpgrade.cost.money || 0 | formatNumber }}
-                                    @if ((machineUpgrade.cost.components || 0) > 0) {
-                                      <img
-                                        src="assets/icons/components_resource.png"
-                                        class="btn-cost-icon"
-                                        alt=""
-                                      />
-                                      {{ machineUpgrade.cost.components || 0 | formatNumber }}
-                                    }
-                                  </span>
-                                }
-                              </app-button>
-                            </div>
-                          }
-
-                          @if (machineUpgrade.isMaxLevel) {
-                            <p class="max-level">
-                              {{ translationService.t('upgrades.max_level') }}
-                            </p>
+                          @if (machineUpgrade.isLocked) {
+                            <span class="machine-card-locked">
+                              <img
+                                src="assets/icons/lock_icon.png"
+                                class="machine-card-locked-icon"
+                                width="14"
+                                height="14"
+                                alt=""
+                                aria-hidden="true"
+                              />
+                              {{ translationService.t('status.bloqueada') }}
+                            </span>
                           }
                         </div>
-                      }
+
+                        @if (!machineUpgrade.isLocked) {
+                          <div class="muc-level-bar">
+                            <div class="muc-level-fill" [style.width.%]="(machineUpgrade.level / (machineUpgrade.maxLevel ?? 1)) * 100"></div>
+                          </div>
+                        }
+
+                        @if (machineUpgrade.isLocked && machineUpgrade.unlockRequirements?.length) {
+                          <div class="machine-unlock-reqs">
+                            @for (req of machineUpgrade.unlockRequirements; track req.machineType) {
+                              <div class="unlock-req-line" [class.unlock-req-line--met]="req.isMet">
+                                <span class="unlock-req-icon">{{ req.isMet ? '✓' : '✗' }}</span>
+                                <span class="unlock-req-text">{{ translationService.t('machines.' + req.machineType) }} {{ translationService.t('common.level_short') }} {{ req.requiredLevel }} ({{ req.currentLevel }}/{{ req.requiredLevel }})</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        @if (!machineUpgrade.isLocked) {
+                          <div class="machine-card-body">
+                            <div class="upgrade-stat">
+                              <span class="stat-label">{{ translationService.t('upgrades.machine_tab.speed_label') }}:</span>
+                              <span class="stat-value">
+                                {{ (machineUpgrade.effectiveSpeed || 0).toFixed(2) }} {{ translationService.t('common.cycles_per_second') }}
+                                @if ((machineUpgrade.speedBonus || 0) > 0) {
+                                  <span class="bonus">(+{{ ((machineUpgrade.speedBonus || 0) * 100).toFixed(0) }}%)</span>
+                                }
+                              </span>
+                            </div>
+
+                            @if ((machineUpgrade.productionMultiplier || 1) > 1) {
+                              <div class="upgrade-stat">
+                                <span class="stat-label">{{ translationService.t('upgrades.machine_tab.production_label') }}:</span>
+                                <span class="stat-value efficiency-gain">×{{ machineUpgrade.productionMultiplier || 1 }}</span>
+                              </div>
+                            }
+
+                            @if ((machineUpgrade.nextBonusAt || 0) > 0 && !machineUpgrade.isMaxLevel) {
+                              <div class="upgrade-stat">
+                                <span class="stat-label">{{ translationService.t('upgrades.machine_tab.next_bonus_label') }}:</span>
+                                <span class="stat-value next-bonus-value">×{{ machineUpgrade.nextProductionMultiplier }} {{ translationService.t('upgrades.machine_tab.in') }} {{ machineUpgrade.nextBonusAt }} {{ translationService.t('upgrades.machine_tab.levels') }}</span>
+                              </div>
+                            }
+
+                            @if (machineUpgrade.isInProgress && machineUpgrade.upgradeId) {
+                              <app-progress-bar
+                                [progress]="getUpgradeProgress(machineUpgrade.upgradeId)"
+                                [label]="formatTime(getRemainingTime(machineUpgrade.upgradeId))"
+                              />
+                            }
+
+                            @if (!machineUpgrade.isMaxLevel) {
+                              <div
+                                class="tutorial-button-anchor"
+                                [attr.data-tutorial-id]="tutorialMachineUpgradeButtonId(machineUpgrade.machineId)"
+                              >
+                                <app-button
+                                  [label]="translationService.t('buttons.mejorar')"
+                                  variant="primary"
+                                  size="md"
+                                  [class.btn-can-afford]="machineUpgrade.canAfford && !machineUpgrade.isInProgress"
+                                  [disabled]="!machineUpgrade.canAfford || machineUpgrade.isInProgress"
+                                  (clicked)="purchaseMachineUpgradeById(machineUpgrade.machineId)"
+                                >
+                                  @if (machineUpgrade.cost) {
+                                    <span btn-cost class="upgrade-btn-cost">
+                                      <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                                      {{ machineUpgrade.cost.money || 0 | formatNumber }}
+                                      @if ((machineUpgrade.cost.components || 0) > 0) {
+                                        <img src="assets/icons/components_resource.png" class="btn-cost-icon" alt="" />
+                                        {{ machineUpgrade.cost.components || 0 | formatNumber }}
+                                      }
+                                    </span>
+                                  }
+                                </app-button>
+                              </div>
+                            }
+
+                            @if (machineUpgrade.isMaxLevel) {
+                              <p class="max-level">{{ translationService.t('upgrades.max_level') }}</p>
+                            }
+                          </div>
+                        }
+                      </div>
                     </div>
                   }
                 </div>
               </div>
             }
+
+            @if (activeTab() === 'contracts') {
+              <div class="contracts-view">
+                <!-- Available contracts -->
+                @if (contractService.available().length > 0) {
+                  <div class="contracts-section-title">{{ translationService.t('contracts.available_title') }}</div>
+                  @for (contract of contractService.available(); track contract.id) {
+                    <div class="contract-card" [class.contract-card--urgent]="contract.urgency === 'urgent'">
+                      <div class="contract-card__header">
+                        <span class="contract-badge contract-badge--{{ contract.type }}">
+                          {{ translationService.t('contracts.type.' + contract.type) }}
+                        </span>
+                        @if (contract.urgency === 'urgent') {
+                          <span class="contract-badge contract-badge--urgent">
+                            ⚡ {{ translationService.t('contracts.urgency.urgent') }}
+                          </span>
+                        }
+                        <span class="contract-expires">
+                          {{ translationService.t('contracts.expires_in') }} {{ contractService.formatTimer(contractService.getAvailableSeconds(contract)) }}
+                        </span>
+                      </div>
+                      <div class="contract-card__body">
+                        <div class="contract-resource">
+                          <span class="contract-amount">{{ contract.amount }}×</span>
+                          <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
+                        </div>
+                        <div class="contract-meta">
+                          <div class="contract-reward">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            <span>{{ contract.reward }}</span>
+                          </div>
+                          @if (contract.penaltyAmount > 0) {
+                            <div class="contract-penalty">
+                              <span>{{ translationService.t('contracts.penalty') }}:</span>
+                              <span>-{{ contract.penaltyAmount }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="contract-card__progress">
+                        <app-progress-bar
+                          [progress]="getAvailableContractProgress(contract)"
+                          [label]="translationService.t('contracts.expires_in') + ' ' + contractService.formatTimer(contractService.getAvailableSeconds(contract))"
+                          [showLabel]="false"
+                          [inline]="true"
+                        />
+                      </div>
+                      <div class="contract-stock" [class.contract-stock--ready]="hasContractStock(contract)">
+                        {{ translationService.t('common.stock_label') }} {{ getContractStock(contract) }} / {{ contract.amount }}
+                      </div>
+                      <div class="contract-card__footer">
+                        <span class="contract-duration">⏱ {{ contractService.formatTimer(contract.durationSeconds) }}</span>
+                        <div class="contract-actions">
+                          <app-button
+                            [label]="translationService.t('contracts.reject')"
+                            variant="secondary"
+                            size="sm"
+                            (clicked)="contractService.reject(contract.id)"
+                          />
+                          <app-button
+                            [label]="translationService.t('contracts.accept')"
+                            variant="primary"
+                            size="sm"
+                            [disabled]="contractService.active().length >= 2"
+                            (clicked)="contractService.accept(contract.id)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+
+                <!-- Active contracts -->
+                @if (contractService.active().length > 0) {
+                  <div class="contracts-section-title">{{ translationService.t('contracts.active_title') }}</div>
+                  @for (contract of contractService.active(); track contract.id) {
+                    <div class="contract-card contract-card--active" [class.contract-card--urgent]="contract.urgency === 'urgent'">
+                      <div class="contract-card__header">
+                        <span class="contract-badge contract-badge--{{ contract.type }}">
+                          {{ translationService.t('contracts.type.' + contract.type) }}
+                        </span>
+                        @if (contract.urgency === 'urgent') {
+                          <span class="contract-badge contract-badge--urgent">
+                            ⚡ {{ translationService.t('contracts.urgency.urgent') }}
+                          </span>
+                        }
+                        <span class="contract-deadline" [class.contract-deadline--low]="contractService.getRemainingSeconds(contract) < 30">
+                          ⏱ {{ contractService.formatTimer(contractService.getRemainingSeconds(contract)) }}
+                        </span>
+                      </div>
+                      <div class="contract-card__body">
+                        <div class="contract-resource">
+                          <span class="contract-amount">{{ contract.amount }}×</span>
+                          <span class="contract-resource-name">{{ translationService.t('resources.' + contract.resourceId) }}</span>
+                        </div>
+                        <div class="contract-meta">
+                          <div class="contract-reward">
+                            <img src="assets/icons/gold_resource_1.png" class="btn-cost-icon" alt="" />
+                            <span>{{ contract.reward }}</span>
+                          </div>
+                          @if (contract.penaltyAmount > 0) {
+                            <div class="contract-penalty">
+                              <span>{{ translationService.t('contracts.penalty') }}:</span>
+                              <span>-{{ contract.penaltyAmount }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="contract-card__progress">
+                        <app-progress-bar
+                          [progress]="getActiveContractProgress(contract)"
+                          [label]="contractService.formatTimer(contractService.getRemainingSeconds(contract))"
+                          [showLabel]="false"
+                          [inline]="true"
+                        />
+                      </div>
+                      <div class="contract-stock" [class.contract-stock--ready]="hasContractStock(contract)">
+                        {{ translationService.t('common.stock_label') }} {{ getContractStock(contract) }} / {{ contract.amount }}
+                      </div>
+                      <div class="contract-card__footer">
+                        <app-button
+                          [label]="translationService.t('contracts.deliver')"
+                          variant="primary"
+                          size="sm"
+                          [disabled]="!contractService.canDeliver(contract)"
+                          (clicked)="contractService.deliver(contract.id)"
+                        />
+                      </div>
+                    </div>
+                  }
+                }
+
+                <!-- Empty state -->
+                @if (contractService.available().length === 0 && contractService.active().length === 0) {
+                  <div class="contracts-empty">
+                    <p>{{ translationService.t('contracts.empty') }}</p>
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
-      }
     </div>
   `,
   styles: [
     `
       .upgrades-panel {
-        background: var(--color-bg-section);
-        border-left: 2px solid var(--color-border);
-        border-top: 2px solid var(--color-accent-main);
-        box-shadow:
-          inset 1px 0 0 rgba(255, 200, 80, 0.06),
-          inset 0 1px 0 rgba(255, 200, 80, 0.1),
-          -4px 0 24px rgba(0, 0, 0, 0.4);
+        background-color: #1a1610;
+        background-image:
+          linear-gradient(rgba(14, 11, 7, 0.91), rgba(14, 11, 7, 0.84)),
+          url('/assets/image/factory_floor.png');
+        background-size: 240px 240px;
+        background-repeat: repeat;
         display: flex;
         flex-direction: column;
         height: 100%;
         transition: all 0.3s ease;
+        position: relative;
       }
 
       .panel-header {
+        margin: 28px;
         padding: var(--space-4);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: var(--color-bg-section);
-        border-bottom: 1px solid var(--color-border);
-      }
-
-      .upgrades-panel.minimized .panel-header {
-        justify-content: center;
-        padding: var(--space-3);
-        border-bottom: none;
+        background: transparent;
+        border-bottom: 1px solid rgba(58, 58, 58, 0.4);
       }
 
       .section-title {
@@ -533,11 +531,17 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
       }
 
       .panel-content {
+        margin: 28px;
         display: flex;
         flex-direction: column;
         height: 100%;
         overflow: hidden;
         animation: panel-fade-in 0.2s ease-out;
+      }
+
+      .upgrades-panel__event-slot {
+        margin: 0 var(--pf-bar, 28px) var(--space-2);
+        padding-inline: calc(var(--pf-corner, 100px) - var(--pf-bar, 28px));
       }
 
       @keyframes panel-fade-in {
@@ -560,13 +564,6 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
 
       .tabs app-button {
         position: relative;
-      }
-
-      .tabs button {
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        font-size: 11px;
-        font-weight: 600;
       }
 
       .tabs app-button.active button {
@@ -701,12 +698,12 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
       .machine-upgrade-card {
         background: var(--color-bg-main);
         border: 1px solid var(--color-border);
-        border-radius: var(--border-radius-medium);
-        padding: var(--space-3);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
+        border-radius: 0;
+        display: grid;
+        grid-template-columns: 68px 1fr;
+        gap: 0;
         transition: border-color 0.2s ease;
+        overflow: hidden;
       }
 
       .machine-upgrade-card:hover:not(.locked) {
@@ -720,6 +717,89 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
 
       .machine-upgrade-card.locked {
         opacity: 0.6;
+      }
+
+      .muc-image {
+        background: rgba(0, 0, 0, 0.55);
+        border-right: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: var(--space-2);
+      }
+
+      .muc-image.locked {
+        filter: grayscale(0.5);
+      }
+
+      .muc-image .machine-icon {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        display: block;
+      }
+
+      .muc-content {
+        padding: var(--space-3);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        min-width: 0;
+      }
+
+      .muc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-2);
+        padding-bottom: var(--space-2);
+        border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+      }
+
+      .muc-level-bar {
+        height: 3px;
+        background: rgba(255, 152, 0, 0.12);
+        width: 100%;
+        flex-shrink: 0;
+      }
+
+      .muc-level-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent-main), rgba(255, 152, 0, 0.4));
+        transition: width 0.4s ease;
+        min-width: 2px;
+      }
+
+      .machine-unlock-reqs {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: var(--space-2) var(--space-3);
+        background: rgba(0,0,0,0.25);
+        border-radius: var(--border-radius-small);
+        font-size: 11px;
+        font-family: var(--font-mono);
+      }
+
+      .unlock-req-line {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--color-state-danger);
+      }
+
+      .unlock-req-line--met {
+        color: var(--color-accent-positive);
+      }
+
+      .unlock-req-icon {
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .unlock-req-text {
+        line-height: 1.4;
       }
 
       .machine-card-header {
@@ -1006,18 +1086,183 @@ import { FirstRunTutorialService } from '../../services/first-run-tutorial.servi
         text-align: center;
         margin: 0;
       }
+
+      /* ── Contracts ────────────────────────────────────────────────── */
+      .contracts-view {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        overflow-y: auto;
+        padding: var(--space-2) 0;
+      }
+
+      .contracts-section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-text-muted, #888);
+        padding: var(--space-1) 0;
+      }
+
+      .contract-card {
+        border: 1px solid rgba(58, 58, 58, 0.6);
+        border-radius: 6px;
+        padding: var(--space-3);
+        background: rgba(30, 26, 18, 0.6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .contract-card--urgent {
+        border-color: rgba(220, 140, 30, 0.5);
+        background: rgba(40, 30, 10, 0.6);
+      }
+
+      .contract-card--active {
+        border-color: rgba(80, 160, 80, 0.4);
+        background: rgba(20, 40, 20, 0.5);
+      }
+
+      .contract-card__header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+
+      .contract-badge {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+
+      .contract-badge--local    { background: rgba(60, 100, 60, 0.4); color: #8bc68b; }
+      .contract-badge--regional { background: rgba(60, 80, 140, 0.4); color: #8aabda; }
+      .contract-badge--corporate{ background: rgba(120, 60, 140, 0.4); color: #c890e0; }
+      .contract-badge--urgent   { background: rgba(160, 80, 20, 0.4); color: #e0a040; }
+
+      .contract-expires {
+        margin-left: auto;
+        font-size: 10px;
+        color: var(--color-text-muted, #888);
+      }
+
+      .contract-deadline {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-accent-positive, #8bc68b);
+      }
+
+      .contract-deadline--low {
+        color: var(--color-accent-negative, #e06060);
+        animation: deadline-pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes deadline-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .contract-card__body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+
+      .contract-resource {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .contract-amount {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-text);
+      }
+
+      .contract-resource-name {
+        font-size: 12px;
+        color: var(--color-text-muted, #aaa);
+      }
+
+      .contract-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+
+      .contract-reward {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--color-accent-gold, #d4a730);
+      }
+
+      .contract-penalty {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-accent-negative, #e06060);
+      }
+
+      .contract-card__progress {
+        margin-top: 8px;
+      }
+
+      .contract-stock {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--color-text-muted, #999);
+      }
+
+      .contract-stock--ready {
+        color: var(--color-accent-positive, #8bc68b);
+      }
+
+      .contract-card__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .contract-duration {
+        font-size: 11px;
+        color: var(--color-text-muted, #888);
+      }
+
+      .contract-actions {
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      .contracts-empty {
+        text-align: center;
+        padding: var(--space-6);
+        color: var(--color-text-muted, #666);
+        font-size: 12px;
+      }
     `,
   ],
 })
 export class UpgradesPanelComponent {
-  @Output() minimizedChange = new EventEmitter<boolean>();
-
   // Exponer configs para usar en template
   readonly SCRAP_GENERATION_CONFIG = SCRAP_GENERATION_CONFIG;
   readonly STORAGE_UPGRADE_CONFIG = STORAGE_UPGRADE_CONFIG;
   readonly UpgradeId = UpgradeId; // Exponer enum para usar en template
 
-  isMinimized = signal(false);
   activeTab = signal('machine');
 
   private readonly machineOrder = [
@@ -1029,29 +1274,38 @@ export class UpgradesPanelComponent {
     MachineType.RECYCLER,
     MachineType.ELECTRIC_ASSEMBLER,
     MachineType.ELECTRIC_PACKAGER,
+    MachineType.PCB_PRINTER,
+    MachineType.HDD_ASSEMBLER,
+    MachineType.SCREEN_FABRICATOR,
+    MachineType.GPU_FAB,
+    MachineType.SMARTPHONE_FACTORY,
+    MachineType.LAPTOP_WORKSHOP,
+    MachineType.PC_BUILDER,
+    MachineType.MINING_RIG_ASSEMBLY,
+    MachineType.DATA_CENTER_ASSEMBLY,
   ];
 
   private machineSelectionService = inject(MachineSelectionService);
   private machinesService = inject(MachinesService);
+  private machineUnlockService = inject(MachineUnlockService);
   private upgradesService = inject(UpgradesService);
   private upgradeProgressService = inject(UpgradeProgressService);
   private resourcesService = inject(ResourcesService);
   private scrapGenerationService = inject(ScrapGenerationService);
   translationService = inject(TranslationService);
+  contractService = inject(ContractService);
   private readonly _elRef = inject(ElementRef<HTMLElement>);
   private tutorialService = inject(FirstRunTutorialService);
 
   private _tutorialBuyUpgradeEffect = effect(() => {
     if (this.tutorialService.currentStepId() === 'buy-first-upgrade') {
-      this.isMinimized.set(false);
       this.activeTab.set('machine');
-      this.minimizedChange.emit(false);
       setTimeout(() => {
         requestAnimationFrame(() => {
           const btn = this._elRef.nativeElement.querySelector(
             '[data-tutorial-id="machine-upgrade-button-crusher"]',
           ) as HTMLElement | null;
-          btn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (btn) this.scrollCardIntoPanel(btn);
         });
       }, 100);
     }
@@ -1060,19 +1314,29 @@ export class UpgradesPanelComponent {
   private _selectionEffect = effect(() => {
     const selectedId = this.machineSelectionService.getSelectedMachineId();
     if (selectedId) {
-      this.isMinimized.set(false);
       this.activeTab.set('machine');
-      this.minimizedChange.emit(false);
       setTimeout(() => {
         requestAnimationFrame(() => {
           const card = this._elRef.nativeElement.querySelector(
             `[data-machine-id="${selectedId}"]`,
           ) as HTMLElement | null;
-          card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (card) this.scrollCardIntoPanel(card);
         });
       }, 100);
     }
   });
+
+  /** Scroll a card into view within the upgrades panel container only.
+   * Uses scrollTop instead of scrollIntoView to avoid propagating scroll to the root window. */
+  private scrollCardIntoPanel(targetEl: HTMLElement): void {
+    const container = this._elRef.nativeElement.querySelector('.tab-content') as HTMLElement | null;
+    if (!container) return;
+    const targetTop = targetEl.offsetTop;
+    const targetHeight = targetEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+    const targetScrollTop = targetTop - containerHeight / 2 + targetHeight / 2;
+    container.scrollTop = Math.max(0, targetScrollTop);
+  }
 
   selectedMachine = computed(() => {
     const selectedId = this.machineSelectionService.getSelectedMachineId();
@@ -1138,6 +1402,7 @@ export class UpgradesPanelComponent {
         };
       }
 
+      const unlockInfo = this.machineUnlockService.getUnlockInfo(machine.id as MachineType);
       const level = this.upgradesService.getLevel(upgradeId);
       const cost = this.upgradesService.getCostForNextLevel(upgradeId);
       const effectiveSpeed = this.upgradesService.calculateEffectiveSpeed(
@@ -1148,7 +1413,7 @@ export class UpgradesPanelComponent {
       const upgrades = level - 1;
       const isMaxMultiplier = productionMultiplier >= 5;
       const nextProductionMultiplier = isMaxMultiplier ? 5 : productionMultiplier + 1;
-      const speedBonus = level * 0.1;
+      const speedBonus = (level - 1) * 0.1;
       const isMaxLevel = level >= 50;
 
       const canAfford = cost
@@ -1163,6 +1428,7 @@ export class UpgradesPanelComponent {
         level,
         maxLevel: 50,
         isLocked: machine.level === 0,
+        unlockRequirements: unlockInfo.requirements,
         baseSpeed: machine.baseSpeed,
         effectiveSpeed,
         speedBonus,
@@ -1227,7 +1493,7 @@ export class UpgradesPanelComponent {
     const isMaxMultiplier = productionMultiplier >= 5;
     const nextProductionMultiplier = isMaxMultiplier ? 5 : productionMultiplier + 1;
 
-    const speedBonus = level * 0.1;
+    const speedBonus = (level - 1) * 0.1;
     const nextBonusAt = isMaxMultiplier ? 0 : 10 - (upgrades % 10);
 
     const canAfford = cost
@@ -1288,9 +1554,63 @@ export class UpgradesPanelComponent {
         resourceId: ResourceType.ELECTRIC_COMPONENTS,
         nameKey: 'upgrades.storage.electric_components',
       },
+      {
+        id: UpgradeId.UPG_STORE_008,
+        resourceId: ResourceType.CIRCUIT_BOARD,
+        nameKey: 'upgrades.storage.circuit_board',
+        unlockedBy: MachineType.PCB_PRINTER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_009,
+        resourceId: ResourceType.HDD,
+        nameKey: 'upgrades.storage.hdd',
+        unlockedBy: MachineType.HDD_ASSEMBLER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_010,
+        resourceId: ResourceType.SCREEN,
+        nameKey: 'upgrades.storage.screen',
+        unlockedBy: MachineType.SCREEN_FABRICATOR,
+      },
+      {
+        id: UpgradeId.UPG_STORE_011,
+        resourceId: ResourceType.GPU,
+        nameKey: 'upgrades.storage.gpu',
+        unlockedBy: MachineType.GPU_FAB,
+      },
+      {
+        id: UpgradeId.UPG_STORE_012,
+        resourceId: ResourceType.SMARTPHONE,
+        nameKey: 'upgrades.storage.smartphone',
+        unlockedBy: MachineType.SMARTPHONE_FACTORY,
+      },
+      {
+        id: UpgradeId.UPG_STORE_013,
+        resourceId: ResourceType.LAPTOP,
+        nameKey: 'upgrades.storage.laptop',
+        unlockedBy: MachineType.LAPTOP_WORKSHOP,
+      },
+      {
+        id: UpgradeId.UPG_STORE_014,
+        resourceId: ResourceType.DESKTOP_PC,
+        nameKey: 'upgrades.storage.desktop_pc',
+        unlockedBy: MachineType.PC_BUILDER,
+      },
+      {
+        id: UpgradeId.UPG_STORE_015,
+        resourceId: ResourceType.MINING_RIG,
+        nameKey: 'upgrades.storage.mining_rig',
+        unlockedBy: MachineType.MINING_RIG_ASSEMBLY,
+      },
+      {
+        id: UpgradeId.UPG_STORE_016,
+        resourceId: ResourceType.SERVER_RACK,
+        nameKey: 'upgrades.storage.server_rack',
+        unlockedBy: MachineType.DATA_CENTER_ASSEMBLY,
+      },
     ];
 
-    return storageUpgradeIds.map(({ id, resourceId, nameKey }) => {
+    return storageUpgradeIds.map(({ id, resourceId, nameKey, unlockedBy }) => {
       const level = this.upgradesService.getLevel(id);
       const cost = this.upgradesService.getCostForNextLevel(id);
       const baseCapacity = this.resourcesService.getBaseCapacity(resourceId);
@@ -1311,6 +1631,7 @@ export class UpgradesPanelComponent {
         : false;
 
       const isMaxLevel = level >= STORAGE_UPGRADE_CONFIG.MAX_LEVEL;
+      const isLocked = unlockedBy ? !this.machinesService.isUnlocked(unlockedBy) : false;
 
       return {
         upgradeId: id,
@@ -1322,6 +1643,7 @@ export class UpgradesPanelComponent {
         cost: cost || { money: 0, components: 0 },
         canAfford: canAfford && !isMaxLevel,
         isMaxLevel,
+        isLocked,
       };
     });
   });
@@ -1381,12 +1703,8 @@ export class UpgradesPanelComponent {
     { id: 'scrap', label: this.translationService.t('upgrades.tabs.scrap') },
     { id: 'storage', label: this.translationService.t('upgrades.tabs.storage') },
     { id: 'machine', label: this.translationService.t('upgrades.tabs.machine') },
+    { id: 'contracts', label: this.translationService.t('upgrades.tabs.contracts') },
   ]);
-
-  toggleMinimize(): void {
-    this.isMinimized.update((v) => !v);
-    this.minimizedChange.emit(this.isMinimized());
-  }
 
   setActiveTab(tabId: string): void {
     this.activeTab.set(tabId);
@@ -1555,6 +1873,26 @@ export class UpgradesPanelComponent {
       const minutes = Math.floor((seconds % 3600) / 60);
       return `${hours}h ${minutes}m`;
     }
+  }
+
+  getContractStock(contract: Contract): number {
+    return this.resourcesService.getAmount(contract.resourceId);
+  }
+
+  hasContractStock(contract: Contract): boolean {
+    return this.contractService.canDeliver(contract);
+  }
+
+  getAvailableContractProgress(contract: Contract): number {
+    const totalSeconds = Math.max(1, Math.ceil((contract.availableUntil - contract.spawnedAt) / 1000));
+    const remaining = Math.max(0, this.contractService.getAvailableSeconds(contract));
+    return Math.max(0, Math.min(1, (totalSeconds - remaining) / totalSeconds));
+  }
+
+  getActiveContractProgress(contract: Contract): number {
+    const totalSeconds = Math.max(1, contract.durationSeconds);
+    const remaining = Math.max(0, this.contractService.getRemainingSeconds(contract));
+    return Math.max(0, Math.min(1, (totalSeconds - remaining) / totalSeconds));
   }
 
   /**

@@ -12,6 +12,8 @@ import { ResourceType } from '../models/resource.model';
 import { AudioService } from './audio.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
+import { ContractService } from './contract.service';
+import { MarketEventService } from './market-event.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +29,8 @@ export class GameLoopService implements OnDestroy {
   private audioService = inject(AudioService);
   private statisticsService = inject(StatisticsService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
+  private contractService = inject(ContractService);
+  private marketEventService = inject(MarketEventService);
   private readonly AUTO_SAVE_INTERVAL = 15;
 
   private resourcesService = inject(ResourcesService);
@@ -75,6 +79,12 @@ export class GameLoopService implements OnDestroy {
 
     // Procesar progreso de upgrades (1 segundo de deltaTime)
     this.processUpgradeProgress(1);
+
+    // Procesar contratos (spawn, timers, penalizaciones)
+    this.contractService.tick();
+
+    // Procesar eventos de mercado
+    this.marketEventService.tick();
 
     // Auto-guardado
     if (this.tickCount() % this.AUTO_SAVE_INTERVAL === 0) {

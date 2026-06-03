@@ -10,13 +10,22 @@
   <div class="app-layout">
     <app-background-grid [opacity]="0.5"></app-background-grid>
     <app-notification-container></app-notification-container>
+    <!-- <app-debug-controls></app-debug-controls> -->
     <app-first-run-tutorial-overlay></app-first-run-tutorial-overlay>
-    <app-demo-end-overlay></app-demo-end-overlay>
-    <app-resources-header></app-resources-header>
+
+    @if (contractService.showContractIntro()) {
+      <app-contract-intro-modal (dismissed)="contractService.dismissContractIntro()"></app-contract-intro-modal>
+    }
 
     <div class="app-body">
-      <div class="column-left">
-        <app-statistics-panel></app-statistics-panel>
+      <app-panel-frame class="frame-sidebar">
+        <app-resources-header></app-resources-header>
+      </app-panel-frame>
+
+      <div class="column-center">
+        <app-panel-frame-h class="frame-stats">
+          <app-statistics-panel></app-statistics-panel>
+        </app-panel-frame-h>
 
         <div class="machines-scroll-area">
           <app-machine-list></app-machine-list>
@@ -24,7 +33,9 @@
       </div>
 
       <div class="column-right" [class.hidden]="isPanelMinimized">
-        <app-upgrades-panel (minimizedChange)="onPanelMinimizedChange($event)"></app-upgrades-panel>
+        <app-panel-frame class="frame-upgrades">
+          <app-upgrades-panel ></app-upgrades-panel>
+        </app-panel-frame>
       </div>
     </div>
   </div>

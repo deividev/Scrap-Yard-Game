@@ -126,7 +126,10 @@ export class ResourcesService {
         loadedResource.icon = currentResource.icon;
       }
     });
-    this.resources.set(resources.map((r) => ({ ...r })));
+    // Save migration: add any resources that exist in config but not in the save
+    const loadedIds = new Set(resources.map((r) => r.id));
+    const missingResources = INITIAL_RESOURCES.filter((r) => !loadedIds.has(r.id));
+    this.resources.set([...resources, ...missingResources].map((r) => ({ ...r })));
   }
 
   setSaveService(saveService: SaveMarker): void {

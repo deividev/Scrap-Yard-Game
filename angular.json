@@ -73,7 +73,16 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "coverageReporters": ["html", "text", "json-summary"],
+            "coverageThresholds": {
+              "statements": 90,
+              "branches": 91,
+              "functions": 96,
+              "lines": 92
+            }
+          }
         }
       }
     }

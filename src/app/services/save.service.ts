@@ -9,9 +9,11 @@ import { SettingsService } from './settings.service';
 import { TranslationService } from './translation.service';
 import { StatisticsService } from './statistics.service';
 import { FirstRunTutorialService } from './first-run-tutorial.service';
-import { DemoEndService } from './demo-end.service';
+import { ContractService } from './contract.service';
 import { SaveState, SAVE_VERSION } from '../models/save-state.model';
 import { UpgradeId } from '../models/upgrade.model';
+import { MachineType } from '../models/machine.model';
+import { ResourceType } from '../models/resource.model';
 import { INITIAL_RESOURCES } from '../config/resources.config';
 import { INITIAL_MACHINES } from '../config/machines.config';
 import { UPGRADE_DEFINITIONS } from '../config/upgrade-definitions.config';
@@ -30,7 +32,7 @@ export class SaveService {
   private translationService = inject(TranslationService);
   private statisticsService = inject(StatisticsService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
-  private demoEndService = inject(DemoEndService);
+  private contractService = inject(ContractService);
 
   private isDirty = signal(false);
   private isSaving = false;
@@ -41,7 +43,9 @@ export class SaveService {
   constructor() {
     this.debugLog('[SaveService] Initialized');
     this.debugLog('[SaveService] Is Electron:', this.isElectron);
-    this.debugLog('[SaveService] window.electronApi:', window.electronApi);
+    if (this.isElectron) {
+      this.debugLog('[SaveService] window.electronApi:', window.electronApi);
+    }
 
     if (this.isElectron) {
       this.logSavePath();
@@ -113,7 +117,9 @@ export class SaveService {
       gameStarted: this.gameStarted(),
       statistics: this.statisticsService.getState(),
       firstRunTutorial: this.firstRunTutorialService.serialize(),
-      demoEndSeen: this.demoEndService.getState(),
+      contracts: this.contractService.serialize(),
+      firstContractSpawned: this.contractService.hasSpawnedFirstContract(),
+      hasSeenContractIntro: this.contractService.hasSeenContractIntro(),
     };
 
     // Custom replacer to handle Infinity values
@@ -192,16 +198,28 @@ export class SaveService {
       }
     } catch (error) {
       console.error('[SaveService] Failed to load game state:', error);
-      alert(
-        'No se pudo cargar la partida guardada. El archivo puede estar dañado.\n\nSe iniciará una partida nueva.',
-      );
+      alert(this.translationService.t('alerts.save_corrupted'));
       return false;
     }
   }
 
   private restoreState(saveState: SaveState): void {
     this.resourcesService.setState(saveState.resources);
-    this.machinesService.setState(saveState.machines);
+
+    this.contractService.hydrate(saveState.contracts, {
+      hasSeenIntro: saveState.hasSeenContractIntro ?? saveState.firstContractSpawned ?? false,
+      hasSpawnedFirstContract: saveState.firstContractSpawned ?? false,
+    });
+
+    // Merge saved machines with INITIAL_MACHINES to inject any new machines
+    // added after the save was created (they won't exist in the save file).
+    const savedIds = new Set(saveState.machines.map((m) => m.id));
+    const mergedMachines = [
+      ...saveState.machines,
+      ...INITIAL_MACHINES.filter((m) => !savedIds.has(m.id)).map((m) => ({ ...m })),
+    ];
+    this.machinesService.setState(mergedMachines);
+
     this.upgradesService.setState(saveState.upgrades);
 
     // Restaurar flag de juego iniciado (siempre establecer el valor explícitamente)
@@ -277,10 +295,6 @@ export class SaveService {
 
     this.firstRunTutorialService.hydrate(saveState.firstRunTutorial);
 
-    if (saveState.demoEndSeen) {
-      this.demoEndService.loadState(true);
-    }
-
     // Apply all storage upgrade effects after loading
     this.upgradesService.applyStorageUpgrades(this.resourcesService);
 
@@ -320,9 +334,13 @@ export class SaveService {
         return false;
       }
 
-      const saveState: SaveState = JSON.parse(savedData);
-      // Solo consideramos que hay un juego guardado si gameStarted es true
-      return saveState.gameStarted === true;
+      const saveState: SaveState = JSON.parse(savedData, (key, value) => {
+        if (value === '__INFINITY__') return Infinity;
+        return value;
+      });
+      // Solo consideramos que hay un juego guardado si gameStarted es true.
+      // Legacy saves (v0/v1) predan el campo gameStarted pero son válidos si tienen recursos.
+      return saveState.gameStarted === true || (Array.isArray(saveState.resources) && saveState.resources.length > 0);
     } catch (error) {
       console.error('[SaveService] Error checking gameStarted flag:', error);
       // En caso de error, asumir que no hay juego guardado
@@ -351,6 +369,7 @@ export class SaveService {
     this.upgradeProgressService.reset();
     this.statisticsService.reset();
     this.firstRunTutorialService.reset();
+    this.contractService.reset();
   }
 
   async getSavePath(): Promise<string | null> {
@@ -372,8 +391,92 @@ export class SaveService {
       save = { ...save, version: 1 };
     }
 
-    // Add future migrations here:
-    // if (save.version < 2) { save = { ...save, version: 2, newField: defaultValue }; }
+    // v1 → v2: F0 rebalanceo Fundidora + pre-inicializar campos F1 y F4
+    if (save.version < 2) {
+      // Corregir Fundidora: 4 Metal → 2 Cobre (0.25/s) => 2 Scrap → 1 Cobre (0.33/s)
+      const machines = save.machines.map((m) => {
+        if (m.id === MachineType.SMELTER) {
+          return {
+            ...m,
+            baseSpeed: 0.33,
+            baseConsumption: [{ resourceId: ResourceType.SCRAP, amount: 2 }],
+            baseProduction: { resourceId: ResourceType.COPPER, amount: 1 },
+            progress: 0,
+          };
+        }
+        return m;
+      });
+      save = {
+        ...save,
+        version: 2,
+        machines,
+        contracts: save.contracts ?? [],
+        lastContractSpawnCheck: save.lastContractSpawnCheck ?? Date.now(),
+        firstContractSpawned: save.firstContractSpawned ?? false,
+        completedMilestones: save.completedMilestones ?? [],
+      };
+      this.isDirty.set(true);
+    }
+
+    // v2 → v3: F2 — inicializar 9 recursos T4-T7 y 9 máquinas T4-T7
+    if (save.version < 3) {
+      const t4t7ResourceIds = [
+        ResourceType.CIRCUIT_BOARD,
+        ResourceType.HDD,
+        ResourceType.SCREEN,
+        ResourceType.GPU,
+        ResourceType.SMARTPHONE,
+        ResourceType.LAPTOP,
+        ResourceType.DESKTOP_PC,
+        ResourceType.MINING_RIG,
+        ResourceType.SERVER_RACK,
+      ];
+      const t4t7MachineIds = [
+        MachineType.PCB_PRINTER,
+        MachineType.HDD_ASSEMBLER,
+        MachineType.SCREEN_FABRICATOR,
+        MachineType.GPU_FAB,
+        MachineType.SMARTPHONE_FACTORY,
+        MachineType.LAPTOP_WORKSHOP,
+        MachineType.PC_BUILDER,
+        MachineType.MINING_RIG_ASSEMBLY,
+        MachineType.DATA_CENTER_ASSEMBLY,
+      ];
+      const existingResourceIds = new Set(save.resources.map((r) => r.id));
+      const existingMachineIds = new Set(save.machines.map((m) => m.id));
+      const newResources = t4t7ResourceIds
+        .filter((id) => !existingResourceIds.has(id))
+        .map((id) => {
+          const base = INITIAL_RESOURCES.find((r) => r.id === id);
+          return base ? { ...base, amount: 0 } : null;
+        })
+        .filter((r): r is NonNullable<typeof r> => r !== null);
+      const newMachines = t4t7MachineIds
+        .filter((id) => !existingMachineIds.has(id))
+        .map((id) => {
+          const base = INITIAL_MACHINES.find((m) => m.id === id);
+          return base ? { ...base, level: 0, isActive: false, progress: 0 } : null;
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null);
+      save = {
+        ...save,
+        version: 3,
+        resources: [...save.resources, ...newResources],
+        machines: [...save.machines, ...newMachines],
+      };
+      this.isDirty.set(true);
+    }
+
+    // v3 → v4: separar "primer contrato spawneado" de "intro visto"
+    if (save.version < 4) {
+      save = {
+        ...save,
+        version: 4,
+        hasSeenContractIntro: save.hasSeenContractIntro ?? save.firstContractSpawned ?? false,
+        firstContractSpawned: save.firstContractSpawned ?? false,
+      };
+      this.isDirty.set(true);
+    }
 
     return save;
   }

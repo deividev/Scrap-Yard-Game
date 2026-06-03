@@ -1,321 +1,118 @@
 # Scrap Yard Idle — Tareas de Implementación del Juego Completo
 
-> Última actualización: Abril 4, 2026
-> Este documento es la fuente de verdad para la implementación del juego completo post-demo.
-> Cada tarea es atómica y contiene el archivo exacto a tocar y qué hacer.
+> Última actualización: Mayo 24, 2026
+> Este documento vuelve a ser la fuente de verdad del backlog activo.
+> No usarlo para replanificar F0, F1 o F2 como si siguieran pendientes: esas fases ya están implementadas.
 
 ---
 
-## Índice
+## Resumen actual
 
-- [Fase 0 — Rebalanceo Tier 3](#fase-0--rebalanceo-tier-3)
-- [Fase 1 — Sistema de Contratos](#fase-1--sistema-de-contratos)
-- [Fase 2 — Nuevas cadenas T4-T7 (9 máquinas nuevas)](#fase-2--nuevas-cadenas-t4-t7)
-- [Fase 3 — Eventos de Mercado](#fase-3--eventos-de-mercado)
-- [Fase 4 — Narrativa mínima / Flavor Text](#fase-4--narrativa-mínima--flavor-text)
+| Fase | Estado | Nota |
+|---|---|---|
+| F0 - Rebalanceo Tier 3 | Completada | Ya vive en `machines.config.ts` y balance actual |
+| F1 - Sistema de contratos | Completada | Servicio, UI, save e intro modal integrados |
+| F2 - Cadenas T4-T12 | Completada | Recursos, maquinas, upgrades, unlocks y mercado avanzado presentes |
+| F3 - Eventos de mercado | Completada | Pool actual de 8 eventos, banner integrado, audio por signo y verificacion archivada |
+| F4 - Milestones / flavor text | Diferida post-release | No bloquea el core pre-release actual |
+| D1 - Header late game | Pendiente | Refactor visual/ergonomico |
+| D2 - Tabs/filtros de maquinas | Pendiente | Refactor de navegacion de UI |
+| Release engineering | Pendiente | QA, packaging y Steam vienen despues del hardening del core |
 
----
+## Qué NO hay que reimplementar
 
-## Fase 0 — Rebalanceo Tier 3
+- No reabrir F0 salvo para bugs o rebalance puntual.
+- No reimplementar contratos como feature nueva; ya existen en codigo.
+- No replanificar T4-T12 como si fueran roadmap futuro; ya estan en el juego.
+- No usar este archivo para tareas de demo/Next Fest antiguas.
 
-> Antes de añadir nada nuevo, el Tier 3 existente tiene un problema de diseño: la Fundidora consume Metal para producir Cobre, lo que la pone en competencia directa con la Ensambladora. El fix es hacer que la Fundidora también procese Scrap directamente, igual que la Trituradora y el Separador.
+## Bloque activo recomendado — QA y hardening pre-release
 
-### Cadena objetivo tras el fix
+### Objetivo
 
-```
-Trituradora:   1 Scrap → 2 Metal      (extracción física → hierro)
-Separador:     1 Scrap → 1 Plástico   (separación química → polímeros)
-Fundidora:     2 Scrap → 1 Cobre      (fundición térmica → cobre)
-```
+Validar el loop completo con F3 ya integrada, corregir bugs reales y decidir con evidencia si D1 y D2 siguen siendo necesarios.
 
----
+### Checklist de implementación
 
-### F0-01 — Cambiar input de Fundidora de Metal a Scrap
+- [ ] Ejecutar la checklist manual completa T1-T12 sin cheats.
+- [ ] Verificar save/load en early, mid y late game.
+- [ ] Confirmar claridad y balance real del sistema de eventos de mercado.
+- [ ] Rebalancear cuellos de botella y payouts solo si QA lo justifica.
+- [ ] Resolver D1/D2 o descartarlos con decision explicita.
 
-**Archivo:** `src/app/config/machines.config.ts`
+### Archivos candidatos
 
-- Localizar la máquina `MachineType.SMELTER`
-- Cambiar `baseConsumption`:
-  - Antes: `[{ resourceId: ResourceType.METAL, amount: 4 }]`
-  - Después: `[{ resourceId: ResourceType.SCRAP, amount: 2 }]`
-- Cambiar `baseProduction`:
-  - Antes: `{ resourceId: ResourceType.COPPER, amount: 2 }`
-  - Después: `{ resourceId: ResourceType.COPPER, amount: 1 }`
-- Justificación del ratio 2:1: la Fundidora es más lenta que las otras T2 (0.25/s), así que producir 1 Cobre por ciclo sigue siendo rentable sin inundar el inventario.
+- `src/app/config/game-balance.config.ts`
+- `src/app/services/market.service.ts`
+- `src/app/services/game-loop.service.ts`
+- `src/app/services/save.service.ts`
+- `src/app/models/save-state.model.ts`
+- `src/assets/i18n/es.json`
+- `src/assets/i18n/en.json`
+- Nuevo servicio/modelo/componente segun diseño final
 
----
+## F4 — Milestones y flavor text
 
-### F0-02 — Ajustar baseSpeed de la Fundidora
+### Objetivo
 
-**Archivo:** `src/app/config/machines.config.ts`
+Dar feedback de progresion y narrativa minima sin convertir el juego en un sistema de quests pesado. Queda deliberadamente fuera del bloque pre-release actual.
 
-- Actualmente: `baseSpeed: 0.25`
-- Propuesta: `baseSpeed: 0.33`
-- Razón: con el input de Scrap compartido entre tres máquinas, la Fundidora puede ser ligeramente más rápida sin starvar a las otras porque el Scrap es fácil de generar.
+### Checklist de implementación
 
----
+- [ ] Definir catalogo de milestones y sus condiciones.
+- [ ] Crear `MilestoneService` o equivalente.
+- [ ] Conectar milestones con sistemas existentes de recursos, maquinas, upgrades y contratos.
+- [ ] Persistir milestones completados.
+- [ ] Mostrar notificaciones y/o historial visible.
+- [ ] Añadir flavor text es/en.
+- [ ] Añadir tests unitarios y de persistencia.
 
-### F0-03 — Revisar precio de venta del Cobre
+### Archivos candidatos
 
-**Archivo:** `src/app/config/game-balance.config.ts`
+- `src/app/models/save-state.model.ts`
+- `src/app/services/save.service.ts`
+- `src/app/services/notification.service.ts`
+- `src/assets/i18n/es.json`
+- `src/assets/i18n/en.json`
+- Nuevos archivos de config, servicio y UI
 
-- Actualmente: `COPPER: 2.8` en `MARKET_CONFIG.BASE_PRICES`
-- El Cobre ahora se produce desde Scrap directamente (más fácil de obtener) → bajar ligeramente a `2.0`
-- También es input de la Ensambladora Eléctrica → no bajarlo demasiado para que vender sea siempre una alternativa real
+## Mejoras de UI post-F4
 
----
+### D1 — Refactor del header de recursos
 
-### F0-04 — Revisar la cadena Ensambladora Eléctrica con el nuevo Cobre
+- [ ] Reducir densidad visual en late game.
+- [ ] Revisar cómo se presentan cantidades, capacidad y acciones de venta.
+- [ ] Evitar que la escala T4-T12 vuelva inmanejable el header.
 
-**Archivo:** `src/app/config/machines.config.ts`
+### D2 — Tabs o filtros de maquinas
 
-- Confirmar que la Ensambladora Eléctrica (`MachineType.ELECTRIC_ASSEMBLER`) sigue siendo viable después del cambio:
-  - Inputs actuales: `Cobre x1 + Componentes x1 + Plástico Reciclado x1 → 1 Comp. Eléctrico`
-  - Con Fundidora produciendo 1 Cobre por ciclo a 0.33/s = ~0.33 Cobre/s sin upgrades
-  - La E.Assembler consume a 0.2/s → tiene suficiente input de Cobre al inicio
-  - No requiere cambio de receta, solo verificar con números
+- [ ] Separar basicas y avanzadas o introducir filtros por tier.
+- [ ] Mantener legible la lista completa de maquinas una vez cerradas F3 y F4.
+- [ ] Cubrir la nueva navegacion con tests de UI.
 
----
+## Backlog de release engineering
 
-### F0-05 — Validar balance Empaquetadora básica vs Eléctrica
+Esto se ejecuta despues de cerrar QA/hardening del core pre-release.
 
-**Archivo:** `src/app/config/machines.config.ts` + `game-balance.config.ts`
+- [ ] Playthrough completo T1-T12 sin cheats.
+- [ ] QA de save/load en toda la progresion.
+- [ ] Balance economico final y deteccion de softlocks.
+- [ ] Verificar `pnpm run package:win` en una corrida limpia.
+- [ ] Revisar drift entre `electron/main.js` y `electron/main.ts`.
+- [ ] Revisar drift entre `electron/preload.js` y `electron/preload.ts`.
+- [ ] Revisar flags, labels o leftovers de beta/demo antes de release.
+- [ ] Preparar assets, store page y pipeline de Steam.
 
-- Empaquetadora básica: consume 4 Componentes → produce $10 a 0.1/s = $1/s
-- Empaquetadora eléctrica: consume 4 Comp. Eléctricos → produce $60 a 0.1/s = $6/s
-- El salto es ×6 en dinero. El setup de la Emp. Eléctrica requiere ~4 máquinas adicionales = justificado
-- Si en QA resulta demasiado agresivo, bajar a `amount: 40` ($4/s = ×4 sobre la básica)
+## Criterio para considerar el PRD completo
 
----
+El core pre-release se considera cerrado cuando se cumplan todos estos puntos:
 
-### F0-06 — Actualizar `docs/systems.md` con la nueva cadena de Fundidora
+- [x] F3 cerrada.
+- [ ] QA funcional completo realizado.
+- [ ] D1 resuelta o descartada con decision explicita.
+- [ ] D2 resuelta o descartada con decision explicita.
 
-**Archivo:** `docs/systems.md`
-
-- En la tabla de máquinas, actualizar la fila de `smelter`:
-  - Inputs: `2 Chatarra` (antes era `4 Metal`)
-  - Output: `1 Cobre` (antes era `2 Cobre`)
-- En el diagrama ASCII de la cadena, cambiar la flecha de Metal → Fundidora por Chatarra → Fundidora
-
----
-
-## Fase 1 — Sistema de Contratos
-
-> Los contratos obligan al jugador a priorizar cadenas de producción concretas. Son la capa de decisión más importante del juego completo. Se implementan ANTES que los nuevos tiers para que el jugador ya tenga contratos disponibles desde T3.
-
-### Diseño de datos
-
-```typescript
-// Tipos de recurso que un contrato puede pedir (solo los que el jugador puede producir)
-type ContractResourceTarget = ResourceType;
-
-interface Contract {
-  id: string;
-  type: 'local' | 'corporate' | 'urgent' | 'chain';
-  resourceId: ContractResourceTarget;
-  amount: number;           // cantidad a entregar
-  timeLimit: number;        // segundos
-  rewardMoney: number;
-  penaltyMoney: number;     // solo si type === 'urgent'
-  isActive: boolean;
-  isCompleted: boolean;
-  isFailed: boolean;
-  timeRemaining: number;    // decrementado por el game loop
-  chainIndex?: number;      // posición en la cadena si type === 'chain'
-  chainId?: string;         // ID del grupo de cadena
-}
-```
-
----
-
-### C-01 — Modelo de datos: `contract.model.ts`
-
-**Archivo a crear:** `src/app/models/contract.model.ts`
-
-- Definir la interfaz `Contract` según el diseño de datos de arriba
-- Definir el enum `ContractType`: `LOCAL | CORPORATE | URGENT | CHAIN`
-- Las propiedades `chainIndex` y `chainId` son opcionales (solo presentes en contratos `CHAIN`)
-
----
-
-### C-02 — Config de contratos: `contracts.config.ts`
-
-**Archivo a crear:** `src/app/config/contracts.config.ts`
-
-- `CONTRACT_SPAWN_INTERVAL`: cada cuántos segundos puede aparecer un contrato nuevo (default: 120s)
-- `MAX_ACTIVE_CONTRACTS`: máximo de contratos simultáneos (default: 3)
-- Tabla de templates por tipo:
-  ```
-  LOCAL:     rewardMoney = amount × basePrice × 1.2,  timeLimit = 300s,  penaltyMoney = 0
-  CORPORATE: rewardMoney = amount × basePrice × 1.5,  timeLimit = 1800s, penaltyMoney = 0
-  URGENT:    rewardMoney = amount × basePrice × 2.0,  timeLimit = 120s,  penaltyMoney = amount × basePrice × 0.5
-  ```
-- Tabla de pools de recursos por tipo de contrato:
-  ```
-  LOCAL:     METAL, PLASTIC, COPPER
-  CORPORATE: COMPONENTS, COPPER, ELECTRIC_COMPONENTS
-  URGENT:    COMPONENTS, ELECTRIC_COMPONENTS
-  ```
-
----
-
-### C-03 — Servicio: `ContractService`
-
-**Archivo a crear:** `src/app/services/contract.service.ts`
-
-Responsabilidades:
-- `contracts` signal: array de contratos activos
-- `generateContract(type: ContractType): Contract` — genera un contrato aleatorio según el template del tipo
-- `acceptContract(id: string): void` — activa un contrato (marca `isActive = true`, arranca el timer)
-- `ignoreContract(id: string): void` — descarta la oferta sin penalización
-- `completeContract(id: string): void` — llamado cuando el player cumple los requisitos; resta recursos, suma reward
-- `failContract(id: string): void` — llamado cuando el timer llega a 0; aplica penalización si es URGENT
-- `tick(): void` — decrementar `timeRemaining` de contratos activos; llamado desde `GameLoopService`
-- `canAccept(contract: Contract): boolean` — false si ya hay `MAX_ACTIVE_CONTRACTS` activos
-- Integración con `ResourcesService.subtract()` al completar
-- Integración con `ResourcesService` (MONEY) para reward y penalización
-- `setSaveService(save: SaveService)` — patrón estándar del proyecto
-- `markDirty()` en cada cambio de estado
-
----
-
-### C-04 — Integrar `ContractService` en `GameLoopService`
-
-**Archivo:** `src/app/services/game-loop.service.ts`
-
-- Inyectar `ContractService` con `inject()`
-- En el método `tick()`: llamar a `contractService.tick()`
-- El timer de contratos decrementa 1 cada tick (1s)
-
----
-
-### C-05 — Integrar `ContractService` en `App`
-
-**Archivo:** `src/app/app.ts`
-
-- Inyectar `ContractService`
-- Llamar a `contractService.setSaveService(this.saveService)` en `ngOnInit`, igual que los demás servicios
-- Añadir `contractService.contracts` al estado de guardado (ver C-10)
-
----
-
-### C-06 — Añadir contratos al `SaveState`
-
-**Archivo:** `src/app/services/save.service.ts` (o donde esté definido `SaveState`)
-
-- Añadir campo `contracts: Contract[]` (opcional, default `[]`)
-- En `migrateSave()`: si `contracts` no existe, inicializar como `[]`
-
----
-
-### C-07 — Componente: `contracts-panel`
-
-**Archivo a crear:** `src/app/components/contracts-panel/contracts-panel.ts`
-**Template:** `src/app/components/contracts-panel/contracts-panel.html`
-**Estilos:** `src/app/components/contracts-panel/contracts-panel.css`
-
-- Lista los contratos activos con:
-  - Tipo (badge: LOCAL / CORPORATIVO / URGENTE)
-  - Recurso y cantidad requerida
-  - Timer visual (barra de progreso o cuenta regresiva)
-  - Estado: pendiente de aceptar / en progreso / completado / fallado
-- Botón "Aceptar" en contratos ofertados
-- Botón "Entregar" activo cuando el jugador tiene los recursos suficientes
-- Para contratos URGENTE: mostrar la penalización claramente en rojo
-
----
-
-### C-08 — Componente: `contract-card`
-
-**Archivo a crear:** `src/app/components/contracts-panel/contract-card/contract-card.ts`
-
-- Componente hijo de `contracts-panel`
-- Input: `@Input() contract: Contract`
-- Emite: `accept`, `deliver`
-- El color del borde cambia según el tipo: gris (local), azul (corporativo), naranja (urgente)
-- Timer: si `timeRemaining < 30s`, el timer parpadea o se muestra en rojo
-
----
-
-### C-09 — Añadir `contracts-panel` al layout principal
-
-**Archivo:** `src/app/app.html` (o el componente de game view)
-
-- Añadir `<app-contracts-panel>` en la vista de juego
-- Posicionarlo como panel colapsable igual que el upgrades-panel
-- Oculto cuando no hay contratos activos o disponibles (para no saturar la UI)
-
----
-
-### C-10 — i18n: claves de contratos
-
-**Archivos:** `src/assets/i18n/es.json` y `src/assets/i18n/en.json`
-
-Claves a añadir:
-```json
-"contracts.panel.title": "Contratos",
-"contracts.type.local": "Local",
-"contracts.type.corporate": "Corporativo",
-"contracts.type.urgent": "URGENTE",
-"contracts.action.accept": "Aceptar",
-"contracts.action.deliver": "Entregar",
-"contracts.action.ignore": "Ignorar",
-"contracts.status.inProgress": "En curso",
-"contracts.status.completed": "Completado",
-"contracts.status.failed": "Fallado",
-"contracts.label.reward": "Recompensa",
-"contracts.label.penalty": "Penalización",
-"contracts.label.timeLeft": "Tiempo restante",
-"contracts.label.deliver": "Entregar {{amount}} {{resource}}",
-"contracts.notification.accepted": "Contrato aceptado",
-"contracts.notification.completed": "¡Contrato completado! +{{reward}}$",
-"contracts.notification.failed": "Contrato fallado. -{{penalty}}$"
-```
-
----
-
-## Fase 2 — Nuevas cadenas T4-T7
-
-> 9 máquinas nuevas, 9 recursos nuevos, desbloqueados progresivamente. Toda esta fase es aditiva — no modifica nada del T1-T3 ya implementado.
-
-### Mapa completo de lo que se añade
-
-```
-T4: PCB Printer        → Circuit Board       (Cobre + Componentes)
-T5: HDD Assembler      → Disco Duro          (Circuit Board + Metal)
-    Screen Fabricator  → Pantalla            (Circuit Board + Comp. Eléctricos + Plástico)
-T6: GPU Fab            → GPU                 (Circuit Board x2 + Cobre)
-    Smartphone Factory → Smartphone          (Pantalla + Circuit Board)
-    Laptop Workshop    → Laptop              (Disco Duro + Pantalla + Circuit Board)
-    PC Builder         → Desktop PC          (Disco Duro + GPU + Metal)
-T7: Data Center Asm.   → Server Rack         (Desktop PC x2 + Circuit Board x4)
-    Mining Rig Asm.    → Mining Rig          (Desktop PC + GPU x2 + Comp. Eléctricos x2)
-```
-
----
-
-### T-01 — Añadir recursos al enum `ResourceType`
-
-**Archivo:** `src/app/models/resource.model.ts`
-
-Añadir al enum `ResourceType`:
-```typescript
-CIRCUIT_BOARD = 'circuit_board',
-HDD = 'hdd',
-SCREEN = 'screen',
-GPU = 'gpu',
-SMARTPHONE = 'smartphone',
-LAPTOP = 'laptop',
-DESKTOP_PC = 'desktop_pc',
-SERVER_RACK = 'server_rack',
-MINING_RIG = 'mining_rig',
-```
-
----
-
-### T-02 — Añadir definiciones de recursos en `resources.config.ts`
-
-**Archivo:** `src/app/config/resources.config.ts`
+Cuando eso ocurra, el proyecto pasa de backlog de producto a backlog de release. F4 queda como mejora opcional post-release.
 
 Para cada recurso nuevo, añadir a `INITIAL_RESOURCES`:
 - `id`: el nuevo `ResourceType`
@@ -615,105 +412,65 @@ Verificar que:
 
 ## Fase 3 — Eventos de Mercado
 
-> Eventos aleatorios que modifican los precios del mercado temporalmente. Crean decisiones de timing (¿vender ahora o esperar el boom?).
+> Implementado. Eventos aleatorios que modifican los precios del mercado temporalmente y crean decisiones de timing (¿vender ahora o esperar el boom?).
 
 ---
 
-### M-01 — Modelo: `market-event.model.ts`
+### M-01 — Estado real del sistema
 
-**Archivo a crear:** `src/app/models/market-event.model.ts`
+**Archivos implementados:** `src/app/models/market-event.model.ts`, `src/app/config/market-events.config.ts`, `src/app/services/market-event.service.ts`, `src/app/components/event-banner/event-banner.component.ts`
 
-```typescript
-interface MarketEvent {
-  id: string;
-  type: 'boom' | 'crash' | 'corporate_deal';
-  affectedResources: ResourceType[];  // qué recursos afecta
-  priceMultiplier: number;             // ej. 3.0 para ×3, 0.4 para crash
-  durationSeconds: number;
-  timeRemaining: number;
-  isActive: boolean;
-}
+- `MarketEventService` se integra en `GameLoopService` con tick por segundo.
+- Solo puede haber un evento activo a la vez.
+- Los eventos no se persisten en save; al recargar se reinicia el cooldown runtime.
+- El banner vive dentro de `upgrades-panel`, no sobre el header.
+- Los eventos solo spawnean si al menos uno de sus recursos afectados ya puede producirse con máquinas desbloqueadas.
+- En dev se puede forzar un evento aleatorio con la tecla `X`.
+
+---
+
+### M-02 — Config actual
+
+**Archivo:** `src/app/config/market-events.config.ts`
+
+```
+COOLDOWN_SECONDS: 300
+INITIAL_SECONDS_SINCE_LAST_EVENT: 240
+
+boom_pcs:            Laptop/Desktop PC/Smartphone ×1.65,  90s, peso 16
+boom_components:     Components/Electric Components ×1.4, 150s, peso 20
+market_crash:        Todos los recursos ×0.8,             60s, peso 12
+corporate_deal:      Server Rack/Mining Rig ×2.0,        120s, peso 6
+tech_parts_rush:     Circuit Board/HDD/Screen/GPU ×1.5, 120s, peso 18
+materials_shortage:  Metal/Plastic/Copper/Recycled Plastic ×0.5, 75s, peso 10
+flash_sale:          Circuit Board/HDD/Laptop ×2.0,       30s, peso 8
+recycling_incentive: Recycled Plastic/Electric Components ×1.4, 150s, peso 10
 ```
 
 ---
 
-### M-02 — Config: `market-events.config.ts`
+### M-03 — Integración de precios
 
-**Archivo a crear:** `src/app/config/market-events.config.ts`
-
-```
-SPAWN_INTERVAL_MIN:  300s  (5 min mínimo entre eventos)
-SPAWN_INTERVAL_MAX:  600s  (10 min máximo entre eventos)
-SPAWN_CHANCE:        0.3   (30% de probabilidad en cada ventana)
-
-Tipos de evento:
-  boom_pc:         PCs + Laptops ×3 precio,  120s,  probabilidad 0.4
-  boom_components: Componentes ×2 precio,    180s,  probabilidad 0.3
-  market_crash:    todos los recursos ×0.4,   60s,  probabilidad 0.2
-  corporate_deal:  Servers + Mining Rig ×5,  300s,  probabilidad 0.1 (solo si T7 desbloqueado)
-```
+- `MarketService` expone `activeEventMultipliers` como signal.
+- `getPrice()` aplica `BASE_PRICE × eventMultiplier`.
+- `getManualSaleValue()` aplica también el bonus por lote y conserva 2 decimales para que eventos negativos afecten recursos baratos de forma visible.
+- Ejemplo actual: Metal con `materials_shortage` paga `0.5` en venta manual de 1 unidad.
 
 ---
 
-### M-03 — Servicio: `MarketEventService`
+### M-04 — Feedback actual
 
-**Archivo a crear:** `src/app/services/market-event.service.ts`
-
-- `activeEvent` signal: `MarketEvent | null`
-- `ticksSinceLastEvent` counter interno
-- `tick(): void` — llamado desde `GameLoopService`
-  - Incrementa contador
-  - Si contador supera la ventana de spawn, tira dado de probabilidad
-  - Si hay evento activo, decrementa `timeRemaining`
-  - Cuando `timeRemaining === 0`, desactiva el evento y resetea el contador
-- `getEffectivePrice(resourceId, basePrice): number`
-  - Si hay evento activo y el recurso está en `affectedResources`, aplica `priceMultiplier`
-  - Si no, devuelve `basePrice`
-- Integrar con `MarketService`: `MarketService` llama a `marketEventService.getEffectivePrice()` al calcular precio de venta
+- Notificación al iniciar y al terminar cada evento.
+- Audio de inicio por signo: positivo para multiplicadores `> 1`, negativo para multiplicadores `< 1`.
+- El banner usa multiplicador verde para eventos positivos y rojo para negativos.
 
 ---
 
-### M-04 — Integrar `MarketEventService` en `GameLoopService`
+### M-05 — Cobertura actual
 
-**Archivo:** `src/app/services/game-loop.service.ts`
-
-- Inyectar `MarketEventService`
-- En `tick()`: llamar `marketEventService.tick()` tras los demás ticks
-
----
-
-### M-05 — UI: banner de evento activo
-
-**Archivo a crear:** `src/app/components/ui/market-event-banner/market-event-banner.ts`
-
-- Solo visible cuando hay evento activo (`activeEvent !== null`)
-- Muestra: tipo de evento (con icono), recursos afectados, multiplicador, tiempo restante
-- Timer en tiempo real (cuenta atrás)
-- Para `market_crash`: estilo rojo/urgente; para `boom`: estilo verde/positivo
-- Se coloca en la zona superior de la pantalla de juego (sobre el header de recursos)
-
----
-
-### M-06 — Notificación al inicio y fin de evento
-
-**Archivo:** integrar en `MarketEventService` con `NotificationService`
-
-- Al activar un evento: `notificationService.show('market_event_start', tipo)`
-- Al terminar un evento: `notificationService.show('market_event_end', tipo)`
-
----
-
-### M-07 — i18n para eventos de mercado
-
-**Archivos:** `src/assets/i18n/es.json` y `src/assets/i18n/en.json`
-
-```json
-"market.event.boom_pc": "¡Boom de PCs! ×{{multiplier}} por {{duration}}s",
-"market.event.boom_components": "Alta demanda de Componentes ×{{multiplier}}",
-"market.event.market_crash": "⚠️ Caída del mercado — precios a ×{{multiplier}}",
-"market.event.corporate_deal": "Oferta corporativa — Servers y Rigs ×{{multiplier}}",
-"market.event.ended": "El evento de mercado ha terminado"
-```
+- Tests de `MarketEventService` cubren cooldown, audio por signo, gating por recursos desbloqueados y limpieza de eventos.
+- Tests de `EventBannerComponent` cubren copy, iconos y clases de multiplicador positivo/negativo.
+- Tests de `MarketService` cubren la aplicación del multiplicador y los payouts decimales.
 
 ---
 

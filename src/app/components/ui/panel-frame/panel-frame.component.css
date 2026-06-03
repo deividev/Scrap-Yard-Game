@@ -1,0 +1,84 @@
+/*
+  PanelFrameComponent — OVERLAY strategy.
+
+  frame_corner.png arms are asymmetric (h-arm 4%, v-arm 23%),
+  so they CANNOT tile with a uniform edge strip without mismatch.
+  Solution: edges span the FULL panel side; corners are decorative
+  overlays on top (z-index:1) that cover the junctions entirely.
+
+  Vertical edge trick — rotate(90deg) from transform-origin:0 0:
+    ::after at left:--pf-bar, top:0, w:9999px, h:--pf-bar
+    (x,y) → (-y, x) in parent coords
+    BL (0, bar) → (bar - bar, 0) = (0, 0) ← x=0 ✓
+    TR (9999, 0) → (0, 9999)             ← goes DOWN ✓
+    Result: strip occupies x=[0..bar], y=[0..panel_h], clipped ✓
+*/
+
+:host {
+  --pf-bar:    28px;   /* edge strip height / vertical strip width */
+  --pf-corner: 100px;  /* corner decoration box */
+  display: block;
+  position: relative;
+}
+
+.pf {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* HORIZONTAL EDGES — full width, corners overlay on top */
+.e-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--pf-bar);
+  background-image: url('../../../assets/image/frame_edge.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+.e-top { top: 0; }
+.e-bot { bottom: 0; transform: scaleY(-1); }
+
+/* VERTICAL EDGES — full height via rotation trick */
+.e-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--pf-bar);
+  overflow: hidden;
+}
+.e-left  { left: 0; }
+.e-right { right: 0; transform: scaleX(-1); }
+
+.e-v::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--pf-bar);
+  width: 9999px;
+  height: var(--pf-bar);
+  background-image: url('../../../assets/image/frame_edge.png');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: left top;
+  transform-origin: 0 0;
+  transform: rotate(90deg);
+}
+
+/* CORNERS — on top of edges (z-index:1), covering junctions */
+.c {
+  position: absolute;
+  z-index: 1;
+  width:  var(--pf-corner);
+  height: var(--pf-corner);
+  background-image: url('../../../assets/image/frame_corner.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.c-tl { top: 0;    left: 0; }
+.c-tr { top: 0;    right: 0;  transform: scaleX(-1); }
+.c-bl { bottom: 0; left: 0;   transform: scaleY(-1); }
+.c-br { bottom: 0; right: 0;  transform: rotate(180deg); }

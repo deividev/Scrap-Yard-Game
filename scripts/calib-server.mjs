@@ -32,6 +32,24 @@ const CONST_NAMES = {
   recycler: 'RECYCLER_CARD_SLOTS',
   electric_assembler: 'ELECTRIC_ASSEMBLER_CARD_SLOTS',
   electric_packager: 'ELECTRIC_PACKAGER_CARD_SLOTS',
+  // T4
+  pcb_printer: 'PCB_PRINTER_CARD_SLOTS',
+  // T5
+  hdd_assembler: 'HDD_ASSEMBLER_CARD_SLOTS',
+  // T6
+  screen_fabricator: 'SCREEN_FABRICATOR_CARD_SLOTS',
+  // T7
+  gpu_fab: 'GPU_FAB_CARD_SLOTS',
+  // T8
+  smartphone_factory: 'SMARTPHONE_FACTORY_CARD_SLOTS',
+  // T9
+  laptop_workshop: 'LAPTOP_WORKSHOP_CARD_SLOTS',
+  // T10
+  pc_builder: 'PC_BUILDER_CARD_SLOTS',
+  // T11
+  mining_rig_assembly: 'MINING_RIG_ASSEMBLY_CARD_SLOTS',
+  // T12
+  data_center_assembly: 'DATA_CENTER_ASSEMBLY_CARD_SLOTS',
 };
 
 // ── Code-gen: rebuild a const block from the slots object ────────────────────

@@ -146,6 +146,43 @@ export class AudioService {
     this.playSweep(320, 60, 0.28, 0.09, 'sawtooth', 'sfx');
   }
 
+  // Contract deadline warning — 4 rapid ascending pulses (alarm-style: tight, high-pitched, urgent)
+  playContractWarning(): void {
+    if (!this.canPlayWithCooldown('contract-warning', 2000)) {
+      return;
+    }
+    this.playTone(1100, 0.04, 0.08, 'square', 'sfx', 0.0);
+    this.playTone(1200, 0.04, 0.085, 'square', 'sfx', 0.07);
+    this.playTone(1300, 0.04, 0.09, 'square', 'sfx', 0.14);
+    this.playTone(1400, 0.05, 0.095, 'square', 'sfx', 0.21);
+  }
+
+  // New contract available — subtle rising 2-tone ping (opportunity knock)
+  playContractNew(): void {
+    if (!this.canPlayWithCooldown('contract-new', 1000)) {
+      return;
+    }
+    this.playNoiseBurst(0.03, 0.025, 3500, 'highpass', 'sfx');
+    this.playTone(660, 0.12, 0.05, 'triangle', 'sfx', 0.02);
+    this.playTone(880, 0.14, 0.055, 'triangle', 'sfx', 0.1);
+  }
+
+  // Market event trigger — bright trading-floor sting for positive events, bearish drop for crashes
+  playMarketEventStart(isNegative = false): void {
+    if (isNegative) {
+      this.playNoiseBurst(0.05, 0.045, 900, 'bandpass', 'sfx');
+      this.playTone(1047, 0.08, 0.06, 'square', 'sfx');
+      this.playTone(784, 0.1, 0.065, 'sawtooth', 'sfx', 0.07);
+      this.playSweep(660, 180, 0.26, 0.07, 'triangle', 'sfx');
+      return;
+    }
+
+    this.playNoiseBurst(0.035, 0.028, 3200, 'highpass', 'sfx');
+    this.playTone(740, 0.11, 0.06, 'square', 'sfx', 0.01);
+    this.playTone(988, 0.13, 0.065, 'triangle', 'sfx', 0.08);
+    this.playTone(1319, 0.18, 0.075, 'triangle', 'sfx', 0.16);
+  }
+
   // Storage full warning — industrial lowpass thud + descending 2-note sawtooth "dunk-wunk"
   playStorageFull(): void {
     if (!this.canPlayWithCooldown('storage-full', 3000)) {

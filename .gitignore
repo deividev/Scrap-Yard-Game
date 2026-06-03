@@ -75,9 +75,11 @@ Thumbs.db
 .parcel-cache
 
 # Project docs and prompts (internal design documents)
+/docs/**
 /docs-old
 /prompts
 /prompts/**
 /gdd_scrap_yard_idle_produccion_inicial.md
 /TODO/**
+AGENTS.md
 

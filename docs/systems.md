@@ -1,294 +1,161 @@
 # Systems — Scrap Yard Idle
 
-## Índice
+## Resumen rápido
 
-1. [Resources](#1-resources)
-2. [Machines](#2-machines)
-3. [Game Loop](#3-game-loop)
-4. [Market](#4-market)
-5. [Upgrades](#5-upgrades)
-6. [Machine Unlock](#6-machine-unlock)
-7. [Scrap Generation](#7-scrap-generation)
-8. [Save / Persistence](#8-save--persistence)
-9. [Statistics](#9-statistics)
-10. [Tutorial First-Run](#10-tutorial-first-run)
-11. [Audio](#11-audio)
-12. [Notifications](#12-notifications)
-13. [Settings / i18n](#13-settings--i18n)
-14. [Game State](#14-game-state)
+Este documento describe el estado real de los sistemas del juego en mayo de 2026. Sirve como inventario técnico, no como roadmap histórico.
 
----
+## Arquitectura base
 
-## 1. Resources
+| Area | Implementación actual |
+|---|---|
+| UI | Angular 21 standalone |
+| Estado reactivo | Signals en servicios |
+| Inyección | `inject()` |
+| Desktop runtime | Electron |
+| Persistencia | `SaveService` + `userData` |
+| i18n | `es.json` y `en.json` |
+| Tests | `ng test` + gate de coverage |
 
-**Servicio:** `ResourcesService`  
-**Config:** `resources.config.ts`
+## Recursos
 
-Gestiona el inventario de todos los recursos del juego mediante un signal reactivo.
+### Recursos implementados
 
-### Tipos de recursos (`ResourceType`)
-
-| ID | Nombre | Capacidad inicial | Notas |
-|---|---|---|---|
-| `scrap` | Chatarra | 50 | Principal input del ciclo |
-| `metal` | Metal | 40 | Output de Trituradora |
-| `plastic` | Plástico | 20 | Output de Separador |
-| `components` | Componentes | 10 | Output de Ensambladora |
-| `money` | Dinero | ∞ | Moneda del juego |
-| `copper` | Cobre | 20 | Output de Fundidora |
-| `recycled_plastic` | Plástico Reciclado | 20 | Output de Recicladora |
-| `electric_components` | Componentes Eléctricos | 10 | Output de Ensambladora Eléctrica |
+| Tier | Recursos |
+|---|---|
+| Base | `scrap`, `metal`, `plastic`, `components`, `money`, `copper`, `recycled_plastic`, `electric_components` |
+| Avanzado | `circuit_board`, `hdd`, `screen`, `gpu`, `smartphone`, `laptop`, `desktop_pc`, `mining_rig`, `server_rack` |
 
 ### Comportamiento
 
-- Capacidad limitada para todos los recursos excepto `money` (Infinity)
-- `add()` respeta la capacidad máxima; exceso se descarta
-- `subtract()` falla silenciosamente si no hay suficiente cantidad
-- Las capacidades se incrementan mediante upgrades de almacenamiento
-- El servicio expone `markDirty()` vía `SaveMarker` para activar auto-guardado
+- `ResourcesService` es la fuente de verdad de cantidades y capacidades.
+- `money` es el unico recurso sin limite de capacidad.
+- Las capacidades se amplian con upgrades de almacenamiento.
+- Toda mutacion relevante termina marcando estado dirty para save.
 
----
+## Maquinas y cadena de producción
 
-## 2. Machines
+### Maquinas implementadas
 
-**Servicio:** `MachinesService`  
-**Config:** `machines.config.ts`
+| Tier | Maquinas |
+|---|---|
+| Base | `crusher`, `separator`, `smelter`, `assembler`, `packager`, `recycler`, `electric_assembler`, `electric_packager` |
+| Avanzado | `pcb_printer`, `hdd_assembler`, `screen_fabricator`, `gpu_fab`, `smartphone_factory`, `laptop_workshop`, `pc_builder`, `mining_rig_assembly`, `data_center_assembly` |
 
-Gestiona el estado de todas las máquinas del juego.
+### Cadena real
 
-### Tipos de máquinas y cadena de producción
+```text
+scrap
+     -> crusher -> metal
+     -> separator -> plastic
+     -> smelter -> copper
 
-```
-Chatarra ──► Trituradora ──► Metal ──► Ensambladora ──► Componentes ──► Empaquetadora ──► (venta)
-         └──► Separador  ──► Plástico ─►──────────────────────────────────►
-                                   └──► Fundidora ──► Cobre ──► (venta)
-                                        Metal ──►
-                                   └──► Recicladora ──► Plástico Reciclado
-                                                        Plástico ──►
-                         └──► Ensambladora Eléctrica ──► Componentes Eléctricos
-                              Componentes ──►
-                 └──► Empaquetadora Eléctrica (requiere Componentes Eléctricos)
-```
+metal + plastic -> assembler -> components
+plastic -> recycler -> recycled_plastic
+copper + components + recycled_plastic -> electric_assembler -> electric_components
+components -> packager -> money
+electric_components -> electric_packager -> money
 
-### Definición de máquinas
-
-| ID | Nombre | Inputs | Output | baseSpeed | Nivel inicial |
-|---|---|---|---|---|---|
-| `crusher` | Trituradora | 1 Chatarra | 2 Metal | 0.50/s | 1 (desbloqueada) |
-| `separator` | Separador | 1 Chatarra | 1 Plástico | 0.50/s | 0 (bloqueada) |
-| `smelter` | Fundidora | 4 Metal | 2 Cobre | 0.25/s | 0 (bloqueada) |
-| `assembler` | Ensambladora | 1 Metal + 1 Plástico | 1 Componente | 0.22/s | 0 (bloqueada) |
-| `packager` | Empaquetadora | 4 Componentes | (venta) | 0.10/s | 0 (bloqueada) |
-| `electric_packager` | Empaquetadora Eléctrica | Componentes Eléctricos | (venta) | 0.10/s | 0 (bloqueada) |
-| `recycler` | Recicladora | 1 Metal + 1 Plástico | 1 Plástico Reciclado | variable | 0 (bloqueada) |
-| `electric_assembler` | Ensambladora Eléctrica | Componentes + Cobre | 1 Comp. Eléctrico | variable | 0 (bloqueada) |
-
-### Estado de una máquina
-
-- `level` — nivel actual (0 = bloqueada, >0 = desbloqueada)
-- `isActive` — si está procesando
-- `progress` — progreso del ciclo actual (0.0 → 1.0)
-- `baseSpeed` — fracción de ciclo completada por tick
-- `baseConsumption[]` — inputs por ciclo
-- `baseProduction` — output por ciclo
-
----
-
-## 3. Game Loop
-
-**Servicio:** `GameLoopService`
-
-Motor central del juego. Corre un `setInterval` de 1 segundo y dentro ejecuta el `tick()`.
-
-### Secuencia del tick
-
-1. Incrementa contador de ticks
-2. Llama a `ScrapGenerationService.processAutomaticGeneration()`
-3. Actualiza `StatisticsService.tick()`
-4. Llama a `processProduction()` → itera todas las máquinas activas
-5. Llama a `processUpgradeProgress(deltaTime=1)` → avanza upgrades en curso
-6. Cada 15 ticks → `SaveService.save()` (auto-save)
-
-### Lógica de producción por máquina
-
-- Si `progress < 0.01` (inicio de ciclo):
-  - Verifica que haya inputs suficientes
-  - Verifica espacio disponible en el output
-  - Si OK → consume inputs, empieza ciclo
-- Avanza `progress += baseSpeed * multipliers`
-- Si `progress >= 1.0` → produce output, resetea progress a 0
-
-### Multiplicadores
-
-- `consumptionMultiplier` — calculado desde upgrades de la máquina
-- `productionMultiplier` — calculado desde upgrades de la máquina
-
----
-
-## 4. Market
-
-**Servicio:** `MarketService`  
-**Config:** `game-balance.config.ts` → `MARKET_CONFIG`
-
-Permite vender recursos manualmente a cambio de dinero.
-
-### Recursos vendibles
-
-| Recurso | Precio base | Bono por lote |
-|---|---|---|
-| Metal | config | Sí (por cantidad) |
-| Plástico | config | Sí |
-| Componentes | config | Sí |
-| Cobre | config | Sí |
-
-### Bonus de lote
-
-- Cuanto mayor la cantidad vendida de una vez, mayor el multiplicador de precio
-- Umbral definido en `MARKET_CONFIG.BATCH_BONUSES`
-
-### Integración
-
-- Los componentes `sell-metal-button`, `sell-components-button` y `sell-resource-button` invocan este servicio
-- Registra el dinero ganado en `StatisticsService`
-- Eventos de venta de Metal disparan pasos del tutorial
-
----
-
-## 5. Upgrades
-
-**Servicios:** `UpgradesService`, `UpgradeProgressService`  
-**Config:** `upgrade-definitions.config.ts`, `game-balance.config.ts`
-
-Sistema de mejoras permanentes compradas con dinero (y a veces componentes).
-
-### Categorías
-
-#### Almacenamiento (`STORAGE`)
-
-Aumenta la capacidad máxima de un recurso por nivel.
-
-| ID | Recurso objetivo | Incremento/nivel | Coste base |
-|---|---|---|---|
-| `UPG_STORE_001` | Chatarra | +25 | $20 |
-| `UPG_STORE_002` | Metal | +15 | $35 |
-| `UPG_STORE_003` | Plástico | +15 | $35 |
-| `UPG_STORE_004` | Componentes | +5 | $35 + componentes |
-| `UPG_STORE_005` | Plástico Reciclado | +10 | $50 |
-| `UPG_STORE_006` | Componentes Eléctricos | +5 | $80 + componentes |
-| `UPG_STORE_007` | Cobre | +15 | $40 |
-
-#### Velocidad de máquinas (`MACHINE`)
-
-Aumenta `baseSpeed` de la máquina target.
-
-| ID | Máquina | Coste base |
-|---|---|---|
-| `UPG_MACH_001` | Trituradora | config |
-| `UPG_MACH_002` | Fundidora | config |
-| `UPG_MACH_003` | Separador | config |
-| `UPG_MACH_004` | Ensambladora | config |
-| + más | Resto de máquinas | config |
-
-#### Generación de chatarra (`UPG_SCRAP_002`)
-
-- Aumenta la generación automática de chatarra
-- Niveles 0–10, tasas: `[0, 0.12, 0.2, 0.32, 0.48, 0.7, 1.0, 1.45, 2.1, 3.0, 4.2]` scrap/s
-
-### Fórmula de coste
-
-```
-cost = ceil(baseCost * multiplier ^ level)
+copper + electric_components -> pcb_printer -> circuit_board
+circuit_board + metal -> hdd_assembler -> hdd
+circuit_board + electric_components + recycled_plastic -> screen_fabricator -> screen
+circuit_board + hdd + copper -> gpu_fab -> gpu
+screen + gpu + circuit_board -> smartphone_factory -> smartphone
+hdd + screen + gpu + circuit_board -> laptop_workshop -> laptop
+hdd + gpu + circuit_board + metal -> pc_builder -> desktop_pc
+desktop_pc + gpu + electric_components -> mining_rig_assembly -> mining_rig
+desktop_pc + gpu + circuit_board -> data_center_assembly -> server_rack
 ```
 
-- Multiplicador estándar: **1.26**
-- Storage: **1.20**
-- Scrap auto: **1.35**
+## Game loop
 
-### Nivel máximo
+`GameLoopService` corre un tick global de 1 segundo y coordina:
 
-- Storage upgrades: **50**
-- Machine / Scrap upgrades: según config
+1. Generacion automatica de scrap.
+2. Estadisticas.
+3. Produccion de maquinas.
+4. Progreso de upgrades en curso.
+5. Tick de contratos.
+6. Tick de eventos de mercado.
+7. Auto-save cuando corresponde.
 
-### Progreso de upgrades
+Las maquinas consumen insumos al inicio de ciclo y producen al completar `progress >= 1`.
 
-`UpgradeProgressService` permite upgrades que tardan tiempo en completarse (investigación). Actualmente los upgrades se aplican de forma instantánea en el MVP pero la infraestructura de temporización está lista.
+## Mercado
 
----
+- `MarketService` permite venta manual de recursos.
+- Hay bonus por lote configurados en `game-balance.config.ts`.
+- `MarketEventService` aplica multiplicadores runtime sobre recursos concretos segun el evento activo.
+- Las ventas manuales conservan precision de 2 decimales, de modo que eventos negativos tambien afectan recursos baratos de forma visible.
+- `EventBannerComponent` vive en el hueco superior del panel de upgrades para mostrar tipo, multiplicador, recursos afectados y tiempo restante sin tapar el header.
 
-## 6. Machine Unlock
+## Upgrades
 
-**Servicio:** `MachineUnlockService`
+Los upgrades actuales cubren:
 
-Gestiona el desbloqueo progresivo de máquinas. Todas las máquinas excepto `crusher` comienzan en `level = 0` (bloqueadas).
+- Storage para recursos base y avanzados.
+- Velocidad para maquinas base y avanzadas.
+- Generacion automatica de scrap.
 
-### Árbol de desbloqueo
+`UpgradeProgressService` sigue existiendo para upgrades con duracion aunque la mayor parte del arbol actual es inmediato o semilineal.
 
-El desbloqueo se basa en el nivel de upgrades de máquinas previas. Se revisa cada vez que se completa un upgrade de máquina (`UPG_MACH_*`).
+## Contratos
 
-### Comportamiento
+`ContractService` ya esta integrado en el juego.
 
-- `checkAndUnlockMachines()` se llama tras completar cualquier upgrade de máquina
-- Itera las máquinas bloqueables y verifica condiciones
-- Al desbloquear: sube `machine.level` a 1, dispara notificación y sonido
+### Comportamiento actual
 
----
+- El primer contrato se fuerza al desbloquear la Ensambladora.
+- Puede haber hasta 3 contratos visibles y 2 activos a la vez.
+- Los contratos usan `type` y `urgency` como conceptos separados.
+- El sistema persiste contratos, intro modal y flags relacionadas.
+- `GameLoopService` ejecuta `contractService.tick()` en cada segundo.
 
-## 7. Scrap Generation
+## Persistencia
 
-**Servicio:** `ScrapGenerationService`  
-**Config:** `SCRAP_GENERATION_CONFIG`
+### Save actual
 
-Dos modos de generación de chatarra:
+- El backend principal es Electron `userData`.
+- La escritura es atomica mediante `save.tmp` y reemplazo posterior.
+- `SAVE_VERSION` actual es `4`.
 
-### Manual (click)
+### Estado persistido
 
-- El botón `scrap-button` llama a este servicio
-- Genera **6 chatarras** por click
-- Tiene un **coste de $1** por click
-- Registra el evento en tutorial (primer click)
+- Recursos.
+- Maquinas.
+- Upgrades.
+- Estadisticas.
+- Tutorial.
+- Settings.
+- Contratos y flags asociadas.
+- Placeholder de milestones completados.
 
-### Automática
+## UI principal
 
-- Genera chatarra cada tick según la tasa configurada
-- Tasa en scrap/s: `[0, 0.12, 0.2, ..., 4.2]` según nivel de `UPG_SCRAP_002`
-- Respeta la capacidad máxima del almacén
+| Area | Rol |
+|---|---|
+| `resources-header` | Estado de recursos y acciones rapidas |
+| `machine-list` | Lista principal de maquinas |
+| `upgrades-panel` | Upgrades + tab de contratos + banner de evento de mercado |
+| `statistics-panel` | Totales de la partida |
+| `first-run-tutorial-overlay` | Onboarding guiado |
+| `notification-container` | Feedback de eventos del juego |
 
----
+## Runtime desktop
 
-## 8. Save / Persistence
+- El entrypoint real de Electron es `electron/main.js`.
+- El bridge real expuesto al renderer vive en `electron/preload.js`.
+- La app empaquetada corre sin menu, con ventana frameless y modo kiosk.
+- Se bloquea la apertura de DevTools en builds empaquetados.
 
-**Servicio:** `SaveService`  
-**Backend:** Electron `userData` (archivo local del usuario)
+## Sistemas que todavía no existen
 
-Sistema de guardado diseñado para aplicación de escritorio. No usa localStorage.
+- F4 - Sistema real de milestones y flavor text.
+- Preparacion operativa para Steam.
 
-### Estrategia
+## Riesgos técnicos actuales
 
-| Tipo | Frecuencia | Condición |
-|---|---|---|
-| Auto-save | Cada 15 ticks (15s) | Solo si `isDirty = true` |
-| Save on close | Al cerrar la app | Siempre |
-
-### Dirty flag
-
-Todos los servicios que mutan estado implementan `SaveMarker.markDirty()`. El `SaveService` solo escribe a disco si `isDirty = true`.
-
-### Escritura atómica
-
-1. Escribir en `save.tmp`
-2. Reemplazar `save.json` con el fichero temporal
-
-Evita corrupción por cierre inesperado.
-
-### Qué se guarda (`SaveState`)
-
-- Recursos (amount + capacity)
-- Máquinas (estado completo)
-- Upgrades (niveles de todos los upgrades)
-- Generación de chatarra (rate auto, nivel)
-- Estadísticas (totales históricos)
-- Tutorial first-run (progreso)
-- Settings (idioma, audio, etc.)
+- Hay drift entre los archivos JS y TS de Electron; el runtime de release debe validarse contra los `.js`.
+- La UI late game sigue necesitando limpieza visual en header y navegacion de maquinas.
 
 ### Carga
 

@@ -1,0 +1,7 @@
+.tier-section:not(:last-child)::after {
+  background-image: url('../../assets/image/tier_divider.png');
+}
+
+.tier-header {
+  background-image: url('../../assets/image/tier_plate.png');
+}

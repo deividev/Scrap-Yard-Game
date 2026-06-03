@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, inject, isDevMode, OnDestroy, OnInit, effect } from '@angular/core';
 import { ResourcesHeaderComponent } from './components/resources-header/resources-header.component';
 import { MachineListComponent } from './components/machine-list/machine-list.component';
 import { UpgradesPanelComponent } from './components/upgrades-panel/upgrades-panel.component';
@@ -9,7 +9,9 @@ import { StatisticsPanelComponent } from './components/statistics-panel/statisti
 import { CommonModule } from '@angular/common';
 import { BackgroundGridComponent } from './components/ui/background-grid/background-grid.component';
 import { FirstRunTutorialOverlayComponent } from './components/first-run-tutorial-overlay/first-run-tutorial-overlay.component';
-import { DemoEndOverlayComponent } from './components/demo-end-overlay/demo-end-overlay.component';
+import { ContractIntroModalComponent } from './components/ui/contract-intro-modal/contract-intro-modal.component';
+import { PanelFrameComponent } from './components/ui/panel-frame/panel-frame.component';
+import { PanelFrameHComponent } from './components/ui/panel-frame-h/panel-frame-h.component';
 import { SaveService } from './services/save.service';
 import { ResourcesService } from './services/resources.service';
 import { MachinesService } from './services/machines.service';
@@ -19,10 +21,15 @@ import { GameStateService } from './services/game-state.service';
 import { AudioService } from './services/audio.service';
 import { GameLoopService } from './services/game-loop.service';
 import { FirstRunTutorialService } from './services/first-run-tutorial.service';
-import { DemoEndService } from './services/demo-end.service';
+import { ContractService } from './services/contract.service';
+import { MarketEventService } from './services/market-event.service';
+
 
 @Component({
   selector: 'app-root',
+  host: {
+    '(window:keydown)': 'onWindowKeydown($event)',
+  },
   imports: [
     CommonModule,
     ResourcesHeaderComponent,
@@ -34,13 +41,17 @@ import { DemoEndService } from './services/demo-end.service';
     StatisticsPanelComponent,
     BackgroundGridComponent,
     FirstRunTutorialOverlayComponent,
-    DemoEndOverlayComponent,
+    PanelFrameComponent,
+    PanelFrameHComponent,
+    ContractIntroModalComponent,
+    // DebugControlsComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App implements OnInit, OnDestroy {
   isPanelMinimized = false;
+  private readonly isDev = isDevMode();
 
   private saveService = inject(SaveService);
   private resourcesService = inject(ResourcesService);
@@ -50,7 +61,8 @@ export class App implements OnInit, OnDestroy {
   private audioService = inject(AudioService);
   private gameLoopService = inject(GameLoopService);
   private firstRunTutorialService = inject(FirstRunTutorialService);
-  private demoEndService = inject(DemoEndService);
+  private marketEventService = inject(MarketEventService);
+  contractService = inject(ContractService);
   gameStateService = inject(GameStateService);
 
   private autoSaveInterval?: number;
@@ -79,7 +91,7 @@ export class App implements OnInit, OnDestroy {
     this.upgradesService.setSaveService(this.saveService);
     this.scrapGenerationService.setSaveService(this.saveService);
     this.firstRunTutorialService.setSaveService(this.saveService);
-    this.demoEndService.setSaveService(this.saveService);
+    this.contractService.setSaveService(this.saveService);
 
     // Cargar el juego en segundo plano
     // Si no hay save, se usarán los valores por defecto
@@ -111,4 +123,32 @@ export class App implements OnInit, OnDestroy {
   onPanelMinimizedChange(isMinimized: boolean): void {
     this.isPanelMinimized = isMinimized;
   }
+
+  onWindowKeydown(event: KeyboardEvent): void {
+    if (!this.isDev || this.gameStateService.view() !== 'game') {
+      return;
+    }
+
+    if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+
+    if (event.key.toLowerCase() !== 'x' || this.isTypingTarget(event.target)) {
+      return;
+    }
+
+    if (this.marketEventService.debugForceRandomEvent()) {
+      event.preventDefault();
+    }
+  }
+
+  private isTypingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    const tagName = target.tagName.toLowerCase();
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable;
+  }
+
 }
